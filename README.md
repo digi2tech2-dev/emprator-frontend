@@ -804,3 +804,4 @@ Do not assume tests exist or pass unless a script is added and run.
 - `APP_URL`, `VITE_APP_MODE`, and non-Vite `ADMIN_WHATSAPP_NUMBER` are stale or ineffective for browser code.
 - The `clean` script is Unix-specific.
 - There is no frontend test script, ESLint script, or Prettier script.
+"# emprator-frontend" 
