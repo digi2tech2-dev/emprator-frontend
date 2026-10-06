@@ -5,7 +5,7 @@ import buyCardsImage from '../assets/slide-3.jpg';
 export const mockUsers = [
   {
     id: 'u1',
-    name: 'Dra90n STORE Admin',
+    name: 'EMBRATOR CARD Admin',
     email: 'admin@ka-card.com',
     password: 'REDACTED',
     role: 'admin',

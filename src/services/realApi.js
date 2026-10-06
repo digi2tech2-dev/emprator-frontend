@@ -561,7 +561,7 @@ const normaliseUser = (u) => {
     approvedAt: u.approvedAt || u.activatedAt || null,
     rejectedAt: u.rejectedAt || u.deniedAt || null,
     // ensure avatar — resolve relative paths and fallback
-    avatar: resolveUserAvatar(u, u.name || u.email || 'Dra90n User'),
+    avatar: resolveUserAvatar(u, u.name || u.email || 'EMBRATOR User'),
     permissions: Array.isArray(u.permissions) ? u.permissions.map((item) => String(item || '').trim()).filter(Boolean) : [],
     twoFactorEnabled: Boolean(u.twoFactorEnabled ?? u.isTwoFactorEnabled),
     isTwoFactorEnabled: Boolean(u.isTwoFactorEnabled ?? u.twoFactorEnabled),

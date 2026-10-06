@@ -5,22 +5,22 @@ const SUPPORT_CONTACTS = Object.freeze([
   {
     id: 'phone',
     type: 'phone',
-    nameAr: 'دعم دراجون',
-    nameEn: 'Dra90n Support',
+    nameAr: 'دعم امبراطور',
+    nameEn: 'EMBRATOR Support',
     number: SUPPORT_PHONE_NUMBER,
   },
   {
     id: 'whatsapp',
     type: 'whatsapp',
-    nameAr: 'دعم دراجون',
-    nameEn: 'Dra90n Support',
+    nameAr: 'دعم امبراطور',
+    nameEn: 'EMBRATOR Support',
     number: SUPPORT_WHATSAPP_NUMBER,
   },
   {
     id: 'whatsapp-2',
     type: 'whatsapp',
-    nameAr: 'دعم دراجون 2',
-    nameEn: 'Dra90n Support 2',
+    nameAr: 'دعم امبراطور 2',
+    nameEn: 'EMBRATOR Support 2',
     number: SUPPORT_WHATSAPP_NUMBER_2,
   },
 ]);

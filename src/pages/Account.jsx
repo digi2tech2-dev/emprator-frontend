@@ -14,6 +14,7 @@ import { useToast } from '../components/ui/Toast';
 import { resolveUserAvatar } from '../utils/avatar';
 import { useBodyScrollLock } from '../utils/bodyScrollLock';
 import { getReadableErrorMessage } from '../utils/errorMessages';
+import avatarFrame from '../assets/ايطار.PNG';
 
 const MAX_AVATAR_FILE_SIZE = 2 * 1024 * 1024;
 const ALLOWED_AVATAR_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -200,7 +201,7 @@ const Account = () => {
     }
   }, [location.hash]);
 
-  const avatarIdentity = form.fullName || savedProfile.fullName || form.username || savedProfile.username || form.email || savedProfile.email || 'Dra90n User';
+  const avatarIdentity = form.fullName || savedProfile.fullName || form.username || savedProfile.username || form.email || savedProfile.email || 'EMBRATOR User';
   const fallbackAvatar = resolveUserAvatar({ name: avatarIdentity, avatar: '' }, avatarIdentity);
   const displayedAvatar =
     form.avatarAction === 'remove'
@@ -623,8 +624,8 @@ const Account = () => {
           </div>
 
           <div className="grid gap-5 p-5 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-center">
-            <div className="relative mx-auto md:mx-0">
-              <span className="absolute -inset-2 rounded-[2rem] bg-[conic-gradient(from_140deg,rgb(var(--color-primary-rgb)/0.18),rgb(192_38_211/0.26),rgb(var(--color-primary-rgb)/0.12))] blur-[2px]" />
+            <div className="relative mx-auto grid h-36 w-36 place-items-center md:mx-0">
+              <span className="absolute inset-2 rounded-full bg-[conic-gradient(from_140deg,rgb(var(--color-primary-rgb)/0.18),rgb(192_38_211/0.26),rgb(var(--color-primary-rgb)/0.12))] blur-[5px]" />
               <img
                 src={displayedAvatar}
                 alt={form.fullName || text.pageTitle}
@@ -632,10 +633,11 @@ const Account = () => {
                   event.currentTarget.onerror = null;
                   event.currentTarget.src = fallbackAvatar;
                 }}
-                className="relative h-24 w-24 rounded-[1.7rem] border-2 border-white/85 object-cover shadow-[0_18px_42px_-24px_rgba(2,6,23,0.75)] dark:border-white/10"
+                className="relative z-10 h-20 w-20 rounded-full object-cover shadow-[0_18px_42px_-24px_rgba(2,6,23,0.75)]"
               />
+              <img src={avatarFrame} className="pointer-events-none absolute inset-0 z-20 h-full w-full object-contain" alt="" aria-hidden="true" />
               <span
-                className="absolute -bottom-1 -right-1 z-10 h-5 w-5 rounded-full border-[3px] border-[color:rgb(var(--color-card-rgb)/0.98)] bg-emerald-400 shadow-[0_0_0_4px_rgb(16_185_129/0.14),0_0_18px_rgb(16_185_129/0.72)]"
+                className="absolute bottom-2 right-2 z-30 h-5 w-5 rounded-full border-[3px] border-[color:rgb(var(--color-card-rgb)/0.98)] bg-emerald-400 shadow-[0_0_0_4px_rgb(16_185_129/0.14),0_0_18px_rgb(16_185_129/0.72)]"
                 role="status"
                 aria-label={isArabic ? 'متصل الآن' : 'Online now'}
                 title={isArabic ? 'متصل الآن' : 'Online now'}
@@ -644,7 +646,7 @@ const Account = () => {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isAvatarSaving}
-                className="absolute -bottom-2 -left-2 inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-white/80 bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-lg transition hover:brightness-105 dark:border-white/10"
+                className="absolute bottom-1 left-1 z-30 inline-flex h-9 w-9 items-center justify-center rounded-2xl border border-white/80 bg-[var(--color-primary)] text-[var(--color-button-text)] shadow-lg transition hover:brightness-105 dark:border-white/10"
                 aria-label={text.changePhoto}
               >
                 <Camera className="h-4 w-4" />

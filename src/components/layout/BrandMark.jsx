@@ -1,7 +1,7 @@
 import React from 'react';
 import { cn } from '../ui/Button';
 import brandIconImage from '../../assets/logo.webp';
-// The new dragon logo is used consistently in both themes.
+// The new emperor logo is used consistently in both themes.
 import brandIconLightImage from '../../assets/logo.webp';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -50,7 +50,7 @@ const BrandMark = ({
       <div className={cn('relative overflow-hidden', styles.iconShell)}>
         <img
           src={isDark ? brandIconImage : brandIconLightImage}
-          alt="Dra90n STORE"
+          alt="EMBRATOR CARD"
           loading="eager"
           decoding="async"
           className="relative h-full w-full object-contain"
@@ -67,10 +67,10 @@ const BrandMark = ({
             )}
           >
             <span className="bg-[linear-gradient(110deg,#ffd36a_0%,#f59e0b_42%,#c2410c_100%)] bg-clip-text text-transparent">
-              Dra90n
+              EMBRATOR
             </span>
             <span className="mx-1 text-[color:rgb(var(--color-text-secondary)/0.5)]">·</span>
-            <span className="text-[color:rgb(var(--color-text-secondary)/0.86)]">STORE</span>
+            <span className="text-[color:rgb(var(--color-text-secondary)/0.86)]">CARD</span>
           </p>
         </div>
       )}

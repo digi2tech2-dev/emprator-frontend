@@ -105,12 +105,12 @@ const getMethodPresentation = (method) => {
   const token = `${method?.id || ''} ${method?.name || ''}`.toLowerCase();
   const type = normalizeMethodType(method?.type);
 
-  if (token.includes('vodafone')) return { icon: 'VC', color: 'from-red-500 to-yellow-500' };
-  if (token.includes('etisalat')) return { icon: 'EC', color: 'from-green-500 to-indigo-500' };
-  if (token.includes('orange')) return { icon: 'OC', color: 'from-orange-500 to-red-500' };
-  if (type === 'bank_transfer') return { icon: 'BT', color: 'from-indigo-500 to-amber-500' };
-  if (type === 'usdt' || type === 'crypto') return { icon: 'USDT', color: 'from-emerald-500 to-indigo-600' };
-  if (type === 'credit_card') return { icon: 'CC', color: 'from-amber-500 to-orange-600' };
+  if (token.includes('vodafone')) return { icon: 'VC', color: 'from-[var(--color-secondary)] to-[var(--color-accent)]' };
+  if (token.includes('etisalat')) return { icon: 'EC', color: 'from-[var(--color-primary)] to-[var(--color-secondary)]' };
+  if (token.includes('orange')) return { icon: 'OC', color: 'from-[var(--color-accent)] to-[var(--color-primary)]' };
+  if (type === 'bank_transfer') return { icon: 'BT', color: 'from-[var(--color-secondary)] to-[var(--color-primary)]' };
+  if (type === 'usdt' || type === 'crypto') return { icon: 'USDT', color: 'from-[var(--color-primary)] to-[var(--color-secondary)]' };
+  if (type === 'credit_card') return { icon: 'CC', color: 'from-[var(--color-accent)] to-[var(--color-primary)]' };
 
   return { icon: 'PM', color: 'from-emerald-500 to-indigo-600' };
 };
@@ -491,7 +491,7 @@ const PaymentDetails = ({
           <button
             type="button"
             onClick={() => (onBack ? onBack() : navigate('/wallet/add-balance'))}
-            className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 dark:text-indigo-300 dark:hover:text-indigo-200"
+            className="text-sm font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
           >
             {t('payments.invalidMethodAction')}
           </button>
@@ -505,7 +505,7 @@ const PaymentDetails = ({
     { label: dir === 'rtl' ? 'البيانات' : 'Details' },
     ...(requiresReceipt ? [{ label: dir === 'rtl' ? 'الإيصال' : 'Receipt' }] : []),
   ];
-  const paymentInputClassName = `${inputBaseClassName} h-12 rounded-xl border-[color:rgb(var(--color-border-rgb)/0.72)] bg-[color:rgb(var(--color-surface-rgb)/0.72)] px-4 text-sm font-bold shadow-none hover:border-cyan-500/35 focus:border-cyan-500/65 focus:bg-[var(--color-card)] focus:ring-cyan-500/10`;
+  const paymentInputClassName = `${inputBaseClassName} h-12 rounded-xl border-[color:rgb(var(--color-border-rgb)/0.72)] bg-[color:rgb(var(--color-surface-rgb)/0.72)] px-4 text-sm font-bold shadow-none hover:border-[color:rgb(var(--color-primary-rgb)/0.5)] focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-[color:rgb(var(--color-primary-rgb)/0.15)]`;
 
   return (
     <div className={embedded ? 'w-full min-w-0 overflow-x-hidden pb-2' : 'pb-6'} dir={dir}>
@@ -551,7 +551,7 @@ const PaymentDetails = ({
               {dir === 'rtl' ? 'دفع آمن' : 'Secure'}
             </span>
             {group?.currency ? (
-              <span className="rounded-md bg-indigo-500/[0.08] px-1.5 py-1 font-['Poppins'] text-[9px] font-black text-indigo-500">
+              <span className="rounded-md bg-[color:rgb(var(--color-primary-rgb)/0.08)] px-1.5 py-1 font-['Poppins'] text-[9px] font-black text-[var(--color-primary)]">
                 {String(group.currency).toUpperCase()}
               </span>
             ) : null}
@@ -562,13 +562,13 @@ const PaymentDetails = ({
           {flowSteps.map((step, index) => (
             <React.Fragment key={step.label}>
               <div className="flex w-16 shrink-0 flex-col items-center text-center sm:w-20">
-                <span className="grid h-7 w-7 place-items-center rounded-full border-2 border-cyan-500 bg-[var(--color-card)] font-['Poppins'] text-[10px] font-black text-cyan-600 dark:text-cyan-300">
+                <span className="grid h-7 w-7 place-items-center rounded-full border-2 border-[var(--color-primary)] bg-[var(--color-card)] font-['Poppins'] text-[10px] font-black text-[var(--color-primary)]">
                   {index + 1}
                 </span>
                 <span className="mt-1.5 text-[9px] font-black text-[var(--color-text-secondary)]">{step.label}</span>
               </div>
               {index < flowSteps.length - 1 ? (
-                <span className="mt-3.5 h-px min-w-4 flex-1 bg-gradient-to-l from-cyan-500/60 to-indigo-500/20" />
+                <span className="mt-3.5 h-px min-w-4 flex-1 bg-gradient-to-l from-[color:rgb(var(--color-primary-rgb)/0.6)] to-[color:rgb(var(--color-accent-rgb)/0.2)]" />
               ) : null}
             </React.Fragment>
           ))}
@@ -583,7 +583,7 @@ const PaymentDetails = ({
             className="min-w-0 border-y border-[color:rgb(var(--color-border-rgb)/0.62)] py-5"
           >
             <div className="mb-4 flex items-center gap-2.5">
-              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-cyan-500/10 text-cyan-600 dark:text-cyan-300">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[color:rgb(var(--color-primary-rgb)/0.1)] text-[var(--color-primary)]">
                 <Landmark className="h-4 w-4" />
               </span>
               <div>
@@ -594,12 +594,12 @@ const PaymentDetails = ({
             <button
               type="button"
               onClick={handleCopyAccount}
-              className="group relative flex w-full items-center justify-between gap-3 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#082f49_0%,#0e7490_48%,#2563eb_100%)] px-4 py-4 text-white shadow-[0_20px_45px_-28px_rgba(8,145,178,0.9)] transition hover:-translate-y-0.5 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-cyan-400/50 focus:ring-offset-2 focus:ring-offset-[var(--color-bg)] sm:px-5"
+              className="group relative flex w-full items-center justify-between gap-3 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,var(--color-secondary)_0%,var(--color-primary)_58%,var(--color-accent)_125%)] px-4 py-4 text-white shadow-[0_20px_45px_-28px_rgb(var(--color-primary-rgb)/0.9)] transition hover:-translate-y-0.5 hover:brightness-110 focus:outline-none focus:ring-2 focus:ring-[color:rgb(var(--color-primary-rgb)/0.5)] focus:ring-offset-2 focus:ring-offset-[var(--color-bg)] sm:px-5"
               title={dir === 'rtl' ? 'اضغط للنسخ' : 'Tap to copy'}
             >
-              <span className="pointer-events-none absolute -top-10 end-5 h-24 w-24 rounded-full bg-cyan-300/20 blur-2xl" />
+              <span className="pointer-events-none absolute -top-10 end-5 h-24 w-24 rounded-full bg-[color:rgb(var(--color-accent-rgb)/0.2)] blur-2xl" />
               <span className="relative min-w-0 text-start">
-                <span className="block text-[9px] font-bold text-cyan-100/75">{dir === 'rtl' ? 'رقم التحويل' : 'Transfer number'}</span>
+                <span className="block text-[9px] font-bold text-[color:rgb(219_234_254/0.8)]">{dir === 'rtl' ? 'رقم التحويل' : 'Transfer number'}</span>
                 <span className="mt-1 block break-all font-['Poppins'] text-xl font-black tracking-[0.08em] [direction:ltr] sm:text-2xl">{method.accountNumber}</span>
               </span>
               <span className="relative inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-white/15 bg-white/10 px-2.5 py-2 text-[10px] font-black text-white backdrop-blur-sm transition group-hover:bg-white/20">
@@ -607,7 +607,7 @@ const PaymentDetails = ({
                 {dir === 'rtl' ? 'نسخ' : 'Copy'}
               </span>
             </button>
-            <p className="mt-2 text-center text-[9px] font-bold text-cyan-600 dark:text-cyan-300">{dir === 'rtl' ? 'اضغط على الرقم لنسخه فورًا' : 'Tap the number to copy it instantly'}</p>
+            <p className="mt-2 text-center text-[9px] font-bold text-[var(--color-primary)]">{dir === 'rtl' ? 'اضغط على الرقم لنسخه فورًا' : 'Tap the number to copy it instantly'}</p>
             <div className="relative mt-4 grid grid-cols-2 border-b border-[color:rgb(var(--color-border-rgb)/0.5)] pb-3 text-start after:absolute after:inset-y-2 after:left-1/2 after:w-px after:-translate-x-1/2 after:bg-gradient-to-b after:from-transparent after:via-cyan-500/35 after:to-transparent">
               {method.accountName && (
                 <div className="min-w-0 px-3 py-2 sm:px-5">
@@ -633,24 +633,24 @@ const PaymentDetails = ({
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.25, delay: 0.07, ease: 'easeOut' }}
             role="note"
-            className="relative isolate my-4 overflow-hidden rounded-2xl border border-amber-300/60 bg-[linear-gradient(135deg,#fffbeb_0%,#fff7ed_54%,#ffffff_100%)] p-4 shadow-[0_20px_44px_-34px_rgb(217_119_6/0.62)] dark:border-amber-300/20 dark:bg-[radial-gradient(18rem_circle_at_100%_0%,rgb(245_158_11/0.16),transparent_52%),linear-gradient(135deg,rgb(50_36_12/0.7),rgb(var(--color-card-rgb)/0.82))]"
+            className="relative isolate my-4 overflow-hidden rounded-2xl border border-[color:rgb(var(--color-accent-rgb)/0.38)] bg-[linear-gradient(135deg,rgb(var(--color-accent-rgb)/0.12),rgb(var(--color-card-rgb)/0.92))] p-4 shadow-[0_20px_44px_-34px_rgb(var(--color-accent-rgb)/0.62)]"
           >
-            <span className="pointer-events-none absolute -end-8 -top-10 -z-10 h-28 w-28 rounded-full bg-amber-300/25 blur-2xl" />
-            <span className="pointer-events-none absolute end-3 top-3 text-amber-500/30"><Sparkles className="h-5 w-5" /></span>
+            <span className="pointer-events-none absolute -end-8 -top-10 -z-10 h-28 w-28 rounded-full bg-[color:rgb(var(--color-accent-rgb)/0.2)] blur-2xl" />
+            <span className="pointer-events-none absolute end-3 top-3 text-[color:rgb(var(--color-accent-rgb)/0.45)]"><Sparkles className="h-5 w-5" /></span>
             <div className="flex items-start gap-3">
-              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-amber-300/70 bg-[linear-gradient(145deg,#facc15,#f59e0b)] text-amber-950 shadow-[0_12px_26px_-18px_rgb(217_119_6/0.9)]">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-[color:rgb(var(--color-accent-rgb)/0.6)] bg-[linear-gradient(145deg,var(--color-accent),var(--color-primary))] text-[var(--color-button-text)] shadow-[0_12px_26px_-18px_rgb(var(--color-accent-rgb)/0.9)]">
                 <Info className="h-5 w-5" />
               </span>
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-xs font-black text-amber-950 dark:text-amber-100">
+                  <h3 className="text-xs font-black text-[var(--color-text)]">
                     {dir === 'rtl' ? 'تعليمات مهمة لهذه الوسيلة' : 'Important payment instructions'}
                   </h3>
-                  <span className="rounded-full border border-amber-400/35 bg-amber-200/55 px-2 py-0.5 text-[8px] font-black text-amber-800 dark:bg-amber-400/10 dark:text-amber-200">
+                  <span className="rounded-full border border-[color:rgb(var(--color-accent-rgb)/0.35)] bg-[color:rgb(var(--color-accent-rgb)/0.12)] px-2 py-0.5 text-[8px] font-black text-[var(--color-accent)]">
                     {dir === 'rtl' ? 'يرجى القراءة' : 'Please read'}
                   </span>
                 </div>
-                <p className="mt-2 whitespace-pre-line break-words text-xs font-semibold leading-6 text-amber-950/80 dark:text-amber-50/80">
+                <p className="mt-2 whitespace-pre-line break-words text-xs font-semibold leading-6 text-[var(--color-text-secondary)]">
                   {methodInstructions}
                 </p>
               </div>
@@ -666,7 +666,7 @@ const PaymentDetails = ({
           className="mx-auto min-w-0 max-w-2xl py-5"
         >
           <div className="mb-5 flex items-center gap-2.5">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-500/10 text-indigo-500 dark:text-indigo-300">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[color:rgb(var(--color-primary-rgb)/0.1)] text-[var(--color-primary)]">
               <ReceiptText className="h-4 w-4" />
             </span>
             <div>
@@ -689,11 +689,11 @@ const PaymentDetails = ({
                 </label>
                 {field === 'amount' ? (
                   <div
-                    className="flex h-12 overflow-hidden rounded-xl border border-amber-400/55 bg-[color:rgb(var(--color-surface-rgb)/0.72)] shadow-inner shadow-black/5 transition focus-within:border-amber-500 focus-within:ring-2 focus-within:ring-amber-400/15 dark:bg-[linear-gradient(110deg,rgb(15_23_42/0.82),rgb(30_27_18/0.76))] dark:shadow-black/15"
+                    className="flex h-12 overflow-hidden rounded-xl border border-[color:rgb(var(--color-accent-rgb)/0.55)] bg-[color:rgb(var(--color-surface-rgb)/0.72)] shadow-inner shadow-black/5 transition focus-within:border-[var(--color-accent)] focus-within:ring-2 focus-within:ring-[color:rgb(var(--color-accent-rgb)/0.15)]"
                     dir={dir}
                   >
                     <span
-                      className="grid min-w-16 shrink-0 place-items-center border-e border-amber-500/55 bg-[linear-gradient(145deg,#fde047,#facc15_55%,#eab308)] px-3 font-['Poppins'] text-xl font-black text-slate-950 shadow-[0_0_24px_-12px_rgb(234_179_8/0.9)]"
+                      className="grid min-w-16 shrink-0 place-items-center border-e border-[color:rgb(var(--color-accent-rgb)/0.55)] bg-[linear-gradient(145deg,var(--color-accent),var(--color-primary))] px-3 font-['Poppins'] text-xl font-black text-[var(--color-button-text)] shadow-[0_0_24px_-12px_rgb(var(--color-accent-rgb)/0.9)]"
                       dir="ltr"
                       title={paymentCurrencyCode}
                     >
@@ -740,10 +740,10 @@ const PaymentDetails = ({
               </label>
               {senderDetailRequirement.field === 'senderWalletNumber' ? (
                 <div
-                  className="flex h-12 overflow-hidden rounded-xl border border-rose-400/55 bg-rose-50/45 shadow-inner shadow-black/5 transition focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-400/15 dark:bg-[linear-gradient(110deg,rgb(31_18_25/0.82),rgb(15_23_42/0.78))] dark:shadow-black/15"
+                    className="flex h-12 overflow-hidden rounded-xl border border-[color:rgb(var(--color-primary-rgb)/0.42)] bg-[color:rgb(var(--color-primary-rgb)/0.06)] shadow-inner shadow-black/5 transition focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[color:rgb(var(--color-primary-rgb)/0.15)]"
                   dir={dir}
                 >
-                  <span className="grid min-w-16 shrink-0 place-items-center border-e border-rose-600/55 bg-[linear-gradient(145deg,#fb7185,#e11d48_58%,#be123c)] text-white shadow-[0_0_24px_-12px_rgb(225_29_72/0.9)]">
+                  <span className="grid min-w-16 shrink-0 place-items-center border-e border-[color:rgb(var(--color-primary-rgb)/0.5)] bg-[linear-gradient(145deg,var(--color-secondary),var(--color-primary))] text-white shadow-[0_0_24px_-12px_rgb(var(--color-primary-rgb)/0.9)]">
                     <Smartphone className="h-5 w-5 drop-shadow-sm" />
                   </span>
                   <input
@@ -752,17 +752,17 @@ const PaymentDetails = ({
                     value={formData[senderDetailRequirement.field] || ''}
                     onChange={(e) => handleInputChange(senderDetailRequirement.field, e.target.value)}
                     placeholder={senderDetailRequirement.placeholder}
-                    className="min-w-0 flex-1 bg-transparent px-4 text-right font-['Poppins'] text-sm font-black text-rose-700 outline-none placeholder:font-semibold placeholder:text-[var(--color-text-secondary)] dark:text-rose-300 [font-variant-numeric:tabular-nums]"
+                    className="min-w-0 flex-1 bg-transparent px-4 text-right font-['Poppins'] text-sm font-black text-[var(--color-text)] outline-none placeholder:font-semibold placeholder:text-[var(--color-text-secondary)] [font-variant-numeric:tabular-nums]"
                     disabled={isSubmitting}
                     required
                   />
                 </div>
               ) : (
                 <div
-                  className="flex h-12 overflow-hidden rounded-xl border border-emerald-400/50 bg-emerald-50/40 shadow-inner shadow-black/5 transition focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-400/15 dark:bg-[linear-gradient(110deg,rgb(8_39_31/0.78),rgb(15_23_42/0.78))] dark:shadow-black/15"
+                  className="flex h-12 overflow-hidden rounded-xl border border-[color:rgb(var(--color-primary-rgb)/0.42)] bg-[color:rgb(var(--color-primary-rgb)/0.06)] shadow-inner shadow-black/5 transition focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[color:rgb(var(--color-primary-rgb)/0.15)]"
                   dir={dir}
                 >
-                  <span className="grid min-w-16 shrink-0 place-items-center border-e border-emerald-600/45 bg-[linear-gradient(145deg,#34d399,#059669_58%,#047857)] text-white shadow-[0_0_24px_-12px_rgb(5_150_105/0.9)]">
+                  <span className="grid min-w-16 shrink-0 place-items-center border-e border-[color:rgb(var(--color-primary-rgb)/0.5)] bg-[linear-gradient(145deg,var(--color-secondary),var(--color-primary))] text-white shadow-[0_0_24px_-12px_rgb(var(--color-primary-rgb)/0.9)]">
                     <WalletCards className="h-5 w-5 drop-shadow-sm" />
                   </span>
                   <input
@@ -770,7 +770,7 @@ const PaymentDetails = ({
                     value={formData[senderDetailRequirement.field] || ''}
                     onChange={(e) => handleInputChange(senderDetailRequirement.field, e.target.value)}
                     placeholder={senderDetailRequirement.placeholder}
-                    className="min-w-0 flex-1 bg-transparent px-4 text-right text-sm font-bold text-emerald-800 outline-none placeholder:font-semibold placeholder:text-[var(--color-text-secondary)] dark:text-emerald-200"
+                    className="min-w-0 flex-1 bg-transparent px-4 text-right text-sm font-bold text-[var(--color-text)] outline-none placeholder:font-semibold placeholder:text-[var(--color-text-secondary)]"
                     disabled={isSubmitting}
                     required
                   />
@@ -786,10 +786,10 @@ const PaymentDetails = ({
               <FieldCompletionBadge complete={Boolean(String(formData.transactionId || '').trim())} />
             </label>
             <div
-              className="flex h-12 overflow-hidden rounded-xl border border-indigo-400/55 bg-indigo-50/50 shadow-inner shadow-black/5 transition focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-400/15 dark:bg-[linear-gradient(110deg,rgb(30_27_75/0.78),rgb(8_47_73/0.72))] dark:shadow-black/15"
+              className="flex h-12 overflow-hidden rounded-xl border border-[color:rgb(var(--color-primary-rgb)/0.42)] bg-[color:rgb(var(--color-primary-rgb)/0.06)] shadow-inner shadow-black/5 transition focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[color:rgb(var(--color-primary-rgb)/0.15)]"
               dir={dir}
             >
-              <span className="grid min-w-16 shrink-0 place-items-center border-e border-indigo-600/50 bg-[linear-gradient(145deg,#818cf8,#4f46e5_52%,#2563eb)] text-white shadow-[0_0_24px_-12px_rgb(79_70_229/0.9)]">
+              <span className="grid min-w-16 shrink-0 place-items-center border-e border-[color:rgb(var(--color-primary-rgb)/0.5)] bg-[linear-gradient(145deg,var(--color-secondary),var(--color-primary))] text-white shadow-[0_0_24px_-12px_rgb(var(--color-primary-rgb)/0.9)]">
                 <Hash className="h-5 w-5 drop-shadow-sm" />
               </span>
               <input
@@ -797,7 +797,7 @@ const PaymentDetails = ({
                 value={formData.transactionId || ''}
                 onChange={(e) => handleInputChange('transactionId', e.target.value)}
                 placeholder="أدخل رقم العملية"
-                className="min-w-0 flex-1 bg-transparent px-4 text-right font-['Poppins'] text-sm font-black tracking-wide text-indigo-700 outline-none placeholder:font-semibold placeholder:tracking-normal placeholder:text-[var(--color-text-secondary)] dark:text-indigo-200 [font-variant-numeric:tabular-nums]"
+                className="min-w-0 flex-1 bg-transparent px-4 text-right font-['Poppins'] text-sm font-black tracking-wide text-[var(--color-text)] outline-none placeholder:font-semibold placeholder:tracking-normal placeholder:text-[var(--color-text-secondary)] [font-variant-numeric:tabular-nums]"
                 disabled={isSubmitting}
                 required
               />
@@ -821,7 +821,7 @@ const PaymentDetails = ({
             </div>
           )}
 
-          <div className="mb-5 rounded-2xl border border-indigo-500/15 bg-[linear-gradient(135deg,rgb(6_182_212/0.07),rgb(79_70_229/0.08))] p-4">
+          <div className="mb-5 rounded-2xl border border-[color:rgb(var(--color-primary-rgb)/0.2)] bg-[linear-gradient(135deg,rgb(var(--color-primary-rgb)/0.08),rgb(var(--color-accent-rgb)/0.08))] p-4">
             <div className="flex items-center justify-between gap-3 px-1 text-xs">
               <span className="font-bold text-[var(--color-text-secondary)]">
                 {t('payments.subtotalLabel', {
@@ -843,13 +843,13 @@ const PaymentDetails = ({
               </div>
             )}
 
-            <div className="mt-3 flex items-end justify-between gap-3 border-t border-indigo-500/15 px-1 pt-3 text-xs">
+            <div className="mt-3 flex items-end justify-between gap-3 border-t border-[color:rgb(var(--color-primary-rgb)/0.18)] px-1 pt-3 text-xs">
               <span className="font-black text-[var(--color-text)]">
                 {t('payments.totalToTransferLabel', {
                   defaultValue: dir === 'rtl' ? 'الإجمالي المطلوب تحويله' : 'Total to transfer',
                 })}
               </span>
-              <span className="font-['Poppins'] text-lg font-black tracking-tight text-cyan-600 [direction:ltr] [font-variant-numeric:tabular-nums] dark:text-cyan-300">{formatMoney(payableAmount)}</span>
+              <span className="font-['Poppins'] text-lg font-black tracking-tight text-[var(--color-primary)] [direction:ltr] [font-variant-numeric:tabular-nums]">{formatMoney(payableAmount)}</span>
             </div>
           </div>
 
@@ -879,7 +879,7 @@ const PaymentDetails = ({
             aria-busy={isSubmitting}
             whileTap={{ scale: 0.985 }}
             whileHover={!isSubmitting ? { y: -1 } : undefined}
-            className="group flex h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,#0891b2_0%,#2563eb_55%,#4f46e5_100%)] px-5 text-sm font-black text-white shadow-[0_20px_38px_-22px_rgba(37,99,235,0.9)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
+            className="group flex h-[52px] w-full items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,var(--color-secondary)_0%,var(--color-primary)_58%,var(--color-accent)_125%)] px-5 text-sm font-black text-[var(--color-button-text)] shadow-[0_20px_38px_-22px_rgb(var(--color-primary-rgb)/0.9)] transition hover:-translate-y-0.5 hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70"
             disabled={isSubmitting}
           >
             {isSubmitting ? (

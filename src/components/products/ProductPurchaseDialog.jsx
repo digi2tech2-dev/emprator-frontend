@@ -11,9 +11,10 @@ import apiClient from '../../services/client';
 import { useToast } from '../ui/Toast';
 import { useLanguage } from '../../context/LanguageContext';
 import { resolveImageUrl } from '../../utils/imageUrl';
+import { resolveUserAvatar } from '../../utils/avatar';
 import brandLogoDark from '../../assets/logo.webp';
 import brandLogoLight from '../../assets/logo.webp';
-import dragonBackground from '../../assets/payment-warning-dragon-lite.webp';
+import emperorBackground from '../../assets/payment-warning-emperor-lite.webp';
 import {
   calculateProductPrice,
   formatCurrencyAmount,
@@ -146,7 +147,7 @@ const ProductImage = ({ product }) => {
     return <img src={resolveImageUrl(product.image)} alt={product?.name || ''} onError={() => setImageFailed(true)} />;
   }
 
-  return <img src={brandLogoDark} alt="Dra90n STORE" className="purchase-dialog-fallback-logo" />;
+  return <img src={brandLogoDark} alt="EMBRATOR CARD" className="purchase-dialog-fallback-logo" />;
 };
 
 const SummaryCell = ({ label, value, icon, onClick, title }) => {
@@ -486,14 +487,16 @@ const ProductPurchaseDialog = ({
 
     if (!data) return null;
 
-    return (
-      <div className="mt-2 flex items-center gap-2 rounded-xl border border-indigo-400/25 bg-indigo-500/10 px-3 py-2 text-start text-xs font-bold text-indigo-200">
-        {data.avatar ? (
-          <img src={data.avatar} alt="" className="h-8 w-8 rounded-full object-cover ring-1 ring-indigo-300/30" />
-        ) : null}
+      return (
+        <div className="mt-2 flex items-center gap-2 rounded-xl border border-[color:rgb(var(--color-primary-rgb)/0.25)] bg-[color:rgb(var(--color-primary-rgb)/0.1)] px-3 py-2 text-start text-xs font-bold text-[var(--color-primary)]">
+        <img
+          src={resolveUserAvatar(data, data.nickName || data.uid || 'Verified User')}
+          alt=""
+          className="h-8 w-8 rounded-full object-cover ring-1 ring-[color:rgb(var(--color-primary-rgb)/0.3)]"
+        />
         <div className="min-w-0">
           <p className="truncate">{data.nickName || data.uid}</p>
-          {data.uid ? <p className="truncate text-[0.68rem] text-indigo-100/70" dir="ltr">{data.uid}</p> : null}
+             {data.uid ? <p className="truncate text-[0.68rem] text-[var(--color-text-secondary)]" dir="ltr">{data.uid}</p> : null}
         </div>
       </div>
     );
@@ -950,12 +953,12 @@ const ProductPurchaseDialog = ({
               className="purchase-dialog-product"
               style={{
                 '--ppd-product-image': product?.image ? `url("${resolveImageUrl(product.image)}")` : 'none',
-                '--ppd-dragon-image': `url("${dragonBackground}")`,
+                '--ppd-emperor-image': `url("${emperorBackground}")`,
               }}
             >
-              <div className="purchase-dialog-platform-logo" title="Dra90n STORE">
-                <img className="purchase-dialog-logo-dark" src={brandLogoDark} alt="Dra90n STORE" />
-                <img className="purchase-dialog-logo-light" src={brandLogoLight} alt="Dra90n STORE" />
+              <div className="purchase-dialog-platform-logo" title="EMBRATOR CARD">
+                <img className="purchase-dialog-logo-dark" src={brandLogoDark} alt="EMBRATOR CARD" />
+                <img className="purchase-dialog-logo-light" src={brandLogoLight} alt="EMBRATOR CARD" />
               </div>
               <div className="purchase-dialog-product-visual">
                 <div className={`purchase-dialog-image ${isPurchasable ? '' : 'is-unavailable'}`}>

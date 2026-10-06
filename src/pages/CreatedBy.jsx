@@ -25,7 +25,7 @@ const CreatedBy = ({ inAccount = false }) => {
   const isArabic = dir === 'rtl';
   const engineersWhatsAppUrl = buildWhatsAppLink({
     number: '01019603238',
-    message: 'مرحبًا، أريد تصميم موقع مشابه لـ Dra90n STORE.',
+    message: 'مرحبًا، أريد تصميم موقع مشابه لـ EMBRATOR CARD.',
   });
 
   useBodyScrollLock(!inAccount && isMenuOpen);
@@ -113,11 +113,11 @@ const CreatedBy = ({ inAccount = false }) => {
 
           <p className="inline-flex items-center gap-2 rounded-full border border-[color:rgb(var(--color-primary-rgb)/0.2)] bg-[color:rgb(var(--color-primary-rgb)/0.08)] px-3 py-1 text-xs font-black text-[var(--color-primary)]">
             <Sparkles className="h-3.5 w-3.5" />
-            Dra90n STORE
+            EMBRATOR CARD
           </p>
 
           <h1 className="mt-4 text-2xl font-black text-[var(--color-text)] sm:text-3xl">
-            {isArabic ? 'Dra90n STORE من تنفيذ DIGI TECH' : 'Dra90n STORE built by DIGI TECH'}
+            {isArabic ? 'EMBRATOR CARD من تنفيذ DIGI TECH' : 'EMBRATOR CARD built by DIGI TECH'}
           </h1>
 
           <a
@@ -141,8 +141,8 @@ const CreatedBy = ({ inAccount = false }) => {
 
           <p className="mt-3 max-w-xl text-sm font-semibold leading-7 text-[var(--color-text-secondary)]">
             {isArabic
-              ? 'نحن شركة برمجة نصمم ونبني منتجات رقمية احترافية، وDra90n STORE أحد أعمالنا التي تعكس اهتمامنا بالتفاصيل وسهولة الاستخدام.'
-              : 'We are a software company that designs and builds professional digital products, and Dra90n STORE is one of our works that reflects our focus on detail and usability.'}
+              ? 'نحن شركة برمجة نصمم ونبني منتجات رقمية احترافية، وEMBRATOR CARD أحد أعمالنا التي تعكس اهتمامنا بالتفاصيل وسهولة الاستخدام.'
+              : 'We are a software company that designs and builds professional digital products, and EMBRATOR CARD is one of our works that reflects our focus on detail and usability.'}
           </p>
         </div>
       </Card>

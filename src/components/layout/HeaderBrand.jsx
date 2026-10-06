@@ -12,10 +12,10 @@ const HeaderBrand = ({ className, iconClassName, textClassName }) => (
     />
     <span className={cn('min-w-0 text-center leading-none', textClassName)}>
       <span className="ka-brand-title block bg-[linear-gradient(110deg,#ffe08a_0%,#f59e0b_45%,#c2410c_100%)] bg-clip-text font-['Orbitron'] text-[0.84rem] font-black leading-none tracking-[0.06em] text-transparent min-[380px]:text-[0.98rem] sm:text-[1.3rem]">
-        Dra90n
+        EMBRATOR
       </span>
       <span className="mt-0.5 block font-['Orbitron'] text-[0.34rem] font-bold uppercase tracking-[0.34em] text-[#f59e0b] sm:text-[0.46rem]">
-        STORE
+        CARD
       </span>
     </span>
   </span>

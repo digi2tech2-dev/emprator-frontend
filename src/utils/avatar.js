@@ -1,5 +1,3 @@
-import { resolveImageUrl } from './imageUrl';
-
 const AVATAR_PALETTES = [
   ['#160b07', '#7f2717', '#f59e0b'],
   ['#080403', '#a81713', '#ffb52e'],
@@ -26,33 +24,8 @@ const getCachedAvatar = (key, factory) => {
   return value;
 };
 
-const isUiAvatarUrl = (value) => /\/\/ui-avatars\.com\//i.test(String(value || ''));
-const isLegacyAvatarUrl = (value) => /\/\/i\.pravatar\.cc\//i.test(String(value || ''));
-
-const safeDecodeUri = (value) => {
-  try {
-    return decodeURIComponent(String(value || ''));
-  } catch {
-    return String(value || '');
-  }
-};
-
-const isLegacyGeneratedAvatarUrl = (value) => {
-  const text = safeDecodeUri(value);
-  return text.includes('data:image/svg+xml')
-    && text.includes('<text x="128" y="216"')
-    && text.includes('font-size="34"');
-};
-
-const isGeneratedSvgAvatarUrl = (value) => {
-  const text = safeDecodeUri(value);
-  return text.includes('data:image/svg+xml')
-    && text.includes('<svg')
-    && text.includes('viewBox="0 0 256 256"');
-};
-
 const hashString = (value) => {
-  const text = String(value || 'Dra90n');
+  const text = String(value || 'EMBRATOR');
   let hash = 0;
 
   for (let index = 0; index < text.length; index += 1) {
@@ -64,7 +37,7 @@ const hashString = (value) => {
 };
 
 const getInitials = (value) => {
-  const parts = String(value || 'Dra90n User')
+  const parts = String(value || 'EMBRATOR User')
     .replace(/[^\p{L}\p{N}\s._-]/gu, ' ')
     .split(/[\s._-]+/)
     .map((part) => part.trim())
@@ -196,12 +169,12 @@ const isAdminIdentity = (source, identity = '') => {
   return text.includes('platform admin') || text.includes('مدير المنصة') || text.includes('مدير المنصه');
 };
 
-export const getDefaultAvatarUrl = (identity = 'Dra90n User', options = {}) => {
+export const getDefaultAvatarUrl = (identity = 'EMBRATOR User', options = {}) => {
   if (options.variant === 'gulf-admin') {
     return getGulfAdminAvatarUrl(identity);
   }
 
-  const seed = String(identity || 'Dra90n User').trim() || 'Dra90n User';
+  const seed = String(identity || 'EMBRATOR User').trim() || 'EMBRATOR User';
   const cacheKey = `anime:${seed}`;
 
   return getCachedAvatar(cacheKey, () => {
@@ -319,20 +292,15 @@ export const getDefaultAvatarUrl = (identity = 'Dra90n User', options = {}) => {
   });
 };
 
-export const resolveUserAvatar = (source, fallbackIdentity = 'Dra90n User') => {
+export const resolveUserAvatar = (source, fallbackIdentity = 'EMBRATOR User') => {
   const isObject = source && typeof source === 'object';
-  const rawAvatar = isObject ? source.avatar : source;
   const identity = String(
     fallbackIdentity
     || (isObject ? (source.name || source.username || source.email) : '')
-    || 'Dra90n User'
+    || 'EMBRATOR User'
   ).trim();
-  const resolved = resolveImageUrl(rawAvatar);
-
-  if (resolved && !isUiAvatarUrl(resolved) && !isLegacyAvatarUrl(resolved) && !isLegacyGeneratedAvatarUrl(resolved) && !isGeneratedSvgAvatarUrl(resolved)) {
-    return resolved;
-  }
-
+  // Keep the storefront identity consistent: every account is represented by
+  // its deterministic cartoon character rather than a photo or a legacy avatar.
   return getDefaultAvatarUrl(identity, {
     variant: isAdminIdentity(source, identity) ? 'gulf-admin' : 'anime',
   });

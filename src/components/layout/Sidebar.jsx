@@ -40,7 +40,8 @@ import HeaderBrand from './HeaderBrand';
 import { SUPERVISOR_ROLES, getDefaultRouteForRole, hasRequiredRole } from '../../utils/authRoles';
 import { PERMISSIONS, hasPermission } from '../../utils/permissions';
 import { resolveUserAvatar } from '../../utils/avatar';
-import dragonLogo from '../../assets/logo.webp';
+import emperorLogo from '../../assets/logo.webp';
+import avatarFrame from '../../assets/ايطار.PNG';
 
 const ADMIN_NAV_ROLES = ['admin', 'super_admin', ...SUPERVISOR_ROLES];
 
@@ -362,12 +363,12 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
                   type="button"
                   onClick={() => navigate(getDefaultRouteForRole(user?.role))}
                   className="flex w-full items-center justify-center rounded-[24px] transition-all hover:-translate-y-0.5"
-                  aria-label="Dra90n STORE"
+                  aria-label="EMBRATOR CARD"
                 >
                   <img
-                    src={dragonLogo}
-                    alt="Dra90n STORE"
-                    className="ka-sidebar-dragon-logo h-auto w-[min(9rem,64%)] object-contain drop-shadow-[0_12px_24px_rgba(168,23,19,0.42)]"
+                    src={emperorLogo}
+                    alt="EMBRATOR CARD"
+                    className="ka-sidebar-emperor-logo h-auto w-[min(9rem,64%)] object-contain drop-shadow-[0_12px_24px_rgba(168,23,19,0.42)]"
                     loading="eager"
                     decoding="async"
                   />
@@ -378,25 +379,11 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
             {isExpanded && (
               <div className="ka-sidebar-user-card mb-3 px-2.5 py-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="relative flex shrink-0 flex-col items-center">
-                    {userId ? (
-                      <button
-                        type="button"
-                        onClick={handleCopyUserId}
-                        className="ka-sidebar-id-chip absolute left-1/2 top-0 z-20 -translate-x-1/2 -translate-y-1/2"
-                        title={copiedUserId ? 'تم نسخ ID المستخدم' : 'اضغط لنسخ ID المستخدم'}
-                        aria-label={copiedUserId ? 'تم نسخ ID المستخدم' : 'نسخ ID المستخدم'}
-                      >
-                        {copiedUserId ? <Check className="h-3 w-3 shrink-0" /> : <Copy className="h-3 w-3 shrink-0" />}
-                        <span className="truncate">{copiedUserId ? 'تم النسخ' : `...${userId.slice(-8)}`}</span>
-                      </button>
-                    ) : null}
-
-                    <div className="relative">
+                  <div className="ka-sidebar-avatar-frame shrink-0">
                       <button
                         type="button"
                         onClick={handleOpenMyAccount}
-                        className="ka-sidebar-avatar h-9 w-9"
+                        className="ka-sidebar-avatar"
                         aria-label={dir === 'rtl' ? 'فتح الحساب' : 'Open account'}
                       >
                         <img
@@ -404,13 +391,13 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
                           alt={userDisplayName}
                         />
                       </button>
+                      <img src={avatarFrame} className="ka-sidebar-avatar-frame-art" alt="" aria-hidden="true" />
                       <span
-                        className="absolute -bottom-0.5 -right-0.5 z-10 h-3.5 w-3.5 rounded-full border-2 border-[color:rgb(var(--color-card-rgb)/0.98)] bg-emerald-400 shadow-[0_0_0_3px_rgb(16_185_129/0.16),0_0_14px_rgb(16_185_129/0.76)]"
+                        className="absolute bottom-1 right-1 z-20 h-3.5 w-3.5 rounded-full border-2 border-[color:rgb(var(--color-card-rgb)/0.98)] bg-emerald-400 shadow-[0_0_0_3px_rgb(16_185_129/0.16),0_0_14px_rgb(16_185_129/0.76)]"
                         role="status"
                         aria-label={dir === 'rtl' ? 'متصل الآن' : 'Online now'}
                         title={dir === 'rtl' ? 'متصل الآن' : 'Online now'}
                       />
-                    </div>
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -426,6 +413,18 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
                         <LogOut className="h-5 w-5" strokeWidth={2.5} />
                       </button>
                     </div>
+                    {userId ? (
+                      <button
+                        type="button"
+                        onClick={handleCopyUserId}
+                        className="ka-sidebar-id-chip ka-sidebar-id-chip--full"
+                        title={copiedUserId ? 'تم نسخ ID المستخدم' : 'اضغط لنسخ ID المستخدم'}
+                        aria-label={copiedUserId ? 'تم نسخ ID المستخدم' : 'نسخ ID المستخدم'}
+                      >
+                        {copiedUserId ? <Check className="h-3 w-3 shrink-0" /> : <Copy className="h-3 w-3 shrink-0" />}
+                        <span>{copiedUserId ? 'تم النسخ' : `ID: ${userId.slice(-8)}`}</span>
+                      </button>
+                    ) : null}
                     <div className="mt-0.5 truncate text-[0.62rem] font-bold text-[var(--color-primary-hover)]">{userRoleLabel}</div>
                   </div>
                 </div>
@@ -460,7 +459,7 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
 
             <div className="ka-sidebar-copyright mt-auto" dir="ltr">
               <span>© 2026</span>
-              <strong>Dra90n STORE</strong>
+              <strong>EMBRATOR CARD</strong>
             </div>
           </div>
 

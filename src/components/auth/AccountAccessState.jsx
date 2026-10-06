@@ -169,13 +169,13 @@ const AccountAccessState = ({ variant = 'pending' }) => {
               <div className="rounded-[1.5rem] border border-[color:rgb(var(--color-border-rgb)/0.84)] bg-[color:rgb(var(--color-card-rgb)/0.72)] p-4 text-start">
                 <div className="flex items-center gap-3">
                   <img
-                    src={resolveUserAvatar(activeUser, activeUser?.name || activeUser?.email || 'Dra90n User')}
+                    src={resolveUserAvatar(activeUser, activeUser?.name || activeUser?.email || 'EMBRATOR User')}
                     alt={activeUser?.name || 'User'}
                     className="h-12 w-12 rounded-full border border-[color:rgb(var(--color-border-rgb)/0.84)] object-cover"
                   />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-[var(--color-text)]">
-                      {activeUser?.name || 'Dra90n User'}
+                      {activeUser?.name || 'EMBRATOR User'}
                     </p>
                     <p className="truncate text-xs text-[var(--color-text-secondary)]">
                       {activeUser?.email || 'account@ka-card.app'}

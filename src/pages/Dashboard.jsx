@@ -16,7 +16,7 @@ import slideTwoHeroImage from '../assets/slide-2.jpg';
 import slideThreeHeroImage from '../assets/slide-3.jpg';
 import slideFourHeroImage from '../assets/slide-4.jpg';
 import targetBannerImage from '../assets/تارجت.jpg';
-import paymentWarningDragon from '../assets/payment-warning-dragon-lite.webp';
+import paymentWarningEmperor from '../assets/payment-warning-emperor-lite.webp';
 import { useBodyScrollLock } from '../utils/bodyScrollLock';
 import {
   createStorefrontCategories,
@@ -31,7 +31,7 @@ const Dashboard = () => {
   const { i18n } = useTranslation();
   const navigate = useNavigate();
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [showWelcomeDragon, setShowWelcomeDragon] = useState(false);
+  const [showWelcomeEmperor, setShowWelcomeEmperor] = useState(false);
   const language = getStorefrontLanguage(i18n);
   const isTwoFactorEnabled = Boolean(user?.twoFactorEnabled ?? user?.isTwoFactorEnabled);
   const isCustomerUser = String(user?.role || '').trim().toLowerCase() === 'customer';
@@ -40,17 +40,17 @@ const Dashboard = () => {
     const userKey = String(user?.id || user?._id || user?.email || user?.username || '').trim();
     if (!userKey || typeof window === 'undefined') return;
 
-    const storageKey = `dra90n:dashboard-welcome:v1:${userKey}`;
+    const storageKey = `embrator:dashboard-welcome:v1:${userKey}`;
     try {
       if (window.localStorage.getItem(storageKey)) return;
       window.localStorage.setItem(storageKey, 'seen');
-      setShowWelcomeDragon(true);
+      setShowWelcomeEmperor(true);
     } catch {
-      setShowWelcomeDragon(true);
+      setShowWelcomeEmperor(true);
     }
   }, [user?.email, user?.id, user?._id, user?.username]);
 
-  useBodyScrollLock(showWelcomeDragon);
+  useBodyScrollLock(showWelcomeEmperor);
 
   useEffect(() => {
     if (refreshProfile) refreshProfile();
@@ -184,26 +184,26 @@ const Dashboard = () => {
     navigate(`/orders/${encodeURIComponent(orderId)}`);
   }, [navigate]);
 
-  const welcomeOverlay = showWelcomeDragon ? (
+  const welcomeOverlay = showWelcomeEmperor ? (
     <div
       className="dashboard-welcome-overlay"
       role="dialog"
       aria-modal="true"
       aria-labelledby="dashboard-welcome-title"
       dir={language === 'ar' ? 'rtl' : 'ltr'}
-      onClick={() => setShowWelcomeDragon(false)}
+      onClick={() => setShowWelcomeEmperor(false)}
     >
       <div className="dashboard-welcome-card" onClick={(event) => event.stopPropagation()}>
         <span className="dashboard-welcome-fire-glow" aria-hidden="true" />
         <span className="dashboard-welcome-embers" aria-hidden="true" />
-        <div className="dashboard-welcome-dragon-stage" aria-hidden="true">
-          <img src={paymentWarningDragon} alt="" className="dashboard-welcome-dragon" decoding="async" fetchPriority="high" />
+        <div className="dashboard-welcome-emperor-stage" aria-hidden="true">
+          <img src={paymentWarningEmperor} alt="" className="dashboard-welcome-emperor" decoding="async" fetchPriority="high" />
         </div>
         <div className="dashboard-welcome-content">
-          <span className="dashboard-welcome-kicker">DRA90N STORE</span>
-          <h1 id="dashboard-welcome-title">{language === 'ar' ? 'مرحبًا بك في DRA90N' : 'Welcome to DRA90N'}</h1>
+          <span className="dashboard-welcome-kicker">EMBRATOR CARD</span>
+          <h1 id="dashboard-welcome-title">{language === 'ar' ? 'مرحبًا بك في EMBRATOR' : 'Welcome to EMBRATOR'}</h1>
           <p>{language === 'ar' ? 'استعد لتجربة شحن نارية وسريعة.' : 'Get ready for a fast, fiery top-up experience.'}</p>
-          <button type="button" onClick={() => setShowWelcomeDragon(false)} className="dashboard-welcome-button">
+          <button type="button" onClick={() => setShowWelcomeEmperor(false)} className="dashboard-welcome-button">
             {language === 'ar' ? 'ابدأ الآن' : 'Start now'}
           </button>
         </div>

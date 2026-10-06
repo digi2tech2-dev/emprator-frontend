@@ -400,7 +400,7 @@ const TargetForm = ({ products = [], paymentMethods = [], onSubmit, onSelectedAp
                 onClick={() => chooseApp(app.id)}
                 className="group flex min-w-0 flex-col items-center gap-2 rounded-2xl px-1 py-1 text-center transition-all hover:-translate-y-1"
               >
-                <div className="aspect-square w-full overflow-hidden rounded-[1.25rem] border-4 border-[color:rgb(var(--color-border-rgb)/0.72)] bg-[color:rgb(var(--color-primary-rgb)/0.08)] p-0.5 shadow-[0_14px_28px_-20px_rgb(var(--color-primary-rgb)/0.95)] transition-all group-hover:border-[color:rgb(var(--color-primary-rgb)/0.58)] group-hover:shadow-[0_18px_34px_-18px_rgb(var(--color-primary-rgb)/0.75)]">
+                <div className="h-24 w-24 overflow-hidden rounded-[1.25rem] border-4 border-[color:rgb(var(--color-border-rgb)/0.72)] bg-[color:rgb(var(--color-primary-rgb)/0.08)] p-0.5 shadow-[0_14px_28px_-20px_rgb(var(--color-primary-rgb)/0.95)] transition-all group-hover:border-[color:rgb(var(--color-primary-rgb)/0.58)] group-hover:shadow-[0_18px_34px_-18px_rgb(var(--color-primary-rgb)/0.75)] sm:h-32 sm:w-32 lg:h-36 lg:w-36">
                   {app.image ? (
                     <img src={resolveImageUrl(app.image)} alt="" className="h-full w-full rounded-[0.95rem] object-contain" />
                   ) : (

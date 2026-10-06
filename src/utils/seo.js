@@ -1,8 +1,8 @@
 import resolveImageUrl from './imageUrl';
 
-const STORE_NAME = 'Dra90n STORE';
-const DEFAULT_DESCRIPTION = 'اشحن ألعابك وتطبيقاتك وبطاقاتك الرقمية فورًا بأسعار منافسة وعروض قوية مع Dra90n STORE — سرعة وأمان ودعم متواصل.';
-const DEFAULT_SOCIAL_IMAGE = '/dra90n-og.webp?v=dra90n-store';
+const STORE_NAME = 'EMBRATOR CARD';
+const DEFAULT_DESCRIPTION = 'اشحن ألعابك وتطبيقاتك وبطاقاتك الرقمية فورًا بأسعار منافسة وعروض قوية مع EMBRATOR CARD — سرعة وأمان ودعم متواصل.';
+const DEFAULT_SOCIAL_IMAGE = '/embrator-og.webp?v=embrator-store';
 
 const SEARCH_PHRASES = [
   'شحن تطبيقات دردشة صوتية',
@@ -14,8 +14,8 @@ const SEARCH_PHRASES = [
   'اشتراكات رقمية',
   'بطاقات رقمية',
   'شحن منتجات رقمية',
-  'Dra90n STORE',
-  'Dragon Store',
+  'EMBRATOR CARD',
+  'EMBRATOR CARD',
 ];
 
 const cleanText = (value) => String(value || '')
@@ -57,8 +57,8 @@ export const getProductSeoDescription = (product, language = 'ar') => {
   const productName = getProductSeoName(product, language);
   const description = cleanText(product?.displayDescription || product?.descriptionAr || product?.description);
   const fallback = language === 'ar'
-    ? `شحن ${productName} عبر Dra90n STORE ضمن خدمات شحن تطبيقات الدردشة الصوتية، الألعاب، الاشتراكات، والمنتجات الرقمية.`
-    : `Top up ${productName} through Dra90n STORE for voice chat apps, games, subscriptions, and digital products.`;
+    ? `شحن ${productName} عبر EMBRATOR CARD ضمن خدمات شحن تطبيقات الدردشة الصوتية، الألعاب، الاشتراكات، والمنتجات الرقمية.`
+    : `Top up ${productName} through EMBRATOR CARD for voice chat apps, games, subscriptions, and digital products.`;
 
   return truncateText(description || fallback, 220);
 };
@@ -142,7 +142,7 @@ export const buildStoreSeo = ({
       '@context': 'https://schema.org',
       '@type': 'Organization',
       name: STORE_NAME,
-      alternateName: 'Dra90n STORE',
+      alternateName: 'EMBRATOR CARD',
       url: origin || canonicalUrl,
       logo: origin ? `${origin}${DEFAULT_SOCIAL_IMAGE}` : DEFAULT_SOCIAL_IMAGE,
       description: seoDescription,
@@ -151,7 +151,7 @@ export const buildStoreSeo = ({
       '@context': 'https://schema.org',
       '@type': 'WebSite',
       name: STORE_NAME,
-      alternateName: 'Dra90n STORE',
+      alternateName: 'EMBRATOR CARD',
       url: origin || canonicalUrl,
       inLanguage: language === 'ar' ? 'ar-EG' : 'en',
     },
@@ -170,7 +170,7 @@ export const buildStoreSeo = ({
     jsonLd.push({
       '@context': 'https://schema.org',
       '@type': 'ItemList',
-      name: language === 'ar' ? 'منتجات Dra90n STORE' : 'Dra90n STORE Products',
+      name: language === 'ar' ? 'منتجات EMBRATOR CARD' : 'EMBRATOR CARD Products',
       description: seoDescription,
       itemListElement: productList,
     });
