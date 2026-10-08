@@ -50,7 +50,7 @@ import paymentWarningEmperor from '../assets/payment-warning-emperor-lite.webp';
 const dataProvider = (import.meta.env.VITE_DATA_PROVIDER || 'mock').toLowerCase();
 const isRealProvider = dataProvider === 'real';
 const WHATSAPP_CHANNEL_URL = 'https://whatsapp.com/channel/0029VbDau0q0G0XdNPUJjN1F';
-const SLIDE_TWO_URL = 'https://whatsapp.com/channel/0029VbDau0q0G0XdNPUJjN1F';
+const SLIDE_TWO_URL = 'https://whatsapp.com/channel/0029Vb97YHSB4hdZjFJysw14';
 const PUBLIC_NOTICES_SEEN_KEY = 'ka-card-public-notices-seen-v1';
 const normalizeCategoryKey = (value) => String(value || '').trim().toLowerCase();
 

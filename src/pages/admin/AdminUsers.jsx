@@ -125,6 +125,7 @@ const AdminUsers = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const statusFromQuery = searchParams.get('status');
+  const userIdFromQuery = String(searchParams.get('userId') || '').trim();
   const initialFilter = FILTER_OPTIONS.includes(statusFromQuery) ? statusFromQuery : 'all';
 
   const {
@@ -350,6 +351,29 @@ const AdminUsers = () => {
       setIsDetailsLoading(false);
     }
   };
+
+  // Enables direct links from order management to the customer's full account details.
+  useEffect(() => {
+    if (!userIdFromQuery) return undefined;
+    let active = true;
+
+    const openRequestedUser = async () => {
+      const existing = (users || []).find((entry) => String(entry?.id || entry?._id || entry?.userId || '').trim() === userIdFromQuery);
+      const entry = existing || await getUserById(userIdFromQuery, { force: true }).catch(() => null);
+      if (active && entry) await openDetails(entry);
+
+      if (active) {
+        const nextParams = new URLSearchParams(searchParams);
+        nextParams.delete('userId');
+        setSearchParams(nextParams, { replace: true });
+      }
+    };
+
+    void openRequestedUser();
+    return () => { active = false; };
+  // The query should be handled once per navigation; user data may refresh while the drawer is open.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userIdFromQuery]);
 
   const formatDate = (value) => {
     if (!value) return isArabic ? 'غير متوفر' : 'Unavailable';

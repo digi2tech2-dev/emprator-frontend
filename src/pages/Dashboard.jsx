@@ -76,7 +76,7 @@ const Dashboard = () => {
     };
   }, [loadProducts]);
 
-  const slideTwoUrl = 'https://whatsapp.com/channel/0029VbDau0q0G0XdNPUJjN1F';
+  const slideTwoUrl = 'https://whatsapp.com/channel/0029Vb97YHSB4hdZjFJysw14';
   const heroSlides = useMemo(() => ([
     { id: 'landing-slide-1', image: slideOneHeroImage, title: '' },
     { id: 'landing-slide-2', image: slideTwoHeroImage, title: '', href: slideTwoUrl },

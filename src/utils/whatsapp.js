@@ -1,29 +1,22 @@
-const SUPPORT_PHONE_NUMBER = '01060682018';
-const SUPPORT_WHATSAPP_NUMBER = '01144558644';
-const SUPPORT_WHATSAPP_NUMBER_2 = '+96597178814';
+const OWNER_PHONE_NUMBER    = '01286591021';
+const SUPPORT_WHATSAPP_NUMBER = '01556537530';
 const SUPPORT_CONTACTS = Object.freeze([
   {
-    id: 'phone',
-    type: 'phone',
-    nameAr: 'دعم امبراطور',
-    nameEn: 'EMBRATOR Support',
-    number: SUPPORT_PHONE_NUMBER,
+    id: 'owner',
+    type: 'whatsapp',
+    nameAr: 'صاحب الموقع',
+    nameEn: 'Site Owner',
+    number: OWNER_PHONE_NUMBER,
   },
   {
-    id: 'whatsapp',
+    id: 'support',
     type: 'whatsapp',
-    nameAr: 'دعم امبراطور',
-    nameEn: 'EMBRATOR Support',
+    nameAr: 'خدمة العملاء',
+    nameEn: 'Customer Support',
     number: SUPPORT_WHATSAPP_NUMBER,
   },
-  {
-    id: 'whatsapp-2',
-    type: 'whatsapp',
-    nameAr: 'دعم امبراطور 2',
-    nameEn: 'EMBRATOR Support 2',
-    number: SUPPORT_WHATSAPP_NUMBER_2,
-  },
 ]);
+
 const FALLBACK_WHATSAPP_NUMBER = SUPPORT_WHATSAPP_NUMBER;
 const ENV_ADMIN_WHATSAPP_NUMBER =
   import.meta.env.VITE_ADMIN_WHATSAPP_NUMBER
