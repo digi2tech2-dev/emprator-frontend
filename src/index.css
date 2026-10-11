@@ -5512,3 +5512,251 @@ html:not(.performance-lite) .page-transition-overlay__progress {
 html:not(.performance-lite) .page-route-loader__spinner {
   animation-duration: 1000ms !important;
 }
+.header-reference-panel {
+  border: 0 !important;
+  border-color: transparent !important;
+  border-radius: 0 !important;
+  background:
+    radial-gradient(30rem circle at 50% -80%, rgb(18 77 123 / 0.24), transparent 60%),
+    linear-gradient(180deg, #050d1d 0%, #071329 100%) !important;
+  box-shadow: none !important;
+  padding: 0 0.35rem !important;
+  backdrop-filter: blur(18px);
+}
+
+.header-reference-row {
+  position: relative;
+  min-height: 2.8rem !important;
+  gap: clamp(0.25rem, 1.2vw, 0.7rem) !important;
+}
+
+.header-reference-brand-slot {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  height: 0;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+}
+
+.header-reference-brand-button {
+  position: relative;
+  z-index: 1;
+  overflow: visible;
+}
+
+.header-reference-brand .relative.overflow-hidden {
+  width: clamp(4.2rem, 8vw, 4.8rem) !important;
+  height: clamp(4.2rem, 8vw, 4.8rem) !important;
+  border-radius: 0 !important;
+}
+
+.header-reference-right {
+  position: relative;
+  z-index: 4;
+  gap: clamp(0.3rem, 1vw, 0.6rem);
+}
+
+.header-reference-theme {
+  position: relative;
+  overflow: hidden !important;
+  width: clamp(4.2rem, 10vw, 7.1rem) !important;
+  height: clamp(2.2rem, 5vw, 2.85rem) !important;
+  flex: 0 0 auto;
+  border-color: rgb(40 108 169 / 0.75) !important;
+  border-radius: 0.7rem !important;
+  background: linear-gradient(180deg, #081a35, #050d1d) !important;
+  box-shadow: inset 0 0 0 1px rgb(35 80 135 / 0.24), 0 0 20px -14px rgb(30 132 226 / 0.9) !important;
+}
+
+.header-reference-theme > span:first-child {
+  top: 0.2rem !important;
+  bottom: 0.2rem !important;
+  left: 0.5rem !important;
+  right: auto !important;
+  width: 1.65rem !important;
+  transform: none !important;
+  background: linear-gradient(145deg, #1676d2, #0d4c99) !important;
+  box-shadow: 0 0 18px rgb(34 130 231 / 0.42) !important;
+}
+
+.header-reference-theme[data-theme-mode='dark'] > span:first-child {
+  right: 0.5rem !important;
+  left: auto !important;
+}
+
+.header-reference-theme svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.header-reference-menu {
+  position: relative;
+  z-index: 5;
+  width: clamp(2.25rem, 5.8vw, 3.2rem) !important;
+  height: clamp(2.25rem, 5.8vw, 3.2rem) !important;
+  border-color: rgb(32 105 183 / 0.82) !important;
+  border-radius: 0.5rem !important;
+  background: linear-gradient(180deg, #07152e, #050b18) !important;
+  color: #d7eaff !important;
+  overflow: hidden;
+  box-shadow: 0 0 20px -14px rgb(32 130 231 / 0.95) !important;
+}
+
+.header-reference-menu svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.header-reference-notification {
+  width: clamp(2.25rem, 5.8vw, 3.1rem) !important;
+  height: clamp(2.25rem, 5.8vw, 3.1rem) !important;
+  border-color: rgb(36 71 117 / 0.85) !important;
+  border-radius: 0.5rem !important;
+  background: linear-gradient(180deg, #07152d, #050b18) !important;
+  box-shadow: 0 0 18px -13px rgb(31 130 231 / 0.72) !important;
+}
+
+.header-reference-notification svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.header-reference-wallet {
+  width: clamp(6rem, 20vw, 11rem);
+  height: clamp(2.2rem, 5vw, 3rem) !important;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  gap: 0.3rem !important;
+  border-color: rgb(19 127 190 / 0.9) !important;
+  border-radius: 0.7rem !important;
+  padding: 0 0.45rem !important;
+  background: linear-gradient(180deg, #091d3b, #061127) !important;
+  box-shadow: inset 0 0 0 1px rgb(27 101 162 / 0.25), 0 0 20px -13px rgb(28 154 228 / 0.92) !important;
+}
+
+.header-reference-wallet .header-wallet-balance {
+  display: block;
+  min-width: 0;
+  flex: 1;
+  max-width: unset !important;
+  font-size: clamp(0.6rem, 1.8vw, 0.85rem) !important;
+  letter-spacing: 0.025em;
+}
+
+.header-reference-wallet > span:last-child {
+  width: 1.55rem !important;
+  height: 1.55rem !important;
+  flex: 0 0 auto;
+  color: #a9d5ff !important;
+  background: rgb(37 119 204 / 0.2) !important;
+}
+
+.header-reference-wallet-desktop {
+  width: clamp(7rem, 20vw, 11rem);
+  height: clamp(2.5rem, 5.2vw, 3.1rem) !important;
+  flex-direction: row-reverse;
+  justify-content: space-between;
+  border-color: rgb(19 127 190 / 0.9) !important;
+  border-radius: 0.7rem !important;
+  background: linear-gradient(180deg, #091d3b, #061127) !important;
+  box-shadow: inset 0 0 0 1px rgb(27 101 162 / 0.25), 0 0 20px -13px rgb(28 154 228 / 0.92) !important;
+}
+
+:root:not(.dark) .app-shell-header-panel.header-reference-panel {
+  border-color: rgb(38 98 153 / 0.78) !important;
+  background:
+    radial-gradient(30rem circle at 50% -80%, rgb(18 77 123 / 0.24), transparent 60%),
+    linear-gradient(180deg, #050d1d 0%, #071329 100%) !important;
+}
+
+:root:not(.dark) .app-shell-header-panel .header-reference-theme,
+:root:not(.dark) .app-shell-header-panel .header-reference-notification,
+:root:not(.dark) .app-shell-header-panel .header-reference-wallet,
+:root:not(.dark) .app-shell-header-panel .header-reference-wallet-desktop,
+:root:not(.dark) .app-shell-header-panel .header-reference-menu {
+  border-color: rgb(36 98 158 / 0.82) !important;
+  background: linear-gradient(180deg, #091b37, #050d1d) !important;
+  color: #d7eaff !important;
+}
+
+:root:not(.dark) .app-shell-header-panel .header-reference-theme > span:first-child {
+  background: linear-gradient(145deg, #1676d2, #0d4c99) !important;
+}
+
+@media (max-width: 767px) {
+  .header-reference-panel {
+    padding-right: 0.25rem !important;
+    padding-left: 0.25rem !important;
+  }
+
+  .header-reference-row {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) !important;
+    gap: 0.18rem !important;
+  }
+
+  .header-reference-left {
+    gap: 0.22rem !important;
+  }
+
+  .header-reference-brand .relative.overflow-hidden {
+    width: 4.2rem !important;
+    height: 4.2rem !important;
+  }
+
+  .header-reference-theme {
+    width: 3.9rem !important;
+  }
+
+  .header-reference-theme > span:first-child {
+    right: auto !important;
+    left: 0.18rem !important;
+    top: 0.18rem !important;
+    bottom: 0.18rem !important;
+    width: 1.55rem !important;
+    transform: none !important;
+  }
+
+  .header-reference-theme[data-theme-mode='dark'] > span:first-child {
+    right: 0.18rem !important;
+    left: auto !important;
+  }
+
+  .header-reference-wallet {
+    width: 6rem;
+    padding: 0 0.3rem !important;
+  }
+}
+
+@media (max-width: 379px) {
+  .header-reference-brand .relative.overflow-hidden {
+    width: 3.9rem !important;
+    height: 3.9rem !important;
+  }
+
+  .header-reference-theme {
+    width: 3.55rem !important;
+    height: 2.15rem !important;
+  }
+
+  .header-reference-menu,
+  .header-reference-notification {
+    width: 2.1rem !important;
+    height: 2.1rem !important;
+  }
+
+  .header-reference-wallet {
+    width: 5.4rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .header-reference-row {
+    min-height: 3.1rem !important;
+  }
+
+  .header-reference-right {
+    gap: 0.5rem;
+  }
+}

@@ -212,23 +212,23 @@ const Dashboard = () => {
   ) : null;
 
   return (
-    <div className="space-y-5 pb-5 sm:space-y-6">
+    <div className="space-y-2.5 pb-5 sm:space-y-6">
       {typeof document !== 'undefined' && welcomeOverlay ? createPortal(welcomeOverlay, document.body) : null}
 
       {!isTwoFactorEnabled ? (
-        <section className="group relative mx-auto w-full max-w-2xl overflow-hidden rounded-2xl border border-emerald-400/20 bg-[linear-gradient(120deg,rgb(16_185_129/0.08),rgb(var(--color-card-rgb)/0.72)_48%,rgb(56_189_248/0.07))] p-2 shadow-[0_16px_40px_-34px_rgb(16_185_129/0.72)] backdrop-blur-xl sm:p-2.5">
-          <span className="pointer-events-none absolute -start-8 -top-10 h-24 w-24 rounded-full bg-emerald-400/10 blur-2xl" />
+        <section className="group relative mx-auto mt-1.5 w-full max-w-2xl overflow-hidden rounded-2xl border border-[rgb(240_207_122/0.24)] bg-[linear-gradient(120deg,rgb(8_34_58/0.94),rgb(var(--color-card-rgb)/0.88)_52%,rgb(14_54_79/0.82))] p-1.5 shadow-[0_16px_40px_-34px_rgb(32_132_194/0.7),0_0_24px_-20px_rgb(240_207_122/0.5)] backdrop-blur-xl sm:p-2.5">
+          <span className="pointer-events-none absolute -start-8 -top-10 h-24 w-24 rounded-full bg-[rgb(240_207_122/0.1)] blur-2xl" />
           <div className="relative flex items-center justify-between gap-2.5">
             <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
-              <span className="relative grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-emerald-300/25 bg-[linear-gradient(145deg,rgb(16_185_129/0.18),rgb(56_189_248/0.12))] text-emerald-500 shadow-[inset_0_1px_0_rgb(255_255_255/0.16)] sm:h-10 sm:w-10">
-                <span className="absolute end-0 top-0 h-2 w-2 -translate-y-1/4 translate-x-1/4 rounded-full border-2 border-[rgb(var(--color-card-rgb))] bg-emerald-400" />
-                <ShieldCheck className="h-4.5 w-4.5 sm:h-5 sm:w-5" strokeWidth={2.2} />
+              <span className="relative grid h-8 w-8 shrink-0 place-items-center rounded-xl border border-[rgb(240_207_122/0.3)] bg-[linear-gradient(145deg,rgb(240_207_122/0.17),rgb(37_111_163/0.22))] text-[#f2cf78] shadow-[inset_0_1px_0_rgb(255_255_255/0.12)] sm:h-9 sm:w-9">
+                <span className="absolute end-0 top-0 h-2 w-2 -translate-y-1/4 translate-x-1/4 rounded-full border-2 border-[rgb(var(--color-card-rgb))] bg-[#f2cf78]" />
+                <ShieldCheck className="h-4 w-4 sm:h-4.5 sm:w-4.5" strokeWidth={2.2} />
               </span>
               <div className="min-w-0 leading-tight">
-                <p className="truncate text-[0.75rem] font-bold text-[var(--color-text)] sm:text-[0.84rem]">
+                <p className="truncate text-[0.68rem] font-bold text-[var(--color-text)] sm:text-[0.78rem]">
                   {language === 'ar' ? 'حماية إضافية لحسابك' : 'Extra protection for your account'}
                 </p>
-                <p className="mt-0.5 truncate text-[0.64rem] font-medium text-[var(--color-text-secondary)] sm:text-[0.71rem]">
+                <p className="mt-0.5 truncate text-[0.56rem] font-medium text-[var(--color-text-secondary)] sm:text-[0.66rem]">
                   {language === 'ar' ? 'فعّل المصادقة الثنائية في أقل من دقيقة.' : 'Enable two-factor authentication in under a minute.'}
                 </p>
               </div>
@@ -236,7 +236,7 @@ const Dashboard = () => {
 
             <Link
               to="/account-security"
-              className="inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-xl border border-emerald-400/25 bg-emerald-500/10 px-2.5 text-[0.66rem] font-extrabold text-emerald-500 transition-all duration-200 hover:-translate-y-0.5 hover:border-emerald-400/40 hover:bg-emerald-500/16 hover:shadow-[0_10px_24px_-16px_rgb(16_185_129/0.9)] sm:h-9 sm:px-3 sm:text-[0.73rem]"
+              className="inline-flex h-7 shrink-0 items-center justify-center gap-1 rounded-lg border border-[#ffe19a]/70 bg-[linear-gradient(135deg,#ffe39a,#d7a63d_58%,#b78226)] px-2 text-[0.58rem] font-extrabold text-[#071329] shadow-[0_5px_16px_-10px_rgb(240_207_122/0.9),inset_0_1px_0_rgb(255_255_255/0.5)] transition-all duration-200 hover:-translate-y-0.5 hover:brightness-110 sm:h-8 sm:px-2.5 sm:text-[0.68rem]"
             >
               <span>{language === 'ar' ? 'تفعيل الحماية' : 'Protect now'}</span>
               <ArrowUpRight className="h-3.5 w-3.5" strokeWidth={2.4} />
@@ -264,22 +264,15 @@ const Dashboard = () => {
         <div className="mx-auto w-full max-w-5xl px-0.5 sm:px-2">
           <Link
             to="/buy-target"
-            className="group mx-auto block w-full max-w-5xl overflow-hidden rounded-[1rem] border border-[color:rgb(var(--color-primary-rgb)/0.28)] bg-[color:rgb(var(--color-card-rgb)/0.76)] shadow-[0_18px_42px_-30px_rgb(var(--color-primary-rgb)/0.82),inset_0_1px_0_rgb(255_255_255/0.08)] backdrop-blur-xl transition-all duration-300 hover:-translate-y-0.5 hover:border-[color:rgb(var(--color-primary-rgb)/0.46)] hover:shadow-[0_22px_48px_-30px_rgb(var(--color-primary-rgb)/0.9)]"
+            className="group mx-auto block w-full max-w-5xl overflow-hidden rounded-[1rem] transition-transform duration-300 hover:-translate-y-0.5"
             aria-label={language === 'ar' ? 'بيع تارجت' : 'Sell Target'}
           >
-            <span className="block overflow-hidden bg-black">
-              <img
-                src={targetBannerImage}
-                alt={language === 'ar' ? 'بيع تارجت' : 'Sell Target'}
-                className="block aspect-[2112/745] w-full object-contain transition-transform duration-500 group-hover:scale-[1.012]"
-                loading="lazy"
-              />
-            </span>
-            <span className="block border-t border-[color:rgb(var(--color-primary-rgb)/0.18)] bg-[linear-gradient(180deg,rgb(var(--color-card-rgb)/0.94),rgb(var(--color-primary-rgb)/0.08))] px-3 py-1.5 text-center">
-              <span className="text-xs font-extrabold text-[var(--color-text)] sm:text-sm">
-                {language === 'ar' ? 'بيع تارجت' : 'Sell Target'}
-              </span>
-            </span>
+            <img
+              src={targetBannerImage}
+              alt=""
+              className="block h-auto w-full transition-transform duration-500 group-hover:scale-[1.012]"
+              loading="lazy"
+            />
           </Link>
         </div>
       ) : null}

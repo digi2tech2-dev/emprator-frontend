@@ -28,6 +28,7 @@ const ThemeToggle = ({ className, compact = false, variant = 'default' }) => {
         )}
         aria-label={isDark ? 'تفعيل الوضع الفاتح' : 'تفعيل الوضع الغامق'}
         title={isDark ? 'الوضع الفاتح' : 'الوضع الغامق'}
+        data-theme-mode={isDark ? 'dark' : 'light'}
       >
         {isDark ? <Sun className="h-4.5 w-4.5" /> : <Moon className="h-4.5 w-4.5" />}
       </button>
@@ -45,6 +46,7 @@ const ThemeToggle = ({ className, compact = false, variant = 'default' }) => {
       )}
       aria-label={isDark ? 'تفعيل الوضع الفاتح' : 'تفعيل الوضع الغامق'}
       title={isDark ? 'الوضع الفاتح' : 'الوضع الغامق'}
+      data-theme-mode={isDark ? 'dark' : 'light'}
     >
       <span
         className={cn(

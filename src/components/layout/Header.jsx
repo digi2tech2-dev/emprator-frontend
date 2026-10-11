@@ -199,40 +199,38 @@ const Header = ({ toggleSidebar }) => {
   return (
     <header dir={isRTL ? 'rtl' : 'ltr'} className="w-full max-w-full">
       <div className={cn(
-        'app-shell-header-panel ka-card-panel w-full max-w-full overflow-visible rounded-[18px] border px-2 py-0.5 backdrop-blur-[22px] sm:rounded-[24px] sm:px-4 sm:py-1',
+        'app-shell-header-panel header-reference-panel ka-card-panel w-full max-w-full overflow-visible rounded-[18px] border px-2 py-0.5 backdrop-blur-[22px] sm:rounded-[24px] sm:px-4 sm:py-1',
         isAdmin && 'border-[color:rgb(var(--color-primary-rgb)/0.26)]'
       )}>
-        <div dir="ltr" className="grid min-h-[2.55rem] min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 sm:min-h-[2.9rem] sm:gap-4">
-          <div className="col-start-2 row-start-1 min-w-0 justify-self-center">
+        <div dir="ltr" className="header-reference-row grid min-h-[2.55rem] min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 sm:min-h-[2.9rem] sm:gap-4">
+          <div className="header-reference-brand-slot col-start-2 row-start-1 min-w-0 justify-self-center">
             <button
               type="button"
               onClick={() => navigate('/dashboard')}
-              className="inline-flex items-center gap-2 rounded-[14px] px-0 py-0 transition-all hover:-translate-y-0.5 sm:gap-4"
+              className="header-reference-brand-button inline-flex items-center justify-center rounded-[14px] px-0 py-0 transition-all hover:-translate-y-0.5"
             >
               <HeaderBrand
-                className="translate-x-11 scale-[0.96] min-[380px]:translate-x-16 sm:translate-x-28 sm:scale-[1.02] lg:translate-x-52"
-                iconClassName="scale-[0.98]"
+                iconOnly
+                size="lg"
+                className="header-reference-brand"
+                iconClassName="!scale-100 min-[380px]:!scale-100 sm:!scale-100"
               />
             </button>
           </div>
 
           <div className={cn(
-            'header-mobile-actions col-start-1 row-start-1 flex min-w-0 shrink-0 items-center gap-1 justify-self-start px-0 sm:gap-2'
+            'header-mobile-actions header-reference-left col-start-1 row-start-1 flex min-w-0 shrink-0 items-center gap-1 justify-self-start px-0 sm:gap-2'
           )}>
-            <ThemeToggle compact className="h-[1.875rem] w-[1.875rem] shrink-0 rounded-full border-[color:rgb(var(--color-border-rgb)/0.84)] bg-[radial-gradient(circle_at_35%_25%,rgb(255_224_138/0.16),transparent_34%),linear-gradient(180deg,rgb(36_17_8/0.9),rgb(5_3_2/0.86))] shadow-[inset_0_0_18px_rgb(245_158_11/0.08),0_0_28px_-18px_rgb(245_158_11/0.9)] min-[380px]:h-8 min-[380px]:w-8 sm:h-8 sm:w-8" />
-
             <div ref={notificationsRef} className="relative">
               <button
                 type="button"
                 onClick={handleNotificationsToggle}
-                className="relative inline-flex h-[1.875rem] w-[1.875rem] shrink-0 items-center justify-center rounded-full border border-[color:rgb(var(--color-border-rgb)/0.84)] bg-[radial-gradient(circle_at_35%_25%,rgb(255_224_138/0.14),transparent_34%),linear-gradient(180deg,rgb(36_17_8/0.9),rgb(5_3_2/0.86))] text-[var(--color-text)] shadow-[inset_0_0_18px_rgb(245_158_11/0.12),0_0_28px_-18px_rgb(245_158_11/0.95)] transition-all hover:-translate-y-0.5 hover:border-[color:rgb(var(--color-primary-rgb)/0.38)] hover:text-[var(--color-primary)] min-[380px]:h-8 min-[380px]:w-8 sm:h-8 sm:w-8"
-                aria-label="الإشعارات"
+                className="header-reference-notification relative inline-flex h-[1.875rem] w-[1.875rem] shrink-0 items-center justify-center rounded-full border border-[color:rgb(var(--color-border-rgb)/0.84)] bg-[radial-gradient(circle_at_35%_25%,rgb(255_224_138/0.14),transparent_34%),linear-gradient(180deg,rgb(36_17_8/0.9),rgb(5_3_2/0.86))] text-[var(--color-text)] shadow-[inset_0_0_18px_rgb(245_158_11/0.12),0_0_28px_-18px_rgb(245_158_11/0.95)] transition-all hover:-translate-y-0.5 hover:border-[color:rgb(var(--color-primary-rgb)/0.38)] hover:text-[var(--color-primary)] min-[380px]:h-8 min-[380px]:w-8 sm:h-8 sm:w-8"
+                aria-label={unreadCount > 0 ? `الإشعارات، ${unreadCount} غير مقروءة` : 'الإشعارات'}
               >
                 <Bell className="h-3.5 w-3.5" />
                 {unreadCount > 0 ? (
-                  <span className="absolute -end-1 -top-1 grid h-5 min-w-5 place-items-center rounded-full bg-[linear-gradient(135deg,#a81713,#ffb52e)] px-1 text-[10px] font-black text-white shadow-[0_0_18px_rgb(168_23_19/0.52)]">
-                    {unreadCount > 9 ? '+9' : unreadCount}
-                  </span>
+                  <span className="absolute -end-1 -top-1 h-3 w-3 rounded-full border-2 border-[#071329] bg-[#ff5968] shadow-[0_0_12px_rgb(255_89_104/0.7)]" />
                 ) : null}
               </button>
 
@@ -298,7 +296,7 @@ const Header = ({ toggleSidebar }) => {
                 <button
                   type="button"
                   onClick={() => navigate(walletTargetPath)}
-                  className="inline-flex h-[1.875rem] shrink-0 items-center gap-1 rounded-full border border-[color:rgb(var(--color-border-rgb)/0.84)] bg-[linear-gradient(180deg,rgb(36_17_8/0.9),rgb(5_3_2/0.84))] px-1.5 text-start shadow-[inset_0_0_18px_rgb(245_158_11/0.08),0_0_28px_-18px_rgb(245_158_11/0.9)] transition-all hover:-translate-y-0.5 min-[380px]:h-8 sm:hidden"
+                  className="header-reference-wallet inline-flex h-[1.875rem] shrink-0 items-center gap-1 rounded-full border border-[color:rgb(var(--color-border-rgb)/0.84)] bg-[linear-gradient(180deg,rgb(36_17_8/0.9),rgb(5_3_2/0.84))] px-1.5 text-start shadow-[inset_0_0_18px_rgb(245_158_11/0.08),0_0_28px_-18px_rgb(245_158_11/0.9)] transition-all hover:-translate-y-0.5 min-[380px]:h-8 sm:hidden"
                   aria-label={language === 'ar' ? 'الرصيد' : 'Balance'}
                 >
                   <span className="header-wallet-balance max-w-[48px] truncate text-[0.62rem] font-semibold text-white dark:text-[var(--color-text)] min-[380px]:max-w-[62px]">
@@ -312,7 +310,7 @@ const Header = ({ toggleSidebar }) => {
                 <button
                   type="button"
                   onClick={() => navigate(walletTargetPath)}
-                  className="hidden h-9 items-center gap-2 rounded-full border border-[color:rgb(var(--color-border-rgb)/0.84)] bg-[linear-gradient(180deg,rgb(36_17_8/0.9),rgb(5_3_2/0.84))] px-3 text-start shadow-[inset_0_0_18px_rgb(245_158_11/0.08),0_0_28px_-18px_rgb(245_158_11/0.9)] transition-all hover:-translate-y-0.5 sm:inline-flex"
+                  className="header-reference-wallet-desktop hidden h-9 items-center gap-2 rounded-full border border-[color:rgb(var(--color-border-rgb)/0.84)] bg-[linear-gradient(180deg,rgb(36_17_8/0.9),rgb(5_3_2/0.84))] px-3 text-start shadow-[inset_0_0_18px_rgb(245_158_11/0.08),0_0_28px_-18px_rgb(245_158_11/0.9)] transition-all hover:-translate-y-0.5 sm:inline-flex"
                   aria-label={language === 'ar' ? 'المحفظة' : 'Wallet'}
                 >
                   <span className="min-w-0">
@@ -328,14 +326,17 @@ const Header = ({ toggleSidebar }) => {
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={toggleSidebar}
-            className="col-start-3 row-start-1 inline-flex h-[1.875rem] w-[1.875rem] shrink-0 items-center justify-center justify-self-end rounded-full border border-[color:rgb(var(--color-border-rgb)/0.84)] bg-[linear-gradient(180deg,rgb(3_8_22/0.9),rgb(2_6_19/0.78))] text-[var(--color-text)] shadow-[inset_0_0_18px_rgb(255_255_255/0.035),0_0_26px_-18px_rgb(34_211_238/0.9)] transition-all hover:-translate-y-0.5 hover:border-[color:rgb(var(--color-primary-rgb)/0.38)] hover:text-[var(--color-primary)] min-[380px]:h-8 min-[380px]:w-8 sm:h-8 sm:w-8"
-            aria-label={language === 'ar' ? 'فتح القائمة' : 'Open menu'}
-          >
-            <Menu className="h-3.5 w-3.5" />
-          </button>
+          <div className="header-reference-right col-start-3 row-start-1 inline-flex items-center justify-self-end">
+            <ThemeToggle className="header-reference-theme" />
+            <button
+              type="button"
+              onClick={toggleSidebar}
+              className="header-reference-menu inline-flex h-[1.875rem] w-[1.875rem] shrink-0 items-center justify-center rounded-full border border-[color:rgb(var(--color-border-rgb)/0.84)] bg-[linear-gradient(180deg,rgb(3_8_22/0.9),rgb(2_6_19/0.78))] text-[var(--color-text)] shadow-[inset_0_0_18px_rgb(255_255_255/0.035),0_0_26px_-18px_rgb(34_211_238/0.9)] transition-all hover:-translate-y-0.5 hover:border-[color:rgb(var(--color-primary-rgb)/0.38)] hover:text-[var(--color-primary)] min-[380px]:h-8 min-[380px]:w-8 sm:h-8 sm:w-8"
+              aria-label={language === 'ar' ? 'فتح القائمة' : 'Open menu'}
+            >
+              <Menu className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
       </div>
     </header>

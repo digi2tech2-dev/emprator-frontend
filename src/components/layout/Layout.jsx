@@ -87,9 +87,9 @@ const Layout = ({ children = null }) => {
       <div
         className="fixed z-40 max-w-full transition-all duration-300"
         style={{
-          top: isMobile ? 'max(0.75rem, env(safe-area-inset-top))' : '1rem',
-          [dir === 'rtl' ? 'right' : 'left']: isMobile ? '12px' : shellOffset,
-          [dir === 'rtl' ? 'left' : 'right']: isMobile ? '12px' : '16px',
+          top: isMobile ? 'env(safe-area-inset-top, 0px)' : '1rem',
+          [dir === 'rtl' ? 'right' : 'left']: isMobile ? '0px' : shellOffset,
+          [dir === 'rtl' ? 'left' : 'right']: isMobile ? '0px' : '16px',
         }}
       >
         <Header toggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
@@ -121,7 +121,7 @@ const Layout = ({ children = null }) => {
         className="min-h-screen min-w-0 max-w-full transition-all duration-300"
         style={{ [dir === 'rtl' ? 'marginRight' : 'marginLeft']: shellOffset }}
       >
-        <div className="h-[4.9rem] sm:h-[6.5rem]" aria-hidden="true" />
+        <div className={isCustomerDashboard ? 'h-[2.85rem] sm:h-[3rem] lg:h-[4.15rem]' : 'h-[4.9rem] sm:h-[6.5rem]'} aria-hidden="true" />
 
         {!isHomePage && (
           <div className="mx-auto mt-4 max-w-[var(--shell-max-width)] px-4 md:px-6 lg:px-8">
