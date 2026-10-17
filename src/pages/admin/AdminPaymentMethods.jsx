@@ -75,6 +75,7 @@ const AdminPaymentMethods = () => {
 
   const [paymentGroups, setPaymentGroups] = useState([]);
   const [isPersisting, setIsPersisting] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [groupModalOpen, setGroupModalOpen] = useState(false);
   const [methodModalOpen, setMethodModalOpen] = useState(false);
   const [editingGroupId, setEditingGroupId] = useState(null);
@@ -123,18 +124,20 @@ const AdminPaymentMethods = () => {
 
   const persistPaymentGroups = async (nextGroups, successMessage) => {
     setIsPersisting(true);
+    setSaveError('');
     try {
       const normalizedGroups = normalizePaymentGroups(nextGroups, { fallbackToDefault: false });
       const savedSettings = await savePaymentSettings(
         { paymentGroups: normalizedGroups },
         user
       );
-      const freshSettings = await loadPaymentSettings({ force: true }).catch(() => savedSettings);
-      setPaymentGroups(normalizePaymentGroups(freshSettings?.paymentGroups || savedSettings?.paymentGroups, { fallbackToDefault: false }));
+      setPaymentGroups(normalizePaymentGroups(savedSettings?.paymentGroups, { fallbackToDefault: false }));
       addToast(successMessage, 'success');
       return true;
     } catch (error) {
-      addToast(error?.message || tx('فشل حفظ إعدادات طرق الدفع', 'Failed to save payment methods settings'), 'error');
+      const message = error?.message || tx('فشل حفظ إعدادات طرق الدفع', 'Failed to save payment methods settings');
+      setSaveError(message);
+      addToast(message, 'error');
       return false;
     } finally {
       setIsPersisting(false);
@@ -147,12 +150,14 @@ const AdminPaymentMethods = () => {
   };
 
   const openAddGroupModal = () => {
+    setSaveError('');
     setEditingGroupId(null);
     setGroupForm(defaultGroupForm);
     setGroupModalOpen(true);
   };
 
   const openEditGroupModal = (group) => {
+    setSaveError('');
     setEditingGroupId(group.id);
     setGroupForm({
       name: group.name,
@@ -280,6 +285,7 @@ const AdminPaymentMethods = () => {
   };
 
   const openAddMethodModal = (groupId) => {
+    setSaveError('');
     setEditingMethodRef({ groupId: '', methodId: '' });
     setMethodForm({
       ...defaultMethodForm,
@@ -289,6 +295,7 @@ const AdminPaymentMethods = () => {
   };
 
   const openEditMethodModal = (groupId, method) => {
+    setSaveError('');
     setEditingMethodRef({ groupId, methodId: method.id });
     setMethodForm({
       groupId,
@@ -755,17 +762,20 @@ const AdminPaymentMethods = () => {
         onClose={() => setGroupModalOpen(false)}
         title={editingGroupId ? tx('تعديل مجموعة الدفع', 'Edit Payment Group') : tx('إضافة مجموعة دفع', 'Add Payment Group')}
         footer={(
-          <div className={`flex flex-col gap-3 sm:flex-row ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-            <Button variant="ghost" className="flex-1" onClick={() => setGroupModalOpen(false)}>
-              {tx('إلغاء', 'Cancel')}
-            </Button>
-            <Button className="flex-1" onClick={handleSaveGroup} disabled={isPersisting}>
-              {editingGroupId ? tx('حفظ التعديلات', 'Save Changes') : tx('إضافة المجموعة', 'Add Group')}
-            </Button>
+          <div className="space-y-3">
+            {saveError && <p role="alert" className="text-sm text-[var(--color-error)]">{saveError}</p>}
+            <div className={`flex flex-col gap-3 sm:flex-row ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+              <Button type="button" variant="ghost" className="flex-1" onClick={() => setGroupModalOpen(false)}>
+                {tx('إلغاء', 'Cancel')}
+              </Button>
+              <Button type="submit" form="payment-group-form" className="flex-1" disabled={isPersisting}>
+                {isPersisting ? tx('جاري الحفظ...', 'Saving...') : editingGroupId ? tx('حفظ التعديلات', 'Save Changes') : tx('إضافة المجموعة', 'Add Group')}
+              </Button>
+            </div>
           </div>
         )}
       >
-        <form onSubmit={handleSaveGroup} className="space-y-4">
+        <form id="payment-group-form" onSubmit={handleSaveGroup} className="space-y-4">
           <Input
             label={tx('اسم المجموعة', 'Group Name')}
             value={groupForm.name}
@@ -864,17 +874,20 @@ const AdminPaymentMethods = () => {
         onClose={() => setMethodModalOpen(false)}
         title={editingMethodRef.methodId ? tx('تعديل طريقة الدفع', 'Edit Payment Method') : tx('إضافة طريقة دفع', 'Add Payment Method')}
         footer={(
-          <div className={`flex flex-col gap-3 sm:flex-row ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
-            <Button variant="ghost" className="flex-1" onClick={() => setMethodModalOpen(false)}>
-              {tx('إلغاء', 'Cancel')}
-            </Button>
-            <Button className="flex-1" onClick={handleSaveMethod} disabled={isPersisting}>
-              {editingMethodRef.methodId ? tx('حفظ التعديلات', 'Save Changes') : tx('إضافة الطريقة', 'Add Method')}
-            </Button>
+          <div className="space-y-3">
+            {saveError && <p role="alert" className="text-sm text-[var(--color-error)]">{saveError}</p>}
+            <div className={`flex flex-col gap-3 sm:flex-row ${isRTL ? 'sm:flex-row-reverse' : ''}`}>
+              <Button type="button" variant="ghost" className="flex-1" onClick={() => setMethodModalOpen(false)}>
+                {tx('إلغاء', 'Cancel')}
+              </Button>
+              <Button type="submit" form="payment-method-form" className="flex-1" disabled={isPersisting}>
+                {isPersisting ? tx('جاري الحفظ...', 'Saving...') : editingMethodRef.methodId ? tx('حفظ التعديلات', 'Save Changes') : tx('إضافة الطريقة', 'Add Method')}
+              </Button>
+            </div>
           </div>
         )}
       >
-        <form onSubmit={handleSaveMethod} className="space-y-4">
+        <form id="payment-method-form" onSubmit={handleSaveMethod} className="space-y-4">
           <div>
             <label className="mb-1.5 block text-sm font-medium text-[var(--color-text-secondary)]">
               {tx('المجموعة', 'Group')}
@@ -888,7 +901,7 @@ const AdminPaymentMethods = () => {
               <option value="">{tx('اختر مجموعة', 'Select a group')}</option>
               {paymentGroups.map((group) => (
                 <option key={group.id} value={group.id}>
-                  {group.name} ({group.discount ?? group.percentage ?? 0}%)
+                  {group.name} ({group.currency})
                 </option>
               ))}
             </select>
