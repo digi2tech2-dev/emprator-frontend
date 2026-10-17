@@ -1984,11 +1984,12 @@ const realApi = {
       return { user, token, status: 'login_complete', callbackStatus: rawCallbackStatus || 'LOGIN_COMPLETE' };
     },
 
-    completeGoogleProfile: async ({ completionToken, country, currency }) => {
+    completeGoogleProfile: async ({ completionToken, country, currency, phone }) => {
       const res = await http.post('/auth/google/complete-profile', {
         completionToken,
         country,
         currency,
+        phone,
       });
       const data = unwrap(res);
       const user = normaliseUser(data.user);

@@ -10,6 +10,7 @@ import {
   Globe,
   Lock,
   Mail,
+  Phone,
   TicketCheck,
   User,
 } from 'lucide-react';
@@ -69,6 +70,21 @@ const StepTwo = ({ children }) => (
   </motion.div>
 );
 
+const getPhoneError = (value, isArabic) => {
+  const phone = String(value || '').trim();
+  if (!phone) return isArabic ? 'رقم الهاتف مطلوب' : 'Phone number is required';
+  const normalized = phone
+    .replace(/[٠-٩]/g, (digit) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+    .replace(/[۰-۹]/g, (digit) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)));
+  const digits = normalized.replace(/[ ()-]/g, '').replace(/^\+/, '');
+  if (!/^[0-9+ ()-]+$/.test(normalized)
+    || (normalized.match(/\+/g) || []).length > (normalized.startsWith('+') ? 1 : 0)
+    || !/^\d{7,15}$/.test(digits)) {
+    return isArabic ? 'أدخل رقم هاتف صحيحًا من 7 إلى 15 رقمًا' : 'Enter a valid phone number with 7 to 15 digits';
+  }
+  return null;
+};
+
 const Auth = () => {
   const fallbackCountries = useMemo(() => COUNTRY_CATALOG, []);
   const navigate = useNavigate();
@@ -102,6 +118,7 @@ const Auth = () => {
   const [name, setName] = useState('');
   const [country, setCountry] = useState('US');
   const [currency, setCurrency] = useState('USD');
+  const [phone, setPhone] = useState('');
   const [referralCode, setReferralCode] = useState(() => readReferralCodeFromSearch(location.search) || readReferralBridge());
   const [countries] = useState(COUNTRY_CATALOG);
   const [errors, setErrors] = useState({});
@@ -121,6 +138,8 @@ const Auth = () => {
       ? ''
       : (new URLSearchParams(window.location.search).get('completionToken') || '')
   ));
+  const googlePhoneOnlySetup = googleSetupPending
+    && new URLSearchParams(location.search).get('missingFields') === 'phone';
 
 const countryOptions = useMemo(() => {
     const source = countries.length ? countries : fallbackCountries;
@@ -249,6 +268,7 @@ const countryOptions = useMemo(() => {
         setEmail(result.user.email || '');
         setCountry(result.user.country || 'US');
         setCurrency(result.user.currency || 'USD');
+        setPhone(result.user.phone || '');
         return;
       }
 
@@ -345,8 +365,9 @@ const countryOptions = useMemo(() => {
 
   const validateRegisterStepTwo = () => {
     const nextErrors = {
-      country: country ? null : t('auth.country'),
-      currency: currency ? null : t('auth.noCurrenciesConfigured'),
+      country: googlePhoneOnlySetup || country ? null : t('auth.country'),
+      currency: googlePhoneOnlySetup || currency ? null : t('auth.noCurrenciesConfigured'),
+      phone: getPhoneError(phone, dir === 'rtl'),
     };
 
     setScopedErrors(nextErrors);
@@ -358,7 +379,7 @@ const countryOptions = useMemo(() => {
     && Boolean(email.trim())
     && Boolean(password)
     && Boolean(confirmPassword);
-  const isStepTwoReady = Boolean(country) && Boolean(currency);
+  const isStepTwoReady = (googlePhoneOnlySetup || (Boolean(country) && Boolean(currency))) && Boolean(phone.trim());
 
   const goToRegisterStepTwo = () => {
     if (!validateRegisterStepOne()) return;
@@ -439,13 +460,13 @@ const countryOptions = useMemo(() => {
       return;
     }
 
-    if (!isLogin && !currency) {
+    if (!isLogin && !googlePhoneOnlySetup && !currency) {
       addToast(t('auth.noCurrenciesConfigured'), 'error');
       return;
     }
 
     if (googleSetupPending) {
-      if (!country || !currency) {
+      if (!googlePhoneOnlySetup && (!country || !currency)) {
         addToast('اختر الدولة والعملة لإكمال حساب Google.', 'error');
         return;
       }
@@ -453,9 +474,11 @@ const countryOptions = useMemo(() => {
       try {
         const result = await completeGoogleProfile({
           completionToken: googleCompletionToken,
-          country,
-          currency,
+          country: googlePhoneOnlySetup ? undefined : country,
+          currency: googlePhoneOnlySetup ? undefined : currency,
+          phone: phone.trim(),
         });
+        if (!result?.ok) return;
         window.sessionStorage.removeItem('auth:google-signup-intent');
         clearReferralBridge();
         setGoogleSetupPending(false);
@@ -476,6 +499,7 @@ const countryOptions = useMemo(() => {
           password,
           country,
           currency,
+          phone: phone.trim(),
           signupMethod: 'email',
           referralCode: referralCode.trim().toUpperCase(),
         });
@@ -831,7 +855,7 @@ const countryOptions = useMemo(() => {
                   </StepOne>
                 ) : registerStep === 2 ? (
                   <StepTwo>
-                    <div>
+                    {!googlePhoneOnlySetup && <div>
                       <label className="mb-1.5 block text-sm font-medium text-[var(--color-text-secondary)]">
                         {t('auth.country')}
                       </label>
@@ -850,9 +874,9 @@ const countryOptions = useMemo(() => {
                         <Globe className={`pointer-events-none absolute top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--color-muted)] ${dir === 'rtl' ? 'right-3' : 'left-3'}`} />
                       </div>
                       {errors.country && <p role="alert" className="mt-2 flex items-center gap-1.5 rounded-lg border border-rose-400/25 bg-rose-500/[0.07] px-2.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300"><AlertCircle className="h-3.5 w-3.5 shrink-0" />{errors.country}</p>}
-                    </div>
+                    </div>}
 
-                    <div>
+                    {!googlePhoneOnlySetup && <div>
                       <label className="mb-1.5 block text-sm font-medium text-[var(--color-text-secondary)]">
                         {t('auth.currency')}
                       </label>
@@ -872,7 +896,24 @@ const countryOptions = useMemo(() => {
                         ))}
                       </select>
                       {errors.currency && <p role="alert" className="mt-2 flex items-center gap-1.5 rounded-lg border border-rose-400/25 bg-rose-500/[0.07] px-2.5 py-2 text-xs font-semibold text-rose-700 dark:text-rose-300"><AlertCircle className="h-3.5 w-3.5 shrink-0" />{errors.currency}</p>}
-                    </div>
+                    </div>}
+
+                    <Input
+                      label={dir === 'rtl' ? 'رقم الهاتف' : 'Phone number'}
+                      type="tel"
+                      inputMode="tel"
+                      autoComplete="tel"
+                      dir="ltr"
+                      placeholder="+201012345678"
+                      value={phone}
+                      onChange={(event) => {
+                        setPhone(event.target.value);
+                        if (errors.phone) setScopedErrors({ phone: null });
+                      }}
+                      icon={<Phone className="h-4 w-4" />}
+                      error={errors.phone}
+                      className={styles.authInput}
+                    />
 
                     <Input
                       label={dir === 'rtl' ? 'كود الدعوة (اختياري)' : 'Invitation code (optional)'}

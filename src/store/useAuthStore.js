@@ -406,10 +406,10 @@ const useAuthStore = create((set, get) => ({
         }
       },
 
-      completeGoogleProfile: async ({ completionToken, country, currency }) => {
+      completeGoogleProfile: async ({ completionToken, country, currency, phone }) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await apiClient.auth.completeGoogleProfile({ completionToken, country, currency });
+          const response = await apiClient.auth.completeGoogleProfile({ completionToken, country, currency, phone });
           const outcome = buildAuthOutcome(response.user);
 
           set({
