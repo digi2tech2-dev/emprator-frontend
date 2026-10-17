@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from '../../assets/logo.webp';
+const logo = '/embrator-og.webp';
 
 const NavigationOverlay = ({ active }) => (
   <div
@@ -11,8 +11,8 @@ const NavigationOverlay = ({ active }) => (
         className="page-transition-overlay__logo"
         src={logo}
         alt=""
-        width="54"
-        height="54"
+        width="120"
+        height="63"
       />
       <div className="page-transition-overlay__track" aria-hidden="true">
         <span className="page-transition-overlay__progress" />

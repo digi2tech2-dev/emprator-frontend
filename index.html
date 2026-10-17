@@ -50,6 +50,9 @@
       })();
     </script>
     <style>
+      html { background: #030712; }
+      html:not(.dark) { background: #f6faf8; }
+
       #app-boot-loader {
         position: fixed;
         inset: 0;
@@ -58,22 +61,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background:
-          radial-gradient(circle at 50% 42%, rgb(30 167 255 / 0.2), transparent 34%),
-          radial-gradient(circle at 50% 44%, rgb(245 183 0 / 0.16), transparent 58%),
-          linear-gradient(145deg, #030712 0%, #071a3d 52%, #030712 100%);
+        background: transparent;
         transition: opacity 240ms ease, visibility 240ms ease;
-      }
-
-      #app-boot-loader::before {
-        position: absolute;
-        width: min(72vw, 27rem);
-        aspect-ratio: 1;
-        border: 1px solid rgb(30 167 255 / 0.2);
-        border-radius: 50%;
-        box-shadow: 0 0 0 14px rgb(245 183 0 / 0.04), 0 0 70px rgb(30 167 255 / 0.18);
-        content: "";
-        animation: boot-aura 2.6s ease-in-out infinite;
       }
 
       #app-boot-loader.is-hidden {
@@ -85,7 +74,7 @@
       .boot-loader__logo {
         position: relative;
         z-index: 1;
-        width: min(64vw, 230px);
+        width: min(88vw, 400px);
         height: auto;
         object-fit: contain;
         animation: boot-logo-motion 2.4s ease-in-out infinite;
@@ -124,19 +113,6 @@
 
         100% {
           transform: translateY(0) scale(0.97);
-        }
-      }
-
-      @keyframes boot-aura {
-        0%,
-        100% {
-          transform: scale(0.94);
-          opacity: 0.52;
-        }
-
-        50% {
-          transform: scale(1.04);
-          opacity: 1;
         }
       }
 
