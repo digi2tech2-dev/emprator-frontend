@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { AlertCircle, CheckCircle, Copy, Hash, Info, Landmark, Loader, ReceiptText, ShieldCheck, Smartphone, Sparkles, WalletCards } from 'lucide-react';
+import { AlertCircle, CheckCircle, Copy, Hash, Info, Landmark, Loader, QrCode, ReceiptText, ShieldCheck, Smartphone, Sparkles, WalletCards } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import UploadReceiptBox from '../components/wallet/UploadReceiptBox';
@@ -25,7 +25,7 @@ const isVodafoneCashMethod = (method) => {
 
 const requiresTransactionNumber = (method) => {
   const type = normalizeMethodType(method?.type);
-  return ['mobile_wallet', 'e_wallet', 'ewallet'].includes(type);
+  return ['mobile_wallet', 'e_wallet', 'ewallet', 'electronic_wallet'].includes(type);
 };
 
 const getReceiverDestination = (method) => {
@@ -49,7 +49,7 @@ const getReceiverDestination = (method) => {
     else destination.receiverUID = accountNumber;
   } else if (methodType === 'usdt' || methodType === 'crypto') {
     destination.receiverWalletAddress = accountNumber;
-  } else if (['mobile_wallet', 'e_wallet', 'ewallet'].includes(methodType)) {
+  } else if (['mobile_wallet', 'e_wallet', 'ewallet', 'electronic_wallet'].includes(methodType)) {
     destination.receiverPhone = accountNumber;
   } else {
     destination.receiverWallet = accountNumber;
@@ -75,19 +75,6 @@ const FieldCompletionBadge = ({ complete }) => (
 
 const getSenderDetailRequirement = (method) => {
   const type = normalizeMethodType(method?.type);
-
-  if (isVodafoneCashMethod(method)) {
-    return null;
-  }
-
-  if (type === 'mobile_wallet' || type === 'e_wallet' || type === 'ewallet') {
-    return {
-      field: 'senderWalletNumber',
-      label: 'رقم المحفظة المحول منها',
-      placeholder: 'أدخل رقم المحفظة التي تم التحويل منها',
-      validationMessage: 'يرجى إدخال رقم المحفظة المحول منها',
-    };
-  }
 
   if (type === 'usdt' || type === 'crypto') {
     return {
@@ -217,6 +204,7 @@ const PaymentDetails = ({
     [methodFields]
   );
   const methodInstructions = String(method?.instructions || '').trim();
+  const qrCodeUrl = resolveImageUrl(method?.qrCodeImage || '');
   const requiresReceipt =
     normalizeMethodType(method?.type) !== 'site_wallet'
     && !isVodafoneCashMethod(method);
@@ -338,6 +326,9 @@ const PaymentDetails = ({
     if (needsTransactionNumber && !String(formData.transactionId || '').trim()) {
       return 'يرجى إدخال رقم العملية';
     }
+    if (needsTransactionNumber && String(formData.transactionId || '').trim().length > 64) {
+      return 'رقم العملية يجب ألا يتجاوز 64 حرفًا';
+    }
     if (requiresReceipt && !uploadedFile) return t('payments.validationReceipt');
     return '';
   };
@@ -380,6 +371,7 @@ const PaymentDetails = ({
         : '';
       const transactionId = String(formData.transactionId || '').trim();
       const freshNeedsTransactionNumber = requiresTransactionNumber(freshMethod);
+      const freshRequiresReceipt = normalizeMethodType(freshMethod?.type) !== 'site_wallet' && !isVodafoneCashMethod(freshMethod);
 
       if (freshSenderRequirement && !senderValue) {
         addToast(freshSenderRequirement.validationMessage, 'error');
@@ -389,6 +381,17 @@ const PaymentDetails = ({
       if (freshNeedsTransactionNumber && !transactionId) {
         addToast('يرجى إدخال رقم العملية', 'error');
         setFormError('يرجى إدخال رقم العملية');
+        return;
+      }
+      if (freshNeedsTransactionNumber && transactionId.length > 64) {
+        addToast('رقم العملية يجب ألا يتجاوز 64 حرفًا', 'error');
+        setFormError('رقم العملية يجب ألا يتجاوز 64 حرفًا');
+        return;
+      }
+      if (freshRequiresReceipt && !uploadedFile) {
+        const message = t('payments.validationReceipt');
+        addToast(message, 'error');
+        setFormError(message);
         return;
       }
 
@@ -627,6 +630,31 @@ const PaymentDetails = ({
           </motion.div>
         )}
 
+        {qrCodeUrl ? (
+          <motion.section
+            initial={{ y: 10, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.25, delay: 0.06, ease: 'easeOut' }}
+            className="my-4 border-y border-[color:rgb(var(--color-border-rgb)/0.62)] py-4 text-center"
+          >
+            <div className="mb-3 flex items-center justify-center gap-2">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-[color:rgb(var(--color-primary-rgb)/0.1)] text-[var(--color-primary)]">
+                <QrCode className="h-4 w-4" />
+              </span>
+              <div className="text-start">
+                <h3 className="text-xs font-black text-[var(--color-text)]">{dir === 'rtl' ? 'الدفع عبر QR Code' : 'Pay with QR Code'}</h3>
+                <p className="mt-0.5 text-[9px] text-[var(--color-text-secondary)]">{dir === 'rtl' ? 'امسح الكود من تطبيق الدفع لإتمام التحويل' : 'Scan the code in your payment app to complete the transfer'}</p>
+              </div>
+            </div>
+            <div className="mx-auto max-w-[19rem] border border-[color:rgb(var(--color-border-rgb)/0.62)] bg-white p-3 shadow-sm">
+              <img src={qrCodeUrl} alt={dir === 'rtl' ? 'رمز QR للدفع' : 'Payment QR code'} decoding="async" referrerPolicy="no-referrer" className="aspect-square w-full object-contain" />
+            </div>
+            <a href={qrCodeUrl} target="_blank" rel="noreferrer" className="mt-3 inline-flex text-xs font-black text-[var(--color-primary)] underline-offset-4 transition hover:underline">
+              {dir === 'rtl' ? 'فتح الصورة بالحجم الكامل' : 'Open full-size image'}
+            </a>
+          </motion.section>
+        ) : null}
+
         {methodInstructions ? (
           <motion.aside
             initial={{ y: 8, opacity: 0 }}
@@ -797,6 +825,7 @@ const PaymentDetails = ({
                 value={formData.transactionId || ''}
                 onChange={(e) => handleInputChange('transactionId', e.target.value)}
                 placeholder="أدخل رقم العملية"
+                maxLength={64}
                 className="min-w-0 flex-1 bg-transparent px-4 text-right font-['Poppins'] text-sm font-black tracking-wide text-[var(--color-text)] outline-none placeholder:font-semibold placeholder:tracking-normal placeholder:text-[var(--color-text-secondary)] [font-variant-numeric:tabular-nums]"
                 disabled={isSubmitting}
                 required

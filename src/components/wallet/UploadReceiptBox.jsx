@@ -4,7 +4,7 @@ import { AlertCircle, FileImage, Upload, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../../context/LanguageContext';
 
-const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic', 'image/heif'];
+const SUPPORTED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const MAX_FILE_SIZE = 20 * 1024 * 1024;
 
 const UploadReceiptBox = ({ onFileUpload }) => {
@@ -91,7 +91,7 @@ const UploadReceiptBox = ({ onFileUpload }) => {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/*"
+              accept="image/jpeg,image/png,image/webp"
               onChange={handleFileInputChange}
               className="hidden"
             />

@@ -114,30 +114,62 @@ const normalizePaymentSettingsResponse = (settings) => {
   };
 };
 
-const serializePaymentGroupsForApi = (groups) => normalizePaymentGroups(groups, { fallbackToDefault: false }).map((group) => ({
-  id: group.id,
-  name: group.name,
-  description: group.description,
-  currency: group.currency,
-  image: group.image,
-  imageName: group.imageName,
-  isActive: group.isActive !== false,
-  methods: group.methods.map((method) => ({
-    id: method.id,
-    name: method.name,
-    description: method.description,
-    type: method.type,
-    accountNumber: method.accountNumber,
-    accountName: method.accountName,
-    bankName: method.bankName,
-    feePercent: method.feePercent,
-    instructions: method.instructions,
-    image: method.image,
-    imageName: method.imageName,
-    isActive: method.isActive !== false,
-    fields: Array.isArray(method.fields) ? method.fields : [],
-  })),
-}));
+const serializePaymentMethodFeePercent = (value) => {
+  if (value === undefined || value === null) return 0;
+  if (typeof value === 'string' && !value.trim()) {
+    throw new Error('Method fee percentage is required.');
+  }
+
+  const feePercent = Number(value);
+  if (!Number.isFinite(feePercent) || feePercent < 0 || feePercent > 100) {
+    throw new Error('Method fee percentage must be a number between 0 and 100.');
+  }
+  return feePercent;
+};
+
+const validatePaymentGroupFeePercentsForApi = (groups) => {
+  if (!Array.isArray(groups)) return;
+  groups.forEach((group) => {
+    if (!group || !Array.isArray(group.methods)) return;
+    group.methods.forEach((method) => {
+      if (method && Object.prototype.hasOwnProperty.call(method, 'feePercent')) {
+        serializePaymentMethodFeePercent(method.feePercent);
+      }
+    });
+  });
+};
+
+const serializePaymentGroupsForApi = (groups) => {
+  // Validate raw values before the normalizer can clamp an invalid fee.
+  validatePaymentGroupFeePercentsForApi(groups);
+
+  return normalizePaymentGroups(groups, { fallbackToDefault: false }).map((group) => ({
+    id: group.id,
+    name: group.name,
+    description: group.description,
+    currency: group.currency,
+    image: group.image,
+    imageName: group.imageName,
+    isActive: group.isActive !== false,
+    methods: group.methods.map((method) => ({
+      id: method.id,
+      name: method.name,
+      description: method.description,
+      type: method.type,
+      accountNumber: method.accountNumber,
+      accountName: method.accountName,
+      bankName: method.bankName,
+      feePercent: serializePaymentMethodFeePercent(method.feePercent),
+      instructions: method.instructions,
+      image: method.image,
+      imageName: method.imageName,
+      qrCodeImage: method.qrCodeImage,
+      qrCodeImageName: method.qrCodeImageName,
+      isActive: method.isActive !== false,
+      fields: Array.isArray(method.fields) ? method.fields : [],
+    })),
+  }));
+};
 
 const normaliseSenderDetails = (source = {}) => {
   const rawDetails = source?.senderDetails && typeof source.senderDetails === 'object'
