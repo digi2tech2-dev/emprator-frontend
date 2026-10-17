@@ -1,16 +1,22 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { isLitePerformanceMode } from '../../utils/performanceMode';
+import { useTheme } from '../../context/ThemeContext';
+import { isSafeThemeMediaPath } from '../../theme/platformTheme';
+import { resolveImageUrl } from '../../utils/imageUrl';
+
+const DEFAULT_MARQUEE_AR = 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ ﴿قُلْ إِنَّ رَبِّي يَبْسُطُ الرِّزْقَ لِمَنْ يَشَاءُ مِنْ عِبَادِهِ وَيَقْدِرُ لَهُ وَمَا أَنْفَقْتُمْ مِنْ شَيْءٍ فَهُوَ يُخْلِفُهُ وَهُوَ خَيْرُ الرَّازِقِينَ﴾ صَدَقَ اللَّهُ الْعَظِيمُ';
 
 const HeroSlider = ({ slides }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const dragStartX = useRef(null);
   const { i18n } = useTranslation();
+  const { publishedTheme } = useTheme();
   const hasMultipleSlides = (slides?.length || 0) > 1;
   const performanceLite = isLitePerformanceMode();
   const isArabic = (i18n.resolvedLanguage || i18n.language || 'ar').toLowerCase().startsWith('ar');
   const verseText = isArabic
-    ? 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ ﴿قُلْ إِنَّ رَبِّي يَبْسُطُ الرِّزْقَ لِمَنْ يَشَاءُ مِنْ عِبَادِهِ وَيَقْدِرُ لَهُ وَمَا أَنْفَقْتُمْ مِنْ شَيْءٍ فَهُوَ يُخْلِفُهُ وَهُوَ خَيْرُ الرَّازِقِينَ﴾ صَدَقَ اللَّهُ الْعَظِيمُ'
+    ? publishedTheme?.brand?.marqueeTextArabic || DEFAULT_MARQUEE_AR
     : 'In the name of Allah, the Most Gracious, the Most Merciful. Do not consume one another’s wealth unjustly, but only through trade by mutual consent.';
 
   useEffect(() => {
@@ -44,7 +50,11 @@ const HeroSlider = ({ slides }) => {
 
   if (!slides?.length) return null;
 
-  const slide = slides[currentSlide];
+  const originalSlide = slides[currentSlide];
+  const slot = /^landing-slide-([1-4])$/.exec(originalSlide?.id || '');
+  const replacement = slot ? publishedTheme?.brand?.slides?.[Number(slot[1]) - 1] : null;
+  const slide = isSafeThemeMediaPath(replacement)
+    ? { ...originalSlide, image: resolveImageUrl(replacement) } : originalSlide;
   const SlideFrame = slide.href ? 'a' : 'div';
   const slideFrameProps = slide.href
     ? {

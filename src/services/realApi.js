@@ -1879,6 +1879,28 @@ const isAdmin = () => {
 
 const realApi = {
 
+  platformTheme: {
+    getPublished: async () => unwrap(await http.get('/theme/published')),
+    getSettings: async () => unwrap(await http.get('/admin/theme/settings')),
+    getPresets: async () => unwrap(await http.get('/admin/theme/presets')),
+    validate: async (configuration) => unwrap(await http.post('/admin/theme/preview/validate', configuration)),
+    saveDraft: async (configuration) => unwrap(await http.post('/admin/theme/draft', configuration)),
+    resetDraft: async () => unwrap(await http.post('/admin/theme/draft/reset')),
+    publish: async (configuration) => unwrap(await http.post('/admin/theme/publish', configuration)),
+    restore: async (version) => unwrap(await http.post('/admin/theme/restore', { version })),
+    getHistory: async (page = 1) => unwrap(await http.get('/admin/theme/history', { params: { page } })),
+    getSubscription: async () => unwrap(await http.get('/admin/theme/subscription')),
+    getPayments: async () => unwrap(await http.get('/admin/theme/subscription/payment-status')),
+    checkout: async () => unwrap(await http.post('/admin/theme/subscription/checkout')),
+    createManualOrder: async (network) => unwrap(await http.post('/admin/theme/subscription/manual-order', { network })),
+    redeemCode: async (reference, code) => unwrap(await http.post('/admin/theme/subscription/redeem', { reference, code })),
+    uploadMedia: async (file) => {
+      const form = new FormData();
+      form.append('image', file);
+      return unwrap(await http.post('/admin/theme/media/upload', form));
+    },
+  },
+
   quota: {
     getMine: async () => {
       const res = await http.get('/me/quota');

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
 import { resolveImageUrl } from '../../utils/imageUrl';
+import { usePlatformNeon } from '../../theme/usePlatformNeon';
 
 const getImageValue = (value) => {
   if (typeof value === 'string') return value.trim();
@@ -78,6 +79,7 @@ const BestSellingSection = ({
   onProductSelect,
   disableUnavailable = false,
 }) => {
+  const neon = usePlatformNeon('bestSellers');
   const isArabic = language === 'ar';
   const DirectionIcon = isArabic ? ChevronLeft : ChevronRight;
   const categoryImages = useMemo(() => new Map(
@@ -86,7 +88,8 @@ const BestSellingSection = ({
 
   return (
     <section
-      className="best-selling-section mx-auto w-full max-w-5xl"
+      className={`best-selling-section mx-auto w-full max-w-5xl ${neon.className}`}
+      style={neon.style}
       aria-labelledby={id}
     >
       <div className="best-selling-heading">

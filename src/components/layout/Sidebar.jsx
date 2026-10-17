@@ -23,6 +23,7 @@ import {
   Share2,
   ReceiptText,
   SlidersHorizontal,
+  Palette,
   Sparkles,
   Target,
   Truck,
@@ -42,6 +43,9 @@ import { SUPERVISOR_ROLES, getDefaultRouteForRole, hasRequiredRole } from '../..
 import { PERMISSIONS, hasPermission } from '../../utils/permissions';
 import { resolveUserAvatar } from '../../utils/avatar';
 import emperorLogo from '../../assets/logo.webp';
+import { useTheme } from '../../context/ThemeContext';
+import { isSafeThemeMediaPath } from '../../theme/platformTheme';
+import { resolveImageUrl } from '../../utils/imageUrl';
 import avatarFrame from '../../assets/ايطار.PNG';
 
 const ADMIN_NAV_ROLES = ['admin', 'super_admin', ...SUPERVISOR_ROLES];
@@ -77,6 +81,10 @@ const copyToClipboard = async (value) => {
 };
 
 const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
+  const { publishedTheme } = useTheme();
+  const uploadedLogo = publishedTheme?.brand?.logoPath;
+  const platformLogo = isSafeThemeMediaPath(uploadedLogo) ? resolveImageUrl(uploadedLogo) : emperorLogo;
+  const platformLogoWidth = publishedTheme?.brand?.logoWidth;
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [copiedUserId, setCopiedUserId] = useState(false);
@@ -182,6 +190,7 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
     { icon: Activity, label: 'مراقبة المشرفين', path: '/admin/supervisor-monitoring', roles: ['admin'], section: 'admin' },
     { icon: FolderKanban, label: t('sidebar.groupsManager'), path: '/admin/groups', roles: ADMIN_NAV_ROLES, permission: PERMISSIONS.ADMIN_GROUPS, section: 'admin' },
     { icon: Boxes, label: t('sidebar.productsManager'), path: '/admin/products', roles: ADMIN_NAV_ROLES, permission: PERMISSIONS.ADMIN_PRODUCTS, section: 'admin' },
+    { icon: Palette, label: t('sidebar.themes'), path: '/admin/themes', roles: ['admin'], visible: (currentUser) => String(currentUser?.role || '').toLowerCase() === 'admin', section: 'admin' },
     {
       icon: ClipboardCheck,
       label: t('sidebar.ordersManager', { defaultValue: dir === 'rtl' ? 'إدارة الطلبات' : 'Orders Manager' }),
@@ -368,9 +377,10 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
                   aria-label="EMBRATOR CARD"
                 >
                   <img
-                    src={emperorLogo}
+                    src={platformLogo}
                     alt="EMBRATOR CARD"
                     className="ka-sidebar-emperor-logo h-auto w-[min(9rem,64%)] object-contain drop-shadow-[0_12px_24px_rgba(168,23,19,0.42)]"
+                    style={Number.isInteger(platformLogoWidth) && platformLogoWidth >= 80 && platformLogoWidth <= 300 ? { width: `${platformLogoWidth}px`, maxWidth: '100%' } : undefined}
                     loading="eager"
                     decoding="async"
                   />

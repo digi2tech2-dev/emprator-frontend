@@ -4,6 +4,8 @@ import brandIconImage from '../../assets/logo.webp';
 // The new emperor logo is used consistently in both themes.
 import brandIconLightImage from '../../assets/logo.webp';
 import { useTheme } from '../../context/ThemeContext';
+import { isSafeThemeMediaPath } from '../../theme/platformTheme';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 const stylesBySize = {
   xs: {
@@ -31,6 +33,7 @@ const stylesBySize = {
     caption: 'text-[0.66rem] tracking-[0.38em]',
   },
 };
+const baseIconPixels = { xs: 48, sm: 56, md: 64, lg: 80 };
 
 const BrandMark = ({
   className,
@@ -41,15 +44,20 @@ const BrandMark = ({
   titleClassName,
   captionClassName,
 }) => {
-  const { isDark } = useTheme();
+  const { isDark, publishedTheme } = useTheme();
+  const customLogo = publishedTheme?.brand?.logoPath;
+  const logo = isSafeThemeMediaPath(customLogo) ? resolveImageUrl(customLogo) : null;
+  const width = publishedTheme?.brand?.logoWidth;
+  const scaledSize = Number.isInteger(width) && width >= 80 && width <= 300
+    ? Math.round(baseIconPixels[size] * width / 144) : null;
   const styles = stylesBySize[size] || stylesBySize.md;
   const isIconEnd = iconPosition === 'end';
 
   return (
     <div className={cn('flex items-center', isIconEnd && 'flex-row-reverse', styles.wrapper, className)}>
-      <div className={cn('relative overflow-hidden', styles.iconShell)}>
+      <div className={cn('relative shrink-0 overflow-hidden', styles.iconShell)} style={scaledSize ? { width: scaledSize, height: scaledSize } : undefined}>
         <img
-          src={isDark ? brandIconImage : brandIconLightImage}
+          src={logo || (isDark ? brandIconImage : brandIconLightImage)}
           alt="EMBRATOR CARD"
           loading="eager"
           decoding="async"

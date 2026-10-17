@@ -5590,3 +5590,10 @@
     font-size: 0.8rem;
   }
 }
+.purchase-dialog-card.platform-neon-border {
+  background:
+    linear-gradient(160deg, rgb(var(--color-card-rgb) / 0.99), rgb(var(--color-bg-rgb) / 0.99)) padding-box,
+    conic-gradient(from var(--platform-neon-angle), transparent 0deg 224deg,
+      var(--platform-neon-color) 270deg, #fff 305deg,
+      var(--platform-neon-color) 335deg, transparent 360deg) border-box;
+}

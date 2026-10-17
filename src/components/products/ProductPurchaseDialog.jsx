@@ -11,6 +11,7 @@ import apiClient from '../../services/client';
 import { useToast } from '../ui/Toast';
 import { useLanguage } from '../../context/LanguageContext';
 import { resolveImageUrl } from '../../utils/imageUrl';
+import { usePlatformNeon } from '../../theme/usePlatformNeon';
 import { resolveUserAvatar } from '../../utils/avatar';
 import brandLogoDark from '../../assets/logo.webp';
 import brandLogoLight from '../../assets/logo.webp';
@@ -202,6 +203,7 @@ const ProductPurchaseDialog = ({
   const navigate = useNavigate();
   const { language, dir } = useLanguage();
   const { addToast } = useToast();
+  const purchaseNeon = usePlatformNeon('purchase');
   const copy = useMemo(() => getCopy(language), [language]);
 
   const user = useAuthStore((state) => state.user);
@@ -805,7 +807,8 @@ const ProductPurchaseDialog = ({
         initial={{ opacity: 0, y: 28, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.18 }}
-        className={`purchase-dialog-card ${showBalanceTopup && topupStep !== 'summary' ? 'is-wallet-flow' : (successOrder ? '' : 'purchase-dialog-card--reference')}`}
+        className={`purchase-dialog-card ${purchaseNeon.className} ${showBalanceTopup && topupStep !== 'summary' ? 'is-wallet-flow' : (successOrder ? '' : 'purchase-dialog-card--reference')}`}
+        style={purchaseNeon.style}
       >
         <div className="purchase-dialog-grid" />
         <button type="button" className="purchase-dialog-close" onClick={onClose} aria-label="Close">

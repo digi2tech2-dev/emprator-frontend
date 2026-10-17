@@ -24,7 +24,9 @@ import HeaderBrand from '../components/layout/HeaderBrand';
 import PublicSidebar from '../components/layout/PublicSidebar';
 import SiteCopyrightFooter from '../components/layout/SiteCopyrightFooter';
 import HeroSlider from '../components/home/HeroSlider';
+import { usePlatformNeon } from '../theme/usePlatformNeon';
 import CategoryCard from '../components/home/CategoryCard';
+import CategoryNeonCard from '../components/home/CategoryNeonCard';
 import BestSellingSection from '../components/home/BestSellingSection';
 import ProductSearchBar from '../components/products/ProductSearchBar';
 import ProductCardSimple from '../components/products/ProductCardSimple';
@@ -134,6 +136,7 @@ const getProductCategoryKeys = (product) => {
 
 const PublicCatalog = () => {
   const navigate = useNavigate();
+  const heroNeon = usePlatformNeon('hero');
   const location = useLocation();
   const { i18n } = useTranslation();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -857,7 +860,7 @@ const PublicCatalog = () => {
       <main className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
         <div className="mx-auto max-w-[var(--shell-max-width)] space-y-5 sm:space-y-6">
           <section aria-label={isArabic ? 'العروض الرئيسية' : 'Featured offers'}>
-            <HeroSlider slides={heroSlides} />
+            <div className={heroNeon.className} style={heroNeon.style}><HeroSlider slides={heroSlides} /></div>
           </section>
 
           <section id="categories" className="scroll-mt-28 space-y-3 sm:space-y-3.5">
@@ -907,7 +910,7 @@ const PublicCatalog = () => {
                 {!isInsideCategory && currentCategories.length > 0 && (
                   <div className="relative z-0 grid grid-cols-2 gap-2 sm:gap-2.5 md:grid-cols-3 xl:grid-cols-4">
                     {currentCategories.map((category, index) => (
-                      <CategoryCard
+                      <CategoryNeonCard
                         key={category.id}
                         category={category}
                         active={false}

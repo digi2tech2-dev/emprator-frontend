@@ -51,6 +51,7 @@ const SupervisorMonitoring = lazy(routeLoaders.SupervisorMonitoring);
 const AdminSuppliers = lazy(routeLoaders.AdminSuppliers);
 const AdminOrders = lazy(routeLoaders.AdminOrders);
 const AdminTargetRequests = lazy(routeLoaders.AdminTargetRequests);
+const PlatformThemeEditor = lazy(routeLoaders.PlatformThemeEditor);
 const BuyTarget = lazy(routeLoaders.BuyTarget);
 const TargetOrders = lazy(routeLoaders.TargetOrders);
 const AddBalance = lazy(routeLoaders.AddBalance);
@@ -91,6 +92,14 @@ const AdminDashboardRoute = () => {
   return renderSuspended(<AdminDashboard />);
 };
 
+const PlatformThemeRoute = () => {
+  const role = useAuthStore((state) => state.user?.role);
+  if (String(role || '').toLowerCase() !== 'admin') {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  return renderSuspended(<PlatformThemeEditor />);
+};
+
 const CreatedByEntryRoute = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const role = useAuthStore((state) => state.user?.role);
@@ -112,6 +121,7 @@ const AnimatedAppRoutes = ({ location }) => {
       <Route path="/about-us" element={renderSuspended(<AboutUsPage />)} />
       <Route path="/created-by" element={<CreatedByEntryRoute />} />
       <Route path="/public-contact-us" element={renderSuspended(<ContactUs accountOnly />)} />
+      {import.meta.env.DEV && <Route path="/theme-preview" element={renderSuspended(<PlatformThemeEditor previewOnly />)} />}
       <Route path="/auth" element={renderSuspended(<Auth />)} />
       <Route path="/login" element={renderSuspended(<Auth />)} />
       <Route path="/email-verified" element={renderSuspended(<EmailVerified />)} />
@@ -450,6 +460,14 @@ const AnimatedAppRoutes = ({ location }) => {
           element={(
             <ProtectedRoute roles={ADMIN_PANEL_ROLES} permission={PERMISSIONS.ADMIN_TARGET_REQUESTS}>
               {renderSuspended(<AdminTargetRequests />)}
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/admin/themes"
+          element={(
+            <ProtectedRoute roles={['admin']}>
+              <PlatformThemeRoute />
             </ProtectedRoute>
           )}
         />

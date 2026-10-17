@@ -7,7 +7,8 @@ import useAuthStore from '../store/useAuthStore';
 import useMediaStore from '../store/useMediaStore';
 import useGroupStore from '../store/useGroupStore';
 import HeroSlider from '../components/home/HeroSlider';
-import CategoryCard from '../components/home/CategoryCard';
+import { usePlatformNeon } from '../theme/usePlatformNeon';
+import CategoryNeonCard from '../components/home/CategoryNeonCard';
 import BestSellingSection from '../components/home/BestSellingSection';
 import ProductSearchBar from '../components/products/ProductSearchBar';
 import ProductPurchaseDialog from '../components/products/ProductPurchaseDialog';
@@ -30,6 +31,7 @@ const Dashboard = () => {
   const groupsLastLoadedAt = useGroupStore((state) => state.groupsLastLoadedAt);
   const { i18n } = useTranslation();
   const navigate = useNavigate();
+  const heroNeon = usePlatformNeon('hero');
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [showWelcomeEmperor, setShowWelcomeEmperor] = useState(false);
   const language = getStorefrontLanguage(i18n);
@@ -245,7 +247,7 @@ const Dashboard = () => {
         </section>
       ) : null}
 
-      <HeroSlider slides={heroSlides} />
+      <div className={heroNeon.className} style={heroNeon.style}><HeroSlider slides={heroSlides} /></div>
 
       <section id="categories" className="scroll-mt-28 space-y-3 sm:space-y-3.5">
         <div className="relative z-10 mx-auto flex w-full max-w-5xl justify-center px-0.5 sm:px-2">
@@ -254,7 +256,7 @@ const Dashboard = () => {
 
         <div className="relative z-0 grid grid-cols-2 gap-2 sm:gap-2.5 md:grid-cols-3 xl:grid-cols-4">
           {visibleHomepageCategories.map((category, index) => (
-            <CategoryCard key={category.id} category={category} active={false} index={index} onSelect={handleCategorySelect} />
+            <CategoryNeonCard key={category.id} category={category} active={false} index={index} onSelect={handleCategorySelect} />
           ))}
         </div>
 

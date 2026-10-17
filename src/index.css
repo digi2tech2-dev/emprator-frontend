@@ -3,6 +3,23 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+html.platform-theme-active body {
+  background: var(--color-bg);
+  font-size: var(--platform-base-font-size, 16px);
+}
+
+html.platform-theme-active[lang="ar"] body { font-family: var(--platform-font-ar, "Cairo", sans-serif); }
+html.platform-theme-active[lang="en"] body { font-family: var(--platform-font-en, "Inter", sans-serif); }
+html.platform-theme-active h1,
+html.platform-theme-active h2,
+html.platform-theme-active h3 { font-weight: var(--platform-heading-weight, 700); }
+html.platform-theme-compact .ka-sidebar-nav-item { padding-block: 0.25rem; }
+html.platform-theme-outline-button .glow-button {
+  background: transparent;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
 .payment-amount-input::-webkit-outer-spin-button,
 .payment-amount-input::-webkit-inner-spin-button {
   margin: 0;
@@ -5746,4 +5763,41 @@ html:not(.performance-lite) .page-route-loader__spinner {
   .header-reference-right {
     gap: 0.5rem;
   }
+}
+@property --platform-neon-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes platform-neon-orbit {
+  to { --platform-neon-angle: 360deg; }
+}
+
+.platform-neon-border {
+  --platform-neon-color: #22d3ee;
+  --platform-neon-speed: 5s;
+  border: 2px solid transparent !important;
+  border-radius: 1.35rem;
+  background:
+    linear-gradient(var(--color-bg), var(--color-bg)) padding-box,
+    conic-gradient(from var(--platform-neon-angle), transparent 0deg 224deg,
+      var(--platform-neon-color) 270deg, #fff 305deg,
+      var(--platform-neon-color) 335deg, transparent 360deg) border-box;
+  box-shadow: 0 0 16px -4px var(--platform-neon-color), inset 0 0 12px -8px var(--platform-neon-color);
+  animation: platform-neon-orbit var(--platform-neon-speed) linear infinite;
+}
+
+.platform-category-neon-card {
+  min-width: 0;
+  height: 100%;
+  border-radius: 1.9rem;
+}
+
+.platform-category-neon-card > .storefront-category-card {
+  height: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .platform-neon-border { animation: none; }
 }

@@ -12,6 +12,9 @@ import {
 } from 'lucide-react';
 import { cn } from '../ui/Button';
 import emperorLogo from '../../assets/logo.webp';
+import { useTheme } from '../../context/ThemeContext';
+import { isSafeThemeMediaPath } from '../../theme/platformTheme';
+import { resolveImageUrl } from '../../utils/imageUrl';
 
 const GoogleMark = () => (
   <svg viewBox="0 0 24 24" aria-hidden="true" className="h-4.5 w-4.5 shrink-0">
@@ -23,6 +26,10 @@ const GoogleMark = () => (
 );
 
 const PublicSidebar = ({ isOpen, onClose, onLogin, onHome, onAbout, onContact, onCreateAccount, onGoogleLogin, isBusy, isArabic }) => {
+  const { publishedTheme } = useTheme();
+  const uploadedLogo = publishedTheme?.brand?.logoPath;
+  const platformLogo = isSafeThemeMediaPath(uploadedLogo) ? resolveImageUrl(uploadedLogo) : emperorLogo;
+  const platformLogoWidth = publishedTheme?.brand?.logoWidth;
   const [isMobile, setIsMobile] = useState(false);
   const { pathname } = useLocation();
   const navigate = useNavigate();
@@ -138,9 +145,10 @@ const PublicSidebar = ({ isOpen, onClose, onLogin, onHome, onAbout, onContact, o
               aria-label="EMBRATOR CARD"
             >
               <img
-                src={emperorLogo}
+                src={platformLogo}
                 alt="EMBRATOR CARD"
                 className="ka-sidebar-emperor-logo h-auto w-[min(9rem,64%)] object-contain drop-shadow-[0_12px_24px_rgba(168,23,19,0.42)]"
+                style={Number.isInteger(platformLogoWidth) && platformLogoWidth >= 80 && platformLogoWidth <= 300 ? { width: `${platformLogoWidth}px`, maxWidth: '100%' } : undefined}
                 loading="eager"
                 decoding="async"
               />
