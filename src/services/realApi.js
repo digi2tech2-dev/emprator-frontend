@@ -1141,6 +1141,7 @@ const normaliseProvider = (p) => {
     name: p.name || p.supplierName || '',
     // API config
     baseUrl: p.baseUrl || '',
+    adapterType: p.adapterType || '',
     apiKey: effectiveToken,
     bearerToken: effectiveToken,
     authType: effectiveToken ? 'bearer_token' : 'none',
@@ -1169,11 +1170,11 @@ const normaliseProvider = (p) => {
 /**
  * Reverse-map FE supplier payload → BE provider validation schema.
  *
- * BE create accepts: { name, slug, baseUrl, apiToken, isActive, syncInterval, supportedFeatures }
+ * BE create accepts: { name, slug, adapterType, baseUrl, apiToken, isActive, syncInterval, supportedFeatures }
  * BE update accepts: same fields, all optional, .min(1)
  *
  * FE sends: { supplierName, supplierCode, baseUrl, apiKey, bearerToken,
- *             authType, supplierType, isActive, syncInterval,
+ *             authType, supplierType, adapterType, isActive, syncInterval,
  *             enableAutoFulfillment, enableStatusSync, enableProductSync, ... }
  */
 const providerToBE = (fe) => {
@@ -1187,6 +1188,9 @@ const providerToBE = (fe) => {
   // Slug
   const slug = trimValue(fe.supplierCode || fe.slug);
   if (slug !== undefined) body.slug = slug;
+
+  // Explicit adapter. Null clears the selection and restores slug/name lookup.
+  if (fe.adapterType !== undefined) body.adapterType = trimValue(fe.adapterType) || null;
 
   // Base URL
   if (fe.baseUrl !== undefined) body.baseUrl = trimValue(fe.baseUrl);
