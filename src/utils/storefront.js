@@ -111,14 +111,34 @@ const shouldKeepUnavailableProductVisible = (product = {}) => {
 export const getCurrencySymbol = (currencyCode = 'USD') => {
   const currencySymbolMap = {
     USD: '$',
-    EGP: '£',
+    MAD: 'د.م.',
+    EGP: 'ج.م',
     GBP: '£',
     EUR: '€',
-    SAR: 'SAR',
-    AED: 'AED',
+    SAR: 'ر.س',
+    AED: 'د.إ',
+    BHD: 'د.ب',
+    IQD: 'د.ع',
+    JOD: 'د.أ',
+    KWD: 'د.ك',
+    OMR: 'ر.ع',
+    QAR: 'ر.ق',
+    TRY: '₺',
   };
 
-  return currencySymbolMap[String(currencyCode || 'USD').toUpperCase()] || String(currencyCode || 'USD').toUpperCase();
+  const normalizedCode = String(currencyCode || 'USD').toUpperCase();
+  if (currencySymbolMap[normalizedCode]) return currencySymbolMap[normalizedCode];
+
+  try {
+    const symbol = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: normalizedCode,
+      currencyDisplay: 'narrowSymbol',
+    }).formatToParts(0).find((part) => part.type === 'currency')?.value;
+    return symbol && symbol.toUpperCase() !== normalizedCode ? symbol : normalizedCode;
+  } catch {
+    return normalizedCode;
+  }
 };
 
 export const formatDisplayNumber = (value, locale = 'en-US', compact = false, options = {}) => {

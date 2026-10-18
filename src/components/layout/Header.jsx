@@ -7,7 +7,7 @@ import useNotificationStore from '../../store/useNotificationStore';
 import { useLanguage } from '../../context/LanguageContext';
 import ThemeToggle from '../ui/ThemeToggle';
 import HeaderBrand from './HeaderBrand';
-import { formatWalletAmount } from '../../utils/storefront';
+import { formatDisplayNumber, getCurrencySymbol } from '../../utils/storefront';
 import { getDefaultRouteForRole, isAdminRole, isSupervisorRole } from '../../utils/authRoles';
 import { cn } from '../ui/Button';
 
@@ -26,7 +26,9 @@ const Header = ({ toggleSidebar }) => {
   const isAdmin = isAdminRole(user?.role);
   const isBackoffice = isAdmin || isSupervisorRole(user?.role);
   const walletValue = Number(user?.coins || 0);
-  const walletDisplayValue = formatWalletAmount(walletValue, user?.currency || 'USD');
+  const walletCurrency = String(user?.currency || 'USD').toUpperCase();
+  const walletCurrencySymbol = getCurrencySymbol(walletCurrency);
+  const walletDisplayValue = formatDisplayNumber(Math.abs(walletValue));
   const walletTargetPath = isCustomer ? '/wallet/add-balance' : '/admin/wallet';
   const shouldShowWallet = isCustomer || isBackoffice;
   const displayedNotifications = useMemo(() => (
@@ -299,9 +301,11 @@ const Header = ({ toggleSidebar }) => {
                   className="header-reference-wallet inline-flex h-[1.875rem] shrink-0 items-center gap-1 rounded-full border border-[color:rgb(var(--color-border-rgb)/0.84)] bg-[linear-gradient(180deg,rgb(36_17_8/0.9),rgb(5_3_2/0.84))] px-1.5 text-start shadow-[inset_0_0_18px_rgb(245_158_11/0.08),0_0_28px_-18px_rgb(245_158_11/0.9)] transition-all hover:-translate-y-0.5 min-[380px]:h-8 sm:hidden"
                   aria-label={language === 'ar' ? 'الرصيد' : 'Balance'}
                 >
-                  <span className="header-wallet-balance max-w-[48px] truncate text-[0.62rem] font-semibold text-white dark:text-[var(--color-text)] min-[380px]:max-w-[62px]">
-                    {walletDisplayValue}
+                  <span className="header-wallet-balance max-w-[48px] text-[0.62rem] font-semibold text-white dark:text-[var(--color-text)] min-[380px]:max-w-[62px]" dir="ltr">
+                    {walletValue < 0 && <span aria-hidden="true">-</span>}
+                    <span className="header-wallet-amount">{walletDisplayValue}</span>
                   </span>
+                  <span className="header-wallet-currency-mark" title={walletCurrency} aria-label={walletCurrencySymbol}>{walletCurrencySymbol}</span>
                   <span className="inline-flex h-[1.375rem] w-[1.375rem] items-center justify-center rounded-full bg-[color:rgb(var(--color-primary-rgb)/0.14)] text-[var(--color-primary)]">
                     <Wallet className="h-3 w-3" />
                   </span>
@@ -314,10 +318,12 @@ const Header = ({ toggleSidebar }) => {
                   aria-label={language === 'ar' ? 'المحفظة' : 'Wallet'}
                 >
                   <span className="min-w-0">
-                    <span className="header-wallet-balance block truncate text-xs font-semibold text-white dark:text-[var(--color-text)]">
-                      {walletDisplayValue}
+                    <span className="header-wallet-balance text-xs font-semibold text-white dark:text-[var(--color-text)]" dir="ltr">
+                      {walletValue < 0 && <span aria-hidden="true">-</span>}
+                      <span className="header-wallet-amount">{walletDisplayValue}</span>
                     </span>
                   </span>
+                  <span className="header-wallet-currency-mark" title={walletCurrency} aria-label={walletCurrencySymbol}>{walletCurrencySymbol}</span>
                   <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[color:rgb(var(--color-primary-rgb)/0.14)] text-[var(--color-primary)]">
                     <Wallet className="h-4 w-4" />
                   </span>

@@ -43,6 +43,8 @@ import { SUPERVISOR_ROLES, getDefaultRouteForRole, hasRequiredRole } from '../..
 import { PERMISSIONS, hasPermission } from '../../utils/permissions';
 import { resolveUserAvatar } from '../../utils/avatar';
 import emperorLogo from '../../assets/logo.webp';
+import royalCrown from '../../assets/تاج.png';
+import apiClient from '../../services/client';
 import { useTheme } from '../../context/ThemeContext';
 import { isSafeThemeMediaPath } from '../../theme/platformTheme';
 import { resolveImageUrl } from '../../utils/imageUrl';
@@ -83,11 +85,14 @@ const copyToClipboard = async (value) => {
 const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
   const { publishedTheme } = useTheme();
   const uploadedLogo = publishedTheme?.brand?.logoPath;
+  const sidebarTemplate = ['royal', 'glass'].includes(publishedTheme?.brand?.sidebarTemplate)
+    ? publishedTheme.brand.sidebarTemplate : 'default';
   const platformLogo = isSafeThemeMediaPath(uploadedLogo) ? resolveImageUrl(uploadedLogo) : emperorLogo;
   const platformLogoWidth = publishedTheme?.brand?.logoWidth;
   const [isPreviewExpanded, setIsPreviewExpanded] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [copiedUserId, setCopiedUserId] = useState(false);
+  const [themeProExpiresAt, setThemeProExpiresAt] = useState(null);
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
   const { dir } = useLanguage();
@@ -95,6 +100,35 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
 
   const isExpanded = isOpen || isMobile || isPreviewExpanded;
   const userId = String(user?.id || user?._id || user?.userId || '').trim();
+  const isPlatformAdmin = ['admin', 'super_admin'].includes(String(user?.role || '').toLowerCase());
+
+  useEffect(() => {
+    if (!isPlatformAdmin) {
+      setThemeProExpiresAt(null);
+      return undefined;
+    }
+
+    let active = true;
+    const refreshThemePro = async () => {
+      try {
+        const result = await apiClient.platformTheme.getSubscription();
+        if (active && result?.eligibility?.plan === 'THEME_PRO') {
+          setThemeProExpiresAt(result.eligibility.subscription?.expiresAt || null);
+        } else if (active) {
+          setThemeProExpiresAt(null);
+        }
+      } catch {
+        if (active) setThemeProExpiresAt(null);
+      }
+    };
+
+    refreshThemePro();
+    window.addEventListener('platform-theme-subscription-updated', refreshThemePro);
+    return () => {
+      active = false;
+      window.removeEventListener('platform-theme-subscription-updated', refreshThemePro);
+    };
+  }, [isPlatformAdmin, userId]);
 
   useEffect(() => {
     if (!copiedUserId) return undefined;
@@ -330,6 +364,7 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
       >
         <div className={cn(
           'app-shell-sidebar-panel ka-sidebar-panel relative flex h-full flex-col rounded-[32px] border',
+          `ka-sidebar-template-${sidebarTemplate}`,
           !isMobile && 'backdrop-blur-[24px]',
           isAdmin && 'border-[color:rgb(var(--color-primary-rgb)/0.26)]'
         )}>
@@ -346,6 +381,17 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
                     iconClassName="scale-[1.04]"
                     textClassName="shrink-0"
                   />
+                </button>
+              )}
+              {!isExpanded && themeProExpiresAt && (
+                <button
+                  type="button"
+                  onClick={() => navigate('/admin/themes')}
+                  className="ka-sidebar-theme-pro-collapsed absolute -bottom-1 left-1/2 grid h-7 w-7 -translate-x-1/2 place-items-center rounded-full"
+                  title={dir === 'rtl' ? 'اشتراك ملكي PRO نشط' : 'Royal PRO subscription active'}
+                  aria-label={dir === 'rtl' ? 'اشتراك ملكي PRO نشط' : 'Royal PRO subscription active'}
+                >
+                  <img src={royalCrown} alt="" aria-hidden="true" className="h-5 w-5 object-contain" />
                 </button>
               )}
 
@@ -438,6 +484,21 @@ const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
                       </button>
                     ) : null}
                     <div className="mt-0.5 truncate text-[0.62rem] font-bold text-[var(--color-primary-hover)]">{userRoleLabel}</div>
+                    {themeProExpiresAt && (
+                      <NavLink
+                        to="/admin/themes"
+                        onClick={closeSidebarOnMobile}
+                        className="ka-sidebar-theme-pro mt-2 flex min-w-0 items-center gap-2 rounded-xl px-2 py-1.5"
+                        title={dir === 'rtl' ? 'اشتراك مظهر الثيم الملكي PRO نشط' : 'Royal Theme PRO subscription is active'}
+                      >
+                        <img src={royalCrown} alt="" aria-hidden="true" className="ka-sidebar-theme-pro-crown h-8 w-8 shrink-0 object-contain" />
+                        <span className="min-w-0">
+                          <span className="block truncate text-[0.69rem] font-black leading-tight">{dir === 'rtl' ? 'ملكي PRO' : 'ROYAL PRO'}</span>
+                          <span className="mt-0.5 block truncate text-[0.54rem] font-bold opacity-75">{dir === 'rtl' ? 'اشتراك الثيم نشط' : 'THEME SUBSCRIPTION ACTIVE'}</span>
+                        </span>
+                        <span className="ka-sidebar-theme-pro-status ml-auto h-2 w-2 shrink-0 rounded-full" />
+                      </NavLink>
+                    )}
                   </div>
                 </div>
               </div>

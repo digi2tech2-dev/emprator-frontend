@@ -3,6 +3,8 @@ import { Building2, Eye, EyeOff, ImagePlus, Pencil, Plus, QrCode, Trash2, X } fr
 import { resolveImageUrl } from '../../utils/imageUrl';
 import { uploadImage } from '../../services/realApi';
 import Button from '../../components/ui/Button';
+import { Link } from 'react-router-dom';
+import apiClient from '../../services/client';
 import Input, { selectClassName, textareaClassName } from '../../components/ui/Input';
 import Modal from '../../components/ui/Modal';
 import ConfirmDialog from '../../components/account/ConfirmDialog';
@@ -74,6 +76,20 @@ const AdminPaymentMethods = () => {
   const tx = (ar, en) => (isEnglish ? en : ar);
 
   const [paymentGroups, setPaymentGroups] = useState([]);
+  const [supportContacts, setSupportContacts] = useState({ owner: '', support: '' });
+  const [adminNotificationWhatsApp, setAdminNotificationWhatsApp] = useState('');
+  const [ultraAccess, setUltraAccess] = useState(false);
+  useEffect(() => {
+    let active = true;
+    const refreshAccess = () => {
+      Promise.resolve().then(() => apiClient.platformTheme.getSubscription())
+        .then((result) => { if (active) setUltraAccess(result?.eligibility?.plan === 'THEME_ULTRA'); })
+        .catch(() => { if (active) setUltraAccess(false); });
+    };
+    refreshAccess();
+    window.addEventListener('platform-theme-subscription-updated', refreshAccess);
+    return () => { active = false; window.removeEventListener('platform-theme-subscription-updated', refreshAccess); };
+  }, []);
   const [isPersisting, setIsPersisting] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [groupModalOpen, setGroupModalOpen] = useState(false);
@@ -95,6 +111,11 @@ const AdminPaymentMethods = () => {
 
   useEffect(() => {
     setPaymentGroups(normalizePaymentGroups(paymentSettings?.paymentGroups, { fallbackToDefault: false }));
+    setSupportContacts({
+      owner: String(paymentSettings?.supportContacts?.owner || '01286591021').trim(),
+      support: String(paymentSettings?.supportContacts?.support || '01556537530').trim(),
+    });
+    setAdminNotificationWhatsApp(String(paymentSettings?.adminNotificationWhatsApp || '').trim());
   }, [paymentSettings]);
 
   const methodTypeOptions = useMemo(
@@ -147,6 +168,27 @@ const AdminPaymentMethods = () => {
   const getFreshPaymentGroups = async () => {
     const freshSettings = await loadPaymentSettings({ force: true });
     return normalizePaymentGroups(freshSettings?.paymentGroups, { fallbackToDefault: false });
+  };
+
+  const persistSupportContacts = async () => {
+    if (!ultraAccess) return;
+    setIsPersisting(true);
+    setSaveError('');
+    try {
+      const savedSettings = await savePaymentSettings({ supportContacts, adminNotificationWhatsApp }, user);
+      setSupportContacts({
+        owner: String(savedSettings?.supportContacts?.owner || supportContacts.owner).trim(),
+        support: String(savedSettings?.supportContacts?.support || supportContacts.support).trim(),
+      });
+      setAdminNotificationWhatsApp(String(savedSettings?.adminNotificationWhatsApp || adminNotificationWhatsApp).trim());
+      addToast(tx('تم حفظ أرقام واتساب التواصل', 'Contact WhatsApp numbers saved'), 'success');
+    } catch (error) {
+      const message = error?.message || tx('تحقق من أرقام واتساب ثم حاول مرة أخرى', 'Check the WhatsApp numbers and try again');
+      setSaveError(message);
+      addToast(message, 'error');
+    } finally {
+      setIsPersisting(false);
+    }
   };
 
   const openAddGroupModal = () => {
@@ -545,6 +587,44 @@ const AdminPaymentMethods = () => {
           </div>
         ))}
       </div>
+
+      <section className="admin-premium-panel p-4 sm:p-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="grid flex-1 gap-3 sm:grid-cols-2">
+            <Input
+              label={tx('واتساب صاحب الموقع', 'Site owner WhatsApp')}
+              dir="ltr"
+              inputMode="tel"
+              value={supportContacts.owner}
+              onChange={(event) => setSupportContacts((current) => ({ ...current, owner: event.target.value }))}
+              disabled={isPersisting || !ultraAccess}
+            />
+            <Input
+              label={tx('واتساب إشعارات السيرفر · ULTRA', 'Server notification WhatsApp · ULTRA')}
+              dir="ltr"
+              inputMode="tel"
+              value={adminNotificationWhatsApp}
+              onChange={(event) => setAdminNotificationWhatsApp(event.target.value)}
+              placeholder="+201012345678"
+              disabled={isPersisting || !ultraAccess}
+            />
+            <Input
+              label={tx('واتساب خدمة العملاء', 'Customer support WhatsApp')}
+              dir="ltr"
+              inputMode="tel"
+              value={supportContacts.support}
+              onChange={(event) => setSupportContacts((current) => ({ ...current, support: event.target.value }))}
+              disabled={isPersisting || !ultraAccess}
+            />
+          </div>
+          <Button type="button" onClick={persistSupportContacts} disabled={isPersisting || !ultraAccess} className="w-full shrink-0 lg:w-auto">
+            {tx('حفظ أرقام التواصل', 'Save contact numbers')}
+          </Button>
+        </div>
+        <p className="mt-3 text-xs text-[var(--color-text-secondary)]">{tx('تظهر هذه الأرقام في نافذة تواصل معنا وصفحة من نحن ومشاكل الحساب.', 'These numbers appear in Contact Us, About Us, and account issues.')}</p>
+        <p className="mt-3 text-xs text-[var(--color-text-secondary)]">{tx('رقم استقبال إشعارات السيرفر خاص بالإدارة. اكتب كود الدولة مع الرقم، مثال: +201012345678.', 'The notification recipient is private to administration. Include the country code, e.g. +201012345678.')}</p>
+        {!ultraAccess && <div className="mt-3 rounded-xl border border-amber-400/40 p-3"><p>{tx('تغيير أرقام واتساب متاح في ULTRA فقط.', 'Editing WhatsApp numbers requires ULTRA.')}</p><Link to="/admin/themes#theme-subscription" className="mt-2 inline-block font-bold text-amber-600">{tx('شاهد الخطط والمميزات وطرق الدفع والتفعيل', 'View plans, features, payment and activation')}</Link></div>}
+      </section>
 
       <div className={`flex ${isRTL ? 'justify-start' : 'justify-end'}`}>
         <Button onClick={openAddGroupModal} disabled={isPersisting} className="w-full sm:w-auto">

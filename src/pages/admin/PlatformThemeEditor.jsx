@@ -33,7 +33,7 @@ const samplePart = (mode) => ({ presetId: 'classic', colors: { ...sampleColors[m
   buttons: { radius: 8, style: 'solid' }, cards: { radius: 12, shadow: 'subtle' }, navigation: { style: 'standard' }, neon: sampleNeon() });
 const DEFAULT_MARQUEE_AR = 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ ﴿قُلْ إِنَّ رَبِّي يَبْسُطُ الرِّزْقَ لِمَنْ يَشَاءُ مِنْ عِبَادِهِ وَيَقْدِرُ لَهُ وَمَا أَنْفَقْتُمْ مِنْ شَيْءٍ فَهُوَ يُخْلِفُهُ وَهُوَ خَيْرُ الرَّازِقِينَ﴾ صَدَقَ اللَّهُ الْعَظِيمُ';
 const sampleTheme = { schemaVersion: 2, modes: { light: samplePart('light'), dark: samplePart('dark') },
-  brand: { logoPath: null, logoWidth: 144, slides: [null, null, null, null], marqueeTextArabic: DEFAULT_MARQUEE_AR } };
+  brand: { logoPath: null, logoWidth: 144, slides: [null, null, null, null], marqueeTextArabic: DEFAULT_MARQUEE_AR, targetBannerPath: null, sidebarTemplate: 'default' } };
 const previewPresetPalettes = {
   "classic": {
     "light": [
@@ -439,6 +439,10 @@ const copy = {
     previewNotice: 'هذه معاينة للتصميم فقط. لإنشاء طلب تحويل حقيقي، افتح صفحة الأدمن بعد تشغيل الباك إند.',
     previewOrderHint: 'لا يمكن إنشاء رقم طلب أو إرسال تحويل من المعاينة. افتح صفحة الأدمن لإنشاء طلب مسجل أولًا.',
     offerEyebrow: 'عرض خاص للثيمات', offerHeadline: 'استمتع بمميزات الثيمات لمدة 3 أشهر فقط',
+    freeWarning: 'الخطة المجانية تمنحك تغييرين فقط، مع الانتظار 30 يومًا بينهما. للمزيد اشترك في PRO أو ULTRA.',
+    ultraBenefits: ['كل مميزات PRO', 'تغيير أرقام واتساب التواصل ورقم استقبال إشعارات السيرفر', 'قوالب سايدبار جاهزة: ملكي وزجاجي'],
+    upgrade: 'الترقية إلى ULTRA بدفع الفرق: 5 USDT فقط', upgradeTerm: 'تستمر الترقية حتى تاريخ انتهاء اشتراك PRO الحالي؛ لا تبدأ مدة جديدة.',
+    amountDue: 'صافي المبلغ المطلوب', changesLeft: 'التغييرات المجانية المتبقية', ultraActive: 'اشتراك ULTRA نشط', contactsSettings: 'إعدادات أرقام واتساب',
     offerOld: 'بدلًا من 50$ لنفس المدة', offerNew: '24.99$ فقط',
     offerPayment: 'التحويل: 24.99 USDT صافي · دفعة واحدة', offerAction: 'شاهد المميزات والاشتراك', offerClose: 'إغلاق العرض', offerOpen: 'عرض اشتراك الثيمات',
     offerBackendOutdated: 'يجب تحديث خدمة الاشتراك إلى عرض 3 أشهر قبل إنشاء طلب تحويل.',
@@ -459,19 +463,22 @@ const copy = {
     currentPlan: 'حالة النشر', lastPublish: 'آخر نشر', nextEdit: 'النشر المجاني التالي', expires: 'ينتهي الاشتراك',
     history: 'سجل النشر', payments: 'طلبات التحويل', empty: 'لا توجد سجلات بعد.',
     paymentStates: { PENDING: 'بانتظار مراجعة التحويل', VERIFIED: 'تم التحقق؛ أدخل كود التفعيل', FAILED: 'فشل', CANCELLED: 'ملغي', REFUNDED: 'مسترد', CHARGEBACK: 'مسترجع' },
-    plan: 'Theme Customization Pro', planPrice: '24.99 USDT صافي', duration: '3 أشهر تقويمية · دفعة واحدة · بدون تجديد تلقائي',
+    plan: 'خطط Theme Customization', planPrice: 'PRO · 24.99 USDT', duration: '3 أشهر تقويمية · دفعة واحدة · بدون تجديد تلقائي', ultra: 'ULTRA · 29.99 USDT بدلًا من 70$ لفترة محدودة',
     benefitsTitle: 'اشترك وسيفتح لك', benefits: ['نشر الثيمات بلا انتظار 30 يومًا', '13 ثيمًا إضافيًا للفاتح والغامق',
       'خطوط عربية وإنجليزية إضافية', 'حجم النص والأزرار والبطاقات والقائمة', 'تغيير صور السلايدر الأربع واللوجو وحجمه', 'تعديل النص العربي المتحرك أسفل السلايدر',
       'حدود نيون متحركة حول الشراء والسلايدر والأقسام والأكثر مبيعًا بألوان وسرعات مستقلة'],
     transferTitle: 'تحويل USDT يدوي', network: 'طريقة التحويل', destination: 'جهة التحويل', payee: 'اسم المستلم',
     copy: 'نسخ', copied: 'تم النسخ', request: 'إنشاء طلب التحويل', whatsapp: 'إرسال إثبات التحويل عبر واتساب',
-    proof: 'بعد التحويل، أرسل لقطة شاشة الإثبات عبر واتساب. بعد التحقق من وصول المبلغ ستتلقى كود التفعيل، ولا يفتح Pro حتى تدخله.',
-    activationTitle: 'تفعيل الاشتراك بالكود المؤقت', activationHint: 'بعد مراجعة وصول 24.99 USDT، سيصلك كود من 10 أرقام. صلاحيته 48 ساعة ويُستخدم مرة واحدة.',
-    activationCode: 'كود التفعيل', activate: 'تفعيل Pro', activated: 'تم تفعيل الاشتراك بنجاح.',
+    proof: 'بعد التحويل، أرسل لقطة شاشة الإثبات عبر واتساب. بعد التحقق من وصول المبلغ ستتلقى كود التفعيل، ولا تتفعّل الخطة حتى تدخله.',
+    activationTitle: 'تفعيل الاشتراك بالكود المؤقت', activationHint: 'بعد مراجعة وصول مبلغ خطتك أو الترقية، سيصلك كود من 10 أرقام. صلاحيته 48 ساعة ويُستخدم مرة واحدة.',
+    activationCode: 'كود التفعيل', activate: 'تفعيل الاشتراك أو الترقية', activated: 'تم تفعيل الاشتراك بنجاح.',
     activationOrderNeeded: 'أنشئ طلب التحويل أولًا، ثم أدخل كود التفعيل بعد تأكيد الدفع.',
+    reviewTitle: 'تأكيد التحويل وإرسال الكود', reviewHint: 'بعد التحقق يدويًا من وصول التحويل في حساب الاستلام، أدخل مرجع الطلب ومعرّف المعاملة. سيُنشئ الخادم الكود ويرسله تلقائيًا إلى واتساب صاحب الطلب؛ لا يظهر الكود هنا.',
+    reviewReference: 'مرجع الطلب', reviewTransaction: 'معرّف التحويل أو المعاملة', reviewConfirm: 'تأكيد الدفع وإرسال الكود', reviewResend: 'إصدار كود جديد وإرساله', reviewSent: 'تم إرسال كود التفعيل إلى واتساب صاحب الطلب.', reviewSkipped: 'تم إصدار الكود في وضع الاختبار المحلي؛ لا يتم إرسال رسائل واتساب محليًا.', reviewFailed: 'تم تأكيد الدفع لكن تعذر إرسال واتساب. أعد اتصال واتساب ثم اضغط إصدار كود جديد وإرساله.',
     noPaymentReady: 'تعليمات التحويل غير متاحة حتى يتصل التطبيق بالباك إند.',
     animatedArabic: 'النص العربي المتحرك', animatedArabicHint: 'تعديل النص الظاهر أسفل السلايدر متاح للمشتركين في Pro فقط (حتى 240 حرفًا).',
-    logo: 'شعار المنصة', logoWidth: 'عرض الشعار', slides: 'صور السلايدر الرئيسية', imageHint: 'JPG أو PNG أو WebP، بحد أقصى 5MB',
+    sidebarTemplate: 'قالب السايدبار', sidebarTemplateHint: 'قوالب السايدبار الجاهزة متاحة مع ULTRA فقط.', sidebarDefault: 'الافتراضي', sidebarRoyal: 'ملكي', sidebarGlass: 'زجاجي', ultraLocked: 'هذه الميزة تحتاج اشتراك ULTRA.',
+    logo: 'شعار المنصة', logoWidth: 'عرض الشعار', slides: 'صور السلايدر الرئيسية', targetBanner: 'صورة بانر بيع التارجت', imageHint: 'JPG أو PNG أو WebP، بحد أقصى 5MB',
     upload: 'رفع صورة', remove: 'إزالة', sample: 'زر تجريبي', sampleText: 'هذه معاينة للألوان والخطوط والبطاقات في الوضع المحدد.',
     retry: 'إعادة المحاولة', partial: 'تعذر تحميل بعض بيانات الاشتراك أو السجل، ويمكنك تعديل الثيم.', loading: 'جارٍ التحميل...',
     unavailable: 'يتطلب المحرر الاتصال بالباك إند الحقيقي.', networkError: 'تعذر الاتصال بالخادم. تحقق من الاتصال وحاول مرة أخرى.',
@@ -483,6 +490,10 @@ const copy = {
     previewNotice: 'This is a design preview. Open the admin page with a running backend to create a real transfer order.',
     previewOrderHint: 'The preview cannot issue an order reference or record a transfer. Open the admin page to create a recorded order first.',
     offerEyebrow: 'Special theme offer', offerHeadline: 'Enjoy theme features for 3 months',
+    freeWarning: 'The free plan includes two changes, with 30 days between them. Subscribe to PRO or ULTRA for more.',
+    ultraBenefits: ['All PRO features', 'Edit public WhatsApp contacts and the server notification recipient', 'Ready sidebar templates: Royal and Glass'],
+    upgrade: 'Upgrade to ULTRA for the difference: only 5 USDT', upgradeTerm: 'The upgrade keeps your current PRO expiry date; it does not start a new term.',
+    amountDue: 'Net amount due', changesLeft: 'Free changes remaining', ultraActive: 'ULTRA active', contactsSettings: 'WhatsApp number settings',
     offerOld: 'Instead of $50 for the same term', offerNew: 'Only $24.99',
     offerPayment: 'Transfer 24.99 USDT net · one payment', offerAction: 'See features and subscribe', offerClose: 'Close offer', offerOpen: 'View theme subscription',
     offerBackendOutdated: 'The subscription service must be updated to the 3-month offer before creating a transfer order.',
@@ -503,19 +514,22 @@ const copy = {
     currentPlan: 'Publishing status', lastPublish: 'Last published', nextEdit: 'Next free publish', expires: 'Subscription expires',
     history: 'Publish history', payments: 'Transfer requests', empty: 'No records yet.',
     paymentStates: { PENDING: 'Awaiting transfer review', VERIFIED: 'Verified; enter activation code', FAILED: 'Failed', CANCELLED: 'Cancelled', REFUNDED: 'Refunded', CHARGEBACK: 'Charged back' },
-    plan: 'Theme Customization Pro', planPrice: '24.99 USDT net', duration: '3 calendar months · one payment · no automatic renewal',
+    plan: 'Theme Customization plans', planPrice: 'PRO · 24.99 USDT', duration: '3 calendar months · one payment · no automatic renewal', ultra: 'ULTRA · 29.99 USDT instead of $70 for a limited time',
     benefitsTitle: 'Subscription unlocks', benefits: ['Unlimited publishing during the term', '13 extra light and dark presets',
       'More Arabic and English fonts', 'Font sizing, buttons, cards, and navigation', 'Four homepage slides, logo, and logo size', 'Edit the animated Arabic text below the slider',
       'Animated neon borders for checkout, slider, categories, and best sellers with separate colors and speeds'],
     transferTitle: 'Manual USDT transfer', network: 'Transfer method', destination: 'Destination', payee: 'Recipient',
     copy: 'Copy', copied: 'Copied', request: 'Create transfer order', whatsapp: 'Send proof on WhatsApp',
-    proof: 'After transfer, send the screenshot on WhatsApp. A code is sent after receipt is verified; enter it to unlock Pro.',
-    activationTitle: 'Activate with a temporary code', activationHint: 'After 24.99 USDT receipt is verified, you receive a 10-digit code. It lasts 48 hours and works once.',
-    activationCode: 'Activation code', activate: 'Activate Pro', activated: 'Subscription activated.',
+    proof: 'After transfer, send the screenshot on WhatsApp. A code is sent after receipt is verified; enter it to activate your plan.',
+    activationTitle: 'Activate with a temporary code', activationHint: 'After your plan or upgrade payment is verified, you receive a 10-digit code. It lasts 48 hours and works once.',
+    activationCode: 'Activation code', activate: 'Activate subscription or upgrade', activated: 'Subscription activated.',
     activationOrderNeeded: 'Create a transfer order first, then enter the activation code after payment verification.',
+    reviewTitle: 'Confirm transfer and send code', reviewHint: 'After manually verifying receipt in the receiving account, enter the order reference and transaction ID. The server creates the code and sends it to the payer’s WhatsApp; the code is never shown here.',
+    reviewReference: 'Order reference', reviewTransaction: 'Transfer or transaction ID', reviewConfirm: 'Confirm payment and send code', reviewResend: 'Issue and send a new code', reviewSent: 'The activation code was sent to the payer’s WhatsApp.', reviewSkipped: 'The code was issued in local safe mode; WhatsApp messages are not sent locally.', reviewFailed: 'Payment was confirmed but WhatsApp delivery failed. Reconnect WhatsApp, then issue and send a new code.',
     noPaymentReady: 'Transfer instructions require a backend connection.',
     animatedArabic: 'Animated Arabic text', animatedArabicHint: 'Pro subscribers can edit the text below the slider (up to 240 characters).',
-    logo: 'Platform logo', logoWidth: 'Logo width', slides: 'Homepage slider images', imageHint: 'JPG, PNG, or WebP up to 5MB',
+    sidebarTemplate: 'Sidebar template', sidebarTemplateHint: 'Ready sidebar templates are available with ULTRA only.', sidebarDefault: 'Default', sidebarRoyal: 'Royal', sidebarGlass: 'Glass', ultraLocked: 'This feature requires ULTRA.',
+    logo: 'Platform logo', logoWidth: 'Logo width', slides: 'Homepage slider images', targetBanner: 'Sell Target banner image', imageHint: 'JPG, PNG, or WebP up to 5MB',
     upload: 'Upload image', remove: 'Remove', sample: 'Sample button', sampleText: 'Preview colors, fonts, and cards in the selected mode.',
     retry: 'Retry', partial: 'Some subscription or history details could not be loaded; you can still edit.', loading: 'Loading...',
     unavailable: 'Connect the real backend to use this editor.', networkError: 'Cannot reach the server. Check your connection and retry.',
@@ -530,6 +544,8 @@ const errorText = (error, t) => {
   if (!status) return t.networkError;
   if (status === 401) return t.unauthorized;
   if (status === 403 && error?.response?.data?.code === 'THEME_PRO_REQUIRED') return t.freeLocked;
+  if (status === 403 && error?.response?.data?.code === 'THEME_FREE_LIMIT') return t.freeWarning;
+  if (status === 403 && error?.response?.data?.code === 'THEME_ULTRA_REQUIRED') return t.ultraLocked;
   if (status === 403) return t.forbidden;
   if (status === 404 && error?.response?.data?.code === 'PAYMENT_NOT_VERIFIED') return t.paymentStates.PENDING;
   if (status === 404) return t.missingApi;
@@ -557,11 +573,15 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
   const [manual, setManual] = useState(null);
   const [paymentError, setPaymentError] = useState('');
   const [network, setNetwork] = useState('BINANCE_ID');
+  const [selectedPlanId, setSelectedPlanId] = useState('THEME_PRO');
   const [order, setOrder] = useState(null);
   const [activationCode, setActivationCode] = useState('');
+  const [reviewReference, setReviewReference] = useState('');
+  const [reviewTransactionId, setReviewTransactionId] = useState('');
+  const [reviewResult, setReviewResult] = useState(null);
   const [history, setHistory] = useState([]);
   const [payments, setPayments] = useState([]);
-  const activationReference = order?.reference || payments.find((item) => item.status === 'VERIFIED')?.providerReference || '';
+  const activationReference = payments.find((item) => item.status === 'VERIFIED' && !item.redeemed)?.providerReference || '';
   const [loading, setLoading] = useState(!previewOnly);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -575,7 +595,15 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
     window.addEventListener('keydown', onKeyDown);
     return () => { window.cancelAnimationFrame(frame); window.removeEventListener('keydown', onKeyDown); };
   }, [offerOpen]);
-  const paid = settings?.eligibility?.plan === 'THEME_PRO';
+  const paid = ['THEME_PRO', 'THEME_ULTRA'].includes(settings?.eligibility?.plan);
+  const ultra = settings?.eligibility?.plan === 'THEME_ULTRA';
+  const upgrading = settings?.eligibility?.plan === 'THEME_PRO' && selectedPlanId === 'THEME_ULTRA';
+  const selectedOffer = manual?.offers?.find((item) => item.id === selectedPlanId);
+  const transferAmount = upgrading ? '5.00' : selectedOffer?.amount || (selectedPlanId === 'THEME_ULTRA' ? '29.99' : '24.99');
+  const selectPlan = (id) => { setSelectedPlanId(id); setOrder(null); };
+  useEffect(() => {
+    if (['THEME_PRO', 'THEME_ULTRA'].includes(settings?.eligibility?.plan)) { setSelectedPlanId('THEME_ULTRA'); setOrder(null); }
+  }, [settings?.eligibility?.plan]);
   const part = draft?.modes?.[mode];
   const previewStyle = useMemo(() => platformThemeStyles(draft, mode), [draft, mode]);
   useEffect(() => {
@@ -670,6 +698,7 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
     try {
       const result = await apiClient.platformTheme.uploadMedia(file);
       if (slot === null) updateBrand({ logoPath: result.path });
+      else if (slot === 'targetBanner') updateBrand({ targetBannerPath: result.path });
       else setDraft((current) => ({ ...current, brand: { ...current.brand,
         slides: current.brand.slides.map((path, index) => index === slot ? result.path : path) } }));
     } catch (cause) { addToast(errorText(cause, t), 'error'); }
@@ -680,7 +709,7 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
     if (manual.durationCalendarMonths !== 3) { addToast(t.offerBackendOutdated, 'error'); return; }
     setBusy(true);
     try {
-      const result = await apiClient.platformTheme.createManualOrder(network);
+      const result = await apiClient.platformTheme.createManualOrder(network, selectedPlanId);
       setOrder(result);
       await refresh(true);
     } catch (cause) { addToast(errorText(cause, t), 'error'); }
@@ -691,9 +720,35 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
     setBusy(true);
     try {
       await apiClient.platformTheme.redeemCode(activationReference.trim(), activationCode.trim());
+      window.dispatchEvent(new CustomEvent('platform-theme-subscription-updated'));
       setActivationCode('');
       await refresh(true);
       addToast(t.activated, 'success');
+    } catch (cause) { addToast(errorText(cause, t), 'error'); }
+    finally { setBusy(false); }
+  };
+  const confirmManualPayment = async () => {
+    if (previewOnly || !/^THEME-[0-9A-F-]{36}$/.test(reviewReference.trim()) || !/^[A-Za-z0-9:_-]{8,128}$/.test(reviewTransactionId.trim())) return;
+    setBusy(true);
+    try {
+      const result = await apiClient.platformTheme.confirmManualOrder(reviewReference.trim(), reviewTransactionId.trim());
+      setReviewResult(result);
+      setReviewTransactionId('');
+      await refresh(true);
+      addToast(result.deliveryStatus === 'SENT' ? t.reviewSent : result.deliveryStatus === 'SKIPPED' ? t.reviewSkipped : t.reviewFailed,
+        result.deliveryStatus === 'FAILED' ? 'error' : 'success');
+    } catch (cause) { addToast(errorText(cause, t), 'error'); }
+    finally { setBusy(false); }
+  };
+  const reissueManualCode = async () => {
+    if (previewOnly || !/^THEME-[0-9A-F-]{36}$/.test(reviewReference.trim())) return;
+    setBusy(true);
+    try {
+      const result = await apiClient.platformTheme.reissueManualCode(reviewReference.trim());
+      setReviewResult(result);
+      await refresh(true);
+      addToast(result.deliveryStatus === 'SENT' ? t.reviewSent : result.deliveryStatus === 'SKIPPED' ? t.reviewSkipped : t.reviewFailed,
+        result.deliveryStatus === 'FAILED' ? 'error' : 'success');
     } catch (cause) { addToast(errorText(cause, t), 'error'); }
     finally { setBusy(false); }
   };
@@ -717,6 +772,7 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
         <div className="theme-offer-window__body">
           <span className="theme-offer-window__eyebrow"><Sparkles className="h-4 w-4" />{t.offerEyebrow}</span>
           <h2>{t.offerHeadline}</h2>
+          <p className="font-bold text-amber-500">{t.freeWarning}</p>
           <div className="theme-offer-window__price"><strong>{t.offerNew}</strong><del>{t.offerOld}</del></div>
           <p>{t.offerPayment}</p>
           <a href="#theme-subscription" className="theme-offer-window__action" onClick={() => setOfferOpen(false)}>{t.offerAction}<span aria-hidden="true">←</span></a>
@@ -779,6 +835,16 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
           </div>
         </Section>
         <Section icon={ImagePlus} title={t.branding} locked={!paid}><p className="mb-3 text-xs text-[var(--color-text-secondary)]">{t.imageHint}</p><div className="grid gap-4 sm:grid-cols-2"><div className="rounded-xl border border-[var(--color-border)] p-3"><p className="mb-2 text-sm font-bold">{t.logo}</p>{draft.brand.logoPath && <div className="mb-2 flex h-28 items-center overflow-auto rounded-lg bg-[var(--color-surface)] p-2"><img src={resolveImageUrl(draft.brand.logoPath)} alt="" className="max-h-full shrink-0 object-contain" style={{ width: draft.brand.logoWidth }} /></div>}<label className={button}>{t.upload}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!paid || busy} onChange={(event) => { upload(event.target.files?.[0]); event.target.value = ''; }} /></label>{draft.brand.logoPath && <button type="button" className={`${button} ms-2`} disabled={!paid} onClick={() => updateBrand({ logoPath: null })}>{t.remove}</button>}<label className="mt-3 block text-xs">{t.logoWidth}: {draft.brand.logoWidth}px<input type="range" min="80" max="300" step="4" className="mt-2 w-full" disabled={!paid} value={draft.brand.logoWidth} onChange={(event) => updateBrand({ logoWidth: Number(event.target.value) })} /></label></div><div className="rounded-xl border border-[var(--color-border)] p-3"><p className="mb-2 text-sm font-bold">{t.slides}</p><div className="grid grid-cols-2 gap-2">{draft.brand.slides.map((path, index) => <div key={index} className="rounded-lg border border-[var(--color-border)] p-2 text-center text-xs"><div className="mb-2 flex aspect-video items-center justify-center overflow-hidden bg-[var(--color-surface)]">{path ? <img src={resolveImageUrl(path)} alt="" className="h-full w-full object-cover" /> : `${index + 1}`}</div><label className={button}>{t.upload}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!paid || busy} onChange={(event) => { upload(event.target.files?.[0], index); event.target.value = ''; }} /></label>{path && <button type="button" className="mt-1 block w-full text-rose-500" disabled={!paid} onClick={() => updateBrand({ slides: draft.brand.slides.map((old, slot) => slot === index ? null : old) })}>{t.remove}</button>}</div>)}</div></div></div></Section>
+        <Section icon={ImagePlus} title={t.targetBanner} locked={!paid}>
+          <p className="mb-3 text-xs text-[var(--color-text-secondary)]">{t.imageHint}</p>
+          <div className="rounded-xl border border-[var(--color-border)] p-3">
+            <div className="mb-3 flex aspect-[5/1] items-center justify-center overflow-hidden rounded-lg bg-[var(--color-surface)]">
+              {draft.brand.targetBannerPath ? <img src={resolveImageUrl(draft.brand.targetBannerPath)} alt="" className="h-full w-full object-cover" /> : <span className="text-xs text-[var(--color-text-secondary)]">{t.targetBanner}</span>}
+            </div>
+            <label className={button}>{t.upload}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!paid || busy} onChange={(event) => { upload(event.target.files?.[0], 'targetBanner'); event.target.value = ''; }} /></label>
+            {draft.brand.targetBannerPath && <button type="button" className={`${button} ms-2`} disabled={!paid} onClick={() => updateBrand({ targetBannerPath: null })}>{t.remove}</button>}
+          </div>
+        </Section>
         <Section icon={Sparkles} title={t.animatedArabic} locked={!paid}>
           <p className="mb-3 text-xs text-[var(--color-text-secondary)]">{t.animatedArabicHint}</p>
           <textarea className={`${input} min-h-24 resize-y`} dir="rtl" lang="ar" maxLength={240}
@@ -786,18 +852,57 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
             disabled={!paid || busy}
             onChange={(event) => updateBrand({ marqueeTextArabic: event.target.value })} />
         </Section>
+        <Section icon={Palette} title={t.sidebarTemplate} locked={!ultra}>
+          <p className="mb-3 text-xs text-[var(--color-text-secondary)]">{t.sidebarTemplateHint}</p>
+          <div className="grid grid-cols-3 gap-2">{[['default', t.sidebarDefault], ['royal', t.sidebarRoyal], ['glass', t.sidebarGlass]].map(([value, label]) => <button key={value} type="button" disabled={!ultra && value !== 'default'} onClick={() => updateBrand({ sidebarTemplate: value })} className={`${button} ${draft.brand.sidebarTemplate === value ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white' : ''}`}>{label}</button>)}</div>
+          {!ultra && <p className="mt-3 text-xs text-amber-600">{t.ultraLocked}</p>}
+        </Section>
         {!paid && needsPro && <p className="rounded-xl border border-amber-500/50 bg-amber-500/10 p-3 text-sm text-[var(--color-text)]">{t.freeLocked}</p>}
         <div className="flex flex-wrap gap-2"><button type="button" className={button} disabled={previewOnly || busy || !settings} onClick={() => run(() => apiClient.platformTheme.saveDraft(draft), t.saved, true)}><Save className="h-4 w-4" />{t.save}</button><button type="button" className={button} disabled={previewOnly || busy || !settings} onClick={() => run(() => apiClient.platformTheme.resetDraft(), t.resetDone)}><RotateCcw className="h-4 w-4" />{t.reset}</button><button type="button" className={`${button} border-[var(--color-primary)] bg-[var(--color-primary)] text-white`} disabled={previewOnly || busy || !settings?.eligibility?.canPublish || (!paid && needsPro)} onClick={() => run(() => apiClient.platformTheme.publish(draft), t.published)}><Check className="h-4 w-4" />{t.publish}</button></div>
       </div>
       <div className="space-y-5">
         <Section icon={Palette} title={`${t.livePreview} · ${t[mode]}`}><div style={previewStyle} className="overflow-hidden rounded-2xl border border-[var(--color-border)] text-[var(--color-text)]"><div className="border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 font-bold">{t.title}</div><div className="space-y-4 bg-[var(--color-bg)] p-5" style={{ fontFamily: language === 'ar' ? previewStyle['--platform-font-ar'] : previewStyle['--platform-font-en'], fontSize: previewStyle['--platform-base-font-size'] }}><h3 style={{ fontWeight: part.typography.headingWeight }}>{t.title}</h3><p className="text-[var(--color-text-secondary)]">{t.sampleText}</p><div className="border border-[var(--color-border)] bg-[var(--color-surface)] p-4" style={{ borderRadius: part.cards.radius, boxShadow: previewStyle['--shadow-subtle'] }}>{t.sampleText}</div><button type="button" style={{ background: part.buttons.style === 'outline' ? 'transparent' : part.colors.primary, color: part.buttons.style === 'outline' ? part.colors.primary : previewStyle['--color-button-text'], borderRadius: part.buttons.radius, border: `1px solid ${part.colors.primary}`, padding: '8px 16px' }}>{t.sample}</button></div></div></Section>
-        {!previewOnly && <Section icon={Clock3} title={t.currentPlan}><strong className="text-lg">{paid ? t.paid : t.free}</strong><div className="mt-2 space-y-1 text-sm text-[var(--color-text-secondary)]"><p>{t.lastPublish}: {dateText(settings?.eligibility?.lastSuccessfulPublishAt, language)}</p><p>{t.nextEdit}: {dateText(settings?.eligibility?.nextFreeEditAt, language)}</p>{paid && <p>{t.expires}: {dateText(settings?.eligibility?.subscription?.expiresAt, language)}</p>}</div></Section>}
-        <div id="theme-subscription" className="scroll-mt-20"><Section icon={CreditCard} title={t.plan}><p className="text-xl font-black text-[var(--color-primary)]">{t.planPrice}</p><p className="mt-1 text-sm text-[var(--color-text-secondary)]">{t.duration}</p><h3 className="mt-4 font-bold">{t.benefitsTitle}</h3><ul className="mt-2 space-y-2 text-sm">{t.benefits.map((benefit) => <li key={benefit} className="flex gap-2"><Check className="h-4 w-4 shrink-0 text-emerald-500" />{benefit}</li>)}</ul>{!paid && <div className="mt-5 border-t border-[var(--color-border)] pt-4"><h3 className="font-bold">{t.transferTitle}</h3>{previewOnly ? <div className="mt-2 space-y-3"><p className="text-sm text-[var(--color-text-secondary)]">{t.previewOrderHint}</p><Link className={`${button} w-full border-[var(--color-primary)] bg-[var(--color-primary)] text-white`} to="/admin/themes">{t.openAdminOrder}</Link></div> : manual ? <><p className="mt-2 text-sm">{t.payee}: <b>{manual.payeeName}</b></p><label className="mt-3 block text-sm">{t.network}<select className={`${input} mt-1`} value={network} onChange={(event) => { setNetwork(event.target.value); setOrder(null); }}>{Object.keys(manual.destinations).map((kind) => <option key={kind} value={kind}>{kind === 'BINANCE_ID' ? 'Binance ID' : kind}</option>)}</select></label><p className="mt-3 text-xs text-[var(--color-text-secondary)]">{t.destination}</p><div className="mt-1 flex items-center gap-2 rounded-xl bg-[var(--color-surface)] p-2"><code dir="ltr" className="min-w-0 flex-1 break-all text-xs">{manual.destinations[network]}</code><button type="button" className={button} onClick={() => copyValue(manual.destinations[network])}>{t.copy}</button></div><button type="button" className={`${button} mt-3 w-full`} disabled={busy || manual.durationCalendarMonths !== 3} onClick={createOrder}>{t.request}</button>{manual.durationCalendarMonths !== 3 && <p role="alert" className="mt-2 text-sm text-amber-600">{t.offerBackendOutdated}</p>}{order && <div className="mt-3 rounded-xl border border-emerald-500/40 p-3 text-sm"><a className={`${button} mt-3 w-full`} href={order.whatsappUrl} target="_blank" rel="noopener noreferrer">{t.whatsapp}</a></div>}<p className="mt-3 text-xs text-[var(--color-text-secondary)]">{t.proof}</p></> : <div className="mt-2 space-y-2 text-sm"><p role="alert">{paymentError || t.noPaymentReady}</p><button type="button" className={button} disabled={loading} onClick={() => refresh(true)}>{t.retry}</button></div>}</div>}</Section></div>
-        {!paid && <Section icon={LockKeyhole} title={t.activationTitle}>
+        {!previewOnly && <Section icon={Clock3} title={t.currentPlan}><strong className="text-lg">{ultra ? t.ultraActive : paid ? t.paid : t.free}</strong><div className="mt-2 space-y-1 text-sm text-[var(--color-text-secondary)]"><p>{t.changesLeft}: {settings?.eligibility?.freeChangesRemaining ?? 2}</p><p>{t.lastPublish}: {dateText(settings?.eligibility?.lastSuccessfulPublishAt, language)}</p><p>{t.nextEdit}: {dateText(settings?.eligibility?.nextFreeEditAt, language)}</p>{paid && <p>{t.expires}: {dateText(settings?.eligibility?.subscription?.expiresAt, language)}</p>}</div></Section>}
+        <div id="theme-subscription" className="scroll-mt-20"><Section icon={CreditCard} title={t.plan}>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {[['THEME_PRO', t.planPrice], ['THEME_ULTRA', t.ultra]].map(([id, label]) => <button key={id} type="button" aria-pressed={selectedPlanId === id} disabled={busy || (paid && id === 'THEME_PRO')} onClick={() => selectPlan(id)} className={`${button} ${selectedPlanId === id ? 'border-amber-400 bg-amber-400/15' : ''}`}>{label}</button>)}
+          </div>
+          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">{t.duration}</p>
+          {upgrading && <div className="mt-3 rounded-xl border border-amber-400/60 bg-amber-400/10 p-3"><strong>{t.upgrade}</strong><p className="mt-2 text-sm">{t.upgradeTerm}</p><p className="mt-1 text-sm">{t.expires}: {dateText(settings?.eligibility?.subscription?.expiresAt, language)}</p></div>}
+          <h3 className="mt-4 font-bold">{t.benefitsTitle}</h3>
+          <ul className="mt-2 space-y-2 text-sm">{[...t.benefits, ...(selectedPlanId === 'THEME_ULTRA' ? t.ultraBenefits : [])].map((benefit) => <li key={benefit} className="flex gap-2"><Check className="h-4 w-4 shrink-0 text-emerald-500" />{benefit}</li>)}</ul>
+          {ultra && <Link to="/admin/payment-methods" className={`${button} mt-4`}>{t.contactsSettings}</Link>}
+          {(!paid || upgrading) && <div className="mt-5 border-t border-[var(--color-border)] pt-4">
+            <h3 className="font-bold">{t.transferTitle}</h3>
+            <p className="mt-2 text-lg font-black">{t.amountDue}: <span dir="ltr">{transferAmount} USDT</span></p>
+            {previewOnly ? <div className="mt-2 space-y-3"><p className="text-sm text-[var(--color-text-secondary)]">{t.previewOrderHint}</p><Link className={`${button} w-full`} to="/admin/themes#theme-subscription">{t.openAdminOrder}</Link></div> : manual ? <>
+              <p className="mt-2 text-sm">{t.payee}: <b>{manual.payeeName}</b></p>
+              <label className="mt-3 block text-sm">{t.network}<select className={`${input} mt-1`} value={network} disabled={busy} onChange={(event) => { setNetwork(event.target.value); setOrder(null); }}>{Object.keys(manual.destinations).map((kind) => <option key={kind} value={kind}>{kind === 'BINANCE_ID' ? 'Binance ID' : kind}</option>)}</select></label>
+              <p className="mt-3 text-xs text-[var(--color-text-secondary)]">{t.destination}</p>
+              <div className="mt-1 flex items-center gap-2 rounded-xl bg-[var(--color-surface)] p-2"><code dir="ltr" className="min-w-0 flex-1 break-all text-xs">{manual.destinations[network]}</code><button type="button" className={button} onClick={() => copyValue(manual.destinations[network])}>{t.copy}</button></div>
+              <button type="button" className={`${button} mt-3 w-full`} disabled={busy || manual.durationCalendarMonths !== 3} onClick={createOrder}>{t.request}</button>
+              {manual.durationCalendarMonths !== 3 && <p role="alert" className="mt-2 text-sm text-amber-600">{t.offerBackendOutdated}</p>}
+              {order && <div className="mt-3 rounded-xl border border-emerald-500/40 p-3 text-sm"><strong>{order.planName} · {order.amount} USDT</strong><a className={`${button} mt-3 w-full`} href={order.whatsappUrl} target="_blank" rel="noopener noreferrer">{t.whatsapp}</a></div>}
+              <p className="mt-3 text-xs text-[var(--color-text-secondary)]">{t.proof}</p>
+            </> : <div className="mt-2 space-y-2 text-sm"><p role="alert">{paymentError || t.noPaymentReady}</p><button type="button" className={button} disabled={loading} onClick={() => refresh(true)}>{t.retry}</button></div>}
+          </div>}
+        </Section></div>
+        {!ultra && <Section icon={LockKeyhole} title={t.activationTitle}>
           <p className="mb-3 text-sm text-[var(--color-text-secondary)]">{t.activationHint}</p>{!previewOnly && !activationReference && <p role="status" className="mb-3 text-sm text-amber-600">{t.activationOrderNeeded}</p>}
           <div className="grid gap-3">
+            {!previewOnly && <button type="button" className={button} disabled={loading || busy} onClick={() => refresh(true)}>{language === 'ar' ? 'تحديث حالة الدفع' : 'Refresh payment status'}</button>}
             <label className="text-sm">{t.activationCode}<input className={`${input} mt-1`} dir="ltr" inputMode="numeric" autoComplete="one-time-code" maxLength={10} value={activationCode} onChange={(event) => setActivationCode(event.target.value.replace(/\D/g, ''))} disabled={previewOnly || busy} placeholder="0000000000" /></label>
             <button type="button" className={`${button} border-[var(--color-primary)] bg-[var(--color-primary)] text-white`} disabled={previewOnly || busy || !/^THEME-[0-9A-F-]{36}$/.test(activationReference.trim()) || !/^\d{10}$/.test(activationCode)} onClick={activateCode}>{t.activate}</button>
+          </div>
+        </Section>}
+        {!previewOnly && <Section icon={CreditCard} title={t.reviewTitle}>
+          <p className="mb-3 text-sm text-[var(--color-text-secondary)]">{t.reviewHint}</p>
+          <div className="grid gap-3">
+            <label className="text-sm">{t.reviewReference}<input className={`${input} mt-1`} dir="ltr" value={reviewReference} onChange={(event) => { setReviewReference(event.target.value.toUpperCase()); setReviewResult(null); }} placeholder="THEME-..." disabled={busy} /></label>
+            <label className="text-sm">{t.reviewTransaction}<input className={`${input} mt-1`} dir="ltr" value={reviewTransactionId} onChange={(event) => setReviewTransactionId(event.target.value)} placeholder="Transaction ID" disabled={busy} /></label>
+            <button type="button" className={`${button} border-[var(--color-primary)] bg-[var(--color-primary)] text-white`} disabled={busy || !/^THEME-[0-9A-F-]{36}$/.test(reviewReference.trim()) || !/^[A-Za-z0-9:_-]{8,128}$/.test(reviewTransactionId.trim())} onClick={confirmManualPayment}>{t.reviewConfirm}</button>
+            {reviewResult?.deliveryStatus === 'FAILED' && <button type="button" className={button} disabled={busy || !/^THEME-[0-9A-F-]{36}$/.test(reviewReference.trim())} onClick={reissueManualCode}>{t.reviewResend}</button>}
+            {reviewResult && <p role="status" className={`text-sm ${reviewResult.deliveryStatus === 'FAILED' ? 'text-amber-600' : 'text-emerald-600'}`}>{reviewResult.deliveryStatus === 'SENT' ? t.reviewSent : reviewResult.deliveryStatus === 'SKIPPED' ? t.reviewSkipped : t.reviewFailed}</p>}
           </div>
         </Section>}
         {!previewOnly && <Section icon={History} title={t.history}><div className="space-y-2">{history.length ? history.map((item) => <div key={item._id} className="flex items-center justify-between gap-2 rounded-xl bg-[var(--color-surface)] p-3 text-sm"><span>#{item.version} · {dateText(item.publishedAt, language)}</span><button type="button" className={button} disabled={busy || !settings?.eligibility?.canPublish} onClick={() => run(() => apiClient.platformTheme.restore(item.version), t.published)}>{t.restore}</button></div>) : t.empty}</div></Section>}

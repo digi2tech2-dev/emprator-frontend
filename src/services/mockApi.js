@@ -636,6 +636,7 @@ const defaultPaymentSettings = {
   countryAccounts: [],
   instructions: 'ارفع صورة الإيصال وحدد المبلغ قبل إرسال الطلب.',
   whatsappNumber: getDefaultWhatsAppNumber(),
+  supportContacts: { owner: '01286591021', support: '01556537530' },
   paymentGroups: createDefaultPaymentGroups(),
 };
 
@@ -2539,6 +2540,7 @@ const mockApi = {
             countryAccounts,
             paymentGroups,
             whatsappNumber: paymentSettings?.whatsappNumber || getDefaultWhatsAppNumber(),
+            supportContacts: paymentSettings?.supportContacts || defaultPaymentSettings.supportContacts,
           };
       },
 
@@ -2572,6 +2574,7 @@ const mockApi = {
             whatsappNumber: normalizeWhatsAppNumber(
               settings?.whatsappNumber ?? current?.whatsappNumber ?? getDefaultWhatsAppNumber()
             ),
+            supportContacts: settings?.supportContacts ?? current?.supportContacts ?? defaultPaymentSettings.supportContacts,
             paymentGroups: normalizedGroups,
           };
 

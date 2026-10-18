@@ -110,6 +110,10 @@ const normalizePaymentSettingsResponse = (settings) => {
       .filter((item) => item.countryCode),
     instructions: String(source?.instructions || '').trim(),
     whatsappNumber: String(source?.whatsappNumber || '').trim(),
+    supportContacts: source?.supportContacts && typeof source.supportContacts === 'object'
+      ? { owner: String(source.supportContacts.owner || '').trim(), support: String(source.supportContacts.support || '').trim() }
+      : null,
+    adminNotificationWhatsApp: String(source?.adminNotificationWhatsApp || '').trim(),
     paymentGroups: normalizePaymentGroups(normalizeSettingArray(source?.paymentGroups), { fallbackToDefault: false }),
   };
 };
@@ -139,6 +143,25 @@ const validatePaymentGroupFeePercentsForApi = (groups) => {
   });
 };
 
+const normalizePaymentQrImagePath = (value) => {
+  const image = String(value || '').trim();
+  if (!image || image.startsWith('/')) return image;
+
+  // Older settings may contain the absolute URL returned by the same backend.
+  // Store only its upload path so the backend's upload-path validation accepts
+  // the existing methods when the full group list is saved again.
+  try {
+    const url = new URL(image);
+    const apiOrigin = new URL(API_BASE).origin;
+    const paymentUploadPath = /^\/uploads\/payments\/[A-Za-z0-9][A-Za-z0-9._-]*\.(?:jpe?g|png|webp)$/i;
+    if (url.origin === apiOrigin && paymentUploadPath.test(url.pathname)) return url.pathname;
+  } catch {
+    // Keep malformed values unchanged so the server returns its normal
+    // validation error instead of silently dropping an image.
+  }
+  return image;
+};
+
 const serializePaymentGroupsForApi = (groups) => {
   // Validate raw values before the normalizer can clamp an invalid fee.
   validatePaymentGroupFeePercentsForApi(groups);
@@ -163,7 +186,7 @@ const serializePaymentGroupsForApi = (groups) => {
       instructions: method.instructions,
       image: method.image,
       imageName: method.imageName,
-      qrCodeImage: method.qrCodeImage,
+      qrCodeImage: normalizePaymentQrImagePath(method.qrCodeImage),
       qrCodeImageName: method.qrCodeImageName,
       isActive: method.isActive !== false,
       fields: Array.isArray(method.fields) ? method.fields : [],
@@ -1892,7 +1915,9 @@ const realApi = {
     getSubscription: async () => unwrap(await http.get('/admin/theme/subscription')),
     getPayments: async () => unwrap(await http.get('/admin/theme/subscription/payment-status')),
     checkout: async () => unwrap(await http.post('/admin/theme/subscription/checkout')),
-    createManualOrder: async (network) => unwrap(await http.post('/admin/theme/subscription/manual-order', { network })),
+    createManualOrder: async (network, planId = 'THEME_PRO') => unwrap(await http.post('/admin/theme/subscription/manual-order', { network, planId })),
+    confirmManualOrder: async (reference, chainTransactionId) => unwrap(await http.post('/admin/theme/subscription/manual-order/confirm', { reference, chainTransactionId })),
+    reissueManualCode: async (reference) => unwrap(await http.post('/admin/theme/subscription/manual-order/reissue-code', { reference })),
     redeemCode: async (reference, code) => unwrap(await http.post('/admin/theme/subscription/redeem', { reference, code })),
     uploadMedia: async (file) => {
       const form = new FormData();
@@ -4179,6 +4204,7 @@ const realApi = {
             countryAccounts: [],
             instructions: '',
             whatsappNumber: '',
+            supportContacts: null,
             paymentGroups: [],
           };
         }
@@ -4193,6 +4219,8 @@ const realApi = {
           countryAccounts: find('paymentCountryAccounts'),
           instructions: find('paymentInstructions'),
           whatsappNumber: find('whatsappNumber'),
+          supportContacts: find('supportContacts'),
+          adminNotificationWhatsApp: find('adminNotificationWhatsApp'),
           paymentGroups: find('paymentGroups'),
         });
         return normalized;
@@ -4208,6 +4236,7 @@ const realApi = {
               countryAccounts: [],
               instructions: '',
               whatsappNumber: '',
+              supportContacts: null,
               paymentGroups: [],
             };
           }
@@ -4218,6 +4247,7 @@ const realApi = {
             countryAccounts: [],
             instructions: '',
             whatsappNumber: '',
+            supportContacts: null,
             paymentGroups: [],
           };
         }
@@ -4247,6 +4277,12 @@ const realApi = {
         ...(payload?.whatsappNumber !== undefined ? {
           whatsappNumber: String(payload.whatsappNumber || '').trim(),
         } : {}),
+        ...(payload?.supportContacts !== undefined ? {
+          supportContacts: payload.supportContacts,
+        } : {}),
+        ...(payload?.adminNotificationWhatsApp !== undefined ? {
+          adminNotificationWhatsApp: String(payload.adminNotificationWhatsApp || '').trim(),
+        } : {}),
         ...(payload?.paymentGroups !== undefined ? {
           paymentGroups: serializePaymentGroupsForApi(payload.paymentGroups),
         } : {}),
@@ -4255,6 +4291,8 @@ const realApi = {
         countryAccounts: 'paymentCountryAccounts',
         instructions: 'paymentInstructions',
         whatsappNumber: 'whatsappNumber',
+        supportContacts: 'supportContacts',
+        adminNotificationWhatsApp: 'adminNotificationWhatsApp',
         paymentGroups: 'paymentGroups',
       };
       const updates = Object.entries(keyMap)
@@ -4271,6 +4309,8 @@ const realApi = {
         countryAccounts: find('paymentCountryAccounts'),
         instructions: find('paymentInstructions'),
         whatsappNumber: find('whatsappNumber'),
+        supportContacts: find('supportContacts'),
+        adminNotificationWhatsApp: find('adminNotificationWhatsApp'),
         paymentGroups: find('paymentGroups'),
       });
     },

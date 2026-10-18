@@ -64,7 +64,7 @@ const ADMIN_PANEL_ROLES = [...ADMIN_ROLES, ...SUPERVISOR_ROLES];
 
 const RouteLoader = () => (
   <div className="page-route-loader" role="status" aria-live="polite">
-    <img className="page-route-loader__logo" src="/embrator-og.webp" alt="" width="120" height="63" />
+    <span className="page-route-loader__label" aria-hidden="true">جارٍ تحميل الصفحة</span>
     <span className="sr-only">Loading page</span>
   </div>
 );

@@ -61,7 +61,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: transparent;
+        background: radial-gradient(ellipse at center, rgb(9 20 40 / 0.96), rgb(3 7 18 / 0.99));
         transition: opacity 240ms ease, visibility 240ms ease;
       }
 
@@ -74,22 +74,22 @@
       .boot-loader__logo {
         position: relative;
         z-index: 1;
-        width: min(88vw, 400px);
+        width: min(76vw, 280px);
         height: auto;
         object-fit: contain;
-        animation: boot-logo-motion 2.4s ease-in-out infinite;
-        filter: drop-shadow(0 12px 24px rgb(245 183 0 / 0.32)) drop-shadow(0 0 24px rgb(30 167 255 / 0.26));
+        animation: boot-logo-motion 1.8s ease-in-out infinite;
+        filter: drop-shadow(0 12px 24px rgb(0 0 0 / 0.28));
       }
 
       .boot-loader__progress {
         position: absolute;
         z-index: 1;
-        bottom: 12vh;
+        bottom: calc(50% - 190px);
         width: min(42vw, 9rem);
         height: 3px;
         overflow: hidden;
         border-radius: 999px;
-        background: rgb(255 255 255 / 0.14);
+        background: rgb(255 255 255 / 0.22);
       }
 
       .boot-loader__progress::after {
@@ -97,22 +97,25 @@
         width: 45%;
         height: 100%;
         border-radius: inherit;
-        background: linear-gradient(90deg, #0b5cff, #1ea7ff, #f5b700);
+        background: linear-gradient(90deg, #168cff, #64d8ff, #ffc247);
         content: "";
         animation: boot-progress 1.5s ease-in-out infinite;
       }
 
       @keyframes boot-logo-motion {
-        0% {
-          transform: translateY(0) scale(0.97);
+        0%, 100% {
+          transform: translateY(0) scale(1);
         }
 
         50% {
-          transform: translateY(-8px) scale(1);
+          transform: translateY(-4px) scale(1.018);
         }
+      }
 
-        100% {
-          transform: translateY(0) scale(0.97);
+      @media (prefers-reduced-motion: reduce) {
+        .boot-loader__logo,
+        .boot-loader__progress::after {
+          animation: none;
         }
       }
 
@@ -130,7 +133,7 @@
   </head>
   <body>
     <div id="app-boot-loader" aria-hidden="true">
-      <img class="boot-loader__logo" src="/embrator-og.webp" alt="EMBRATOR CARD" />
+      <img class="boot-loader__logo" alt="" />
       <span class="boot-loader__progress" aria-hidden="true"></span>
     </div>
     <div id="root"></div>

@@ -44,7 +44,7 @@ const AdminSupervisors = () => {
   useEffect(() => {
     let mounted = true;
     setIsLoading(true);
-    Promise.resolve(loadUsers({ force: true })).finally(() => {
+    Promise.resolve(loadUsers({ force: true, role: 'supervisor', limit: 500 })).finally(() => {
       if (mounted) setIsLoading(false);
     });
     return () => {
@@ -118,7 +118,7 @@ const AdminSupervisors = () => {
     try {
       await updateUserRole(id, nextRole, actor);
       addToast('تم تحديث الدور بنجاح.', 'success');
-      await loadUsers({ force: true });
+      await loadUsers({ force: true, role: 'supervisor', limit: 500 });
     } catch (error) {
       addToast(error?.message || 'فشل تحديث الدور.', 'error');
     }
@@ -153,7 +153,7 @@ const AdminSupervisors = () => {
       setCandidateSearch('');
       setCandidateUsers([]);
       setSelectedCandidateId('');
-      await loadUsers({ force: true });
+      await loadUsers({ force: true, role: 'supervisor', limit: 500 });
     } catch (error) {
       addToast(error?.message || 'فشل إضافة المشرف.', 'error');
     } finally {
@@ -166,7 +166,7 @@ const AdminSupervisors = () => {
     try {
       await updateUserStatus(target.id, nextStatus, actor);
       addToast(nextStatus === 'approved' ? 'تم تفعيل المشرف.' : 'تم حظر المشرف.', 'success');
-      await loadUsers({ force: true });
+      await loadUsers({ force: true, role: 'supervisor', limit: 500 });
     } catch (error) {
       addToast(error?.message || 'فشل تحديث الحالة.', 'error');
     }
@@ -183,7 +183,7 @@ const AdminSupervisors = () => {
       await updateUserPermissions(demoteTarget.id, [], actor);
       addToast('تم تحويل المشرف إلى عميل.', 'success');
       setDemoteTarget(null);
-      await loadUsers({ force: true });
+      await loadUsers({ force: true, role: 'supervisor', limit: 500 });
     } catch (error) {
       addToast(error?.message || 'فشل تحويل المشرف إلى عميل.', 'error');
     }
@@ -209,7 +209,7 @@ const AdminSupervisors = () => {
       await updateUserPermissions(permissionTarget.id, selectedPermissions, actor);
       addToast('تم تحديث صلاحيات المشرف.', 'success');
       setPermissionTarget(null);
-      await loadUsers({ force: true });
+      await loadUsers({ force: true, role: 'supervisor', limit: 500 });
     } catch (error) {
       addToast(error?.message || 'فشل تحديث الصلاحيات.', 'error');
     } finally {

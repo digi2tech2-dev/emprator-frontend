@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -11,16 +11,22 @@ import PublicSidebar from '../components/layout/PublicSidebar';
 import SiteCopyrightFooter from '../components/layout/SiteCopyrightFooter';
 import { useBodyScrollLock } from '../utils/bodyScrollLock';
 import { buildPhoneLink, buildWhatsAppLink, getAdminWhatsAppNumber, getSupportContacts } from '../utils/whatsapp';
+import useSystemStore from '../store/useSystemStore';
 import brandIconImage from '../assets/logo.webp';
 
 const AboutUsPage = () => {
   const navigate = useNavigate();
   const { i18n } = useTranslation();
   const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
+  const { paymentSettings, loadPaymentSettings } = useSystemStore();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const isArabic = String(i18n.resolvedLanguage || i18n.language || 'ar').toLowerCase().startsWith('ar');
-  const supportContacts = getSupportContacts();
+  const supportContacts = getSupportContacts(paymentSettings?.supportContacts);
+
+  useEffect(() => {
+    void loadPaymentSettings({ force: true });
+  }, [loadPaymentSettings]);
 
   useBodyScrollLock(isMenuOpen);
 

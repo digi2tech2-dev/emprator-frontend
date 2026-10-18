@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -8,7 +8,8 @@ import Card from '../components/ui/Card';
 import Button from '../components/ui/Button';
 import { textareaClassName } from '../components/ui/Input';
 import { cn } from '../components/ui/Button';
-import { buildWhatsAppLink, getAdminWhatsAppNumber } from '../utils/whatsapp';
+import { buildWhatsAppLink, getOwnerWhatsAppNumber } from '../utils/whatsapp';
+import useSystemStore from '../store/useSystemStore';
 import { useLanguage } from '../context/LanguageContext';
 import useAuthStore from '../store/useAuthStore';
 import ThemeToggle from '../components/ui/ThemeToggle';
@@ -22,12 +23,17 @@ const ContactUs = ({ accountOnly = false }) => {
   const { dir } = useLanguage();
   const { i18n } = useTranslation();
   const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
+  const { paymentSettings, loadPaymentSettings } = useSystemStore();
   const isArabic = String(i18n.resolvedLanguage || i18n.language || dir || 'ar').toLowerCase().startsWith('ar');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [message, setMessage] = useState('');
   const [messageError, setMessageError] = useState('');
   const [selectedComplaint, setSelectedComplaint] = useState('');
   const [submitted, setSubmitted] = useState(false);
+
+  useEffect(() => {
+    void loadPaymentSettings({ force: true });
+  }, [loadPaymentSettings]);
 
   useBodyScrollLock(accountOnly && isMenuOpen);
 
@@ -210,7 +216,7 @@ const ContactUs = ({ accountOnly = false }) => {
     }
 
     const href = buildWhatsAppLink({
-      number: getAdminWhatsAppNumber(),
+      number: getOwnerWhatsAppNumber(paymentSettings?.supportContacts),
       message: trimmedMessage,
     });
 

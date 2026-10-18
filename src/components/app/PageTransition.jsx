@@ -8,13 +8,6 @@ import React, {
 import { useLocation, useNavigationType } from 'react-router-dom';
 import NavigationOverlay from './NavigationOverlay';
 import { preloadRoute } from '../../transitions/routeModules';
-import {
-  getBarbaNamespace,
-  resetBarbaTransitionStyles,
-  runBarbaEnter,
-  runBarbaInitialReveal,
-  runBarbaLeave,
-} from '../../transitions/barbaTransition';
 import { isLitePerformanceMode } from '../../utils/performanceMode';
 
 const locationIdentity = (location) => [
@@ -72,7 +65,6 @@ const PageTransition = ({ children }) => {
   const navigationType = useNavigationType();
   const [displayedLocation, setDisplayedLocation] = useState(routerLocation);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const containerRef = useRef(null);
   const displayedLocationRef = useRef(routerLocation);
   const latestNavigationRef = useRef({
     location: routerLocation,
@@ -80,8 +72,6 @@ const PageTransition = ({ children }) => {
   });
   const processingRef = useRef(false);
   const mountedRef = useRef(false);
-  const initialRevealRef = useRef(false);
-  const initialRevealControllerRef = useRef(null);
   const abortControllerRef = useRef(null);
   const commitResolverRef = useRef(null);
   const scrollPositionsRef = useRef(new Map());
@@ -92,10 +82,8 @@ const PageTransition = ({ children }) => {
 
     return () => {
       mountedRef.current = false;
-      initialRevealControllerRef.current?.abort();
       abortControllerRef.current?.abort();
       commitResolverRef.current?.resolve();
-      resetBarbaTransitionStyles(containerRef.current);
       delete document.documentElement.dataset.pageTransition;
     };
   }, []);
@@ -135,9 +123,7 @@ const PageTransition = ({ children }) => {
 
         const controller = new AbortController();
         abortControllerRef.current = controller;
-        initialRevealControllerRef.current?.abort();
 
-        const container = containerRef.current;
         const fallbackPosition = { x: window.scrollX, y: window.scrollY };
         scrollPositionsRef.current.set(from.key, fallbackPosition);
 
@@ -147,14 +133,6 @@ const PageTransition = ({ children }) => {
 
         const preloadPromise = preloadRoute(to.pathname);
         await nextPaint();
-
-        const barbaData = await runBarbaLeave({
-          from,
-          to,
-          container,
-          trigger: targetNavigation.navigationType.toLowerCase(),
-          signal: controller.signal,
-        });
 
         if (controller.signal.aborted || !mountedRef.current) break;
 
@@ -169,12 +147,6 @@ const PageTransition = ({ children }) => {
           fallbackPosition
         );
 
-        await runBarbaEnter({
-          data: barbaData,
-          container: containerRef.current,
-          signal: controller.signal,
-        });
-
         if (controller.signal.aborted || !mountedRef.current) break;
         displayedLocationRef.current = to;
       }
@@ -183,7 +155,6 @@ const PageTransition = ({ children }) => {
       abortControllerRef.current = null;
 
       if (mountedRef.current) {
-        resetBarbaTransitionStyles(containerRef.current);
         setIsTransitioning(false);
         delete document.documentElement.dataset.pageTransition;
 
@@ -219,30 +190,6 @@ const PageTransition = ({ children }) => {
   }, [performanceLite, routerLocation.hash, routerLocation.key, routerLocation.state]);
 
   useEffect(() => {
-    if (performanceLite) return undefined;
-    if (initialRevealRef.current || !containerRef.current) return undefined;
-    initialRevealRef.current = true;
-
-    const controller = new AbortController();
-    initialRevealControllerRef.current = controller;
-
-    void runBarbaInitialReveal({
-      location: displayedLocationRef.current,
-      container: containerRef.current,
-      signal: controller.signal,
-    });
-
-    return () => {
-      controller.abort();
-
-      if (initialRevealControllerRef.current === controller) {
-        initialRevealControllerRef.current = null;
-        initialRevealRef.current = false;
-      }
-    };
-  }, [performanceLite]);
-
-  useEffect(() => {
     const previousScrollRestoration = window.history.scrollRestoration;
     window.history.scrollRestoration = 'manual';
 
@@ -251,12 +198,10 @@ const PageTransition = ({ children }) => {
     };
   }, []);
 
-  const namespace = getBarbaNamespace(displayedLocation);
-
   if (performanceLite) {
     return (
-      <div className="barba-react-wrapper">
-        <div className="barba-page-container">
+      <div className="page-transition-wrapper">
+        <div className="page-transition-content">
           {children(routerLocation)}
         </div>
       </div>
@@ -264,12 +209,9 @@ const PageTransition = ({ children }) => {
   }
 
   return (
-    <div data-barba="wrapper" className="barba-react-wrapper">
+    <div className="page-transition-wrapper">
       <div
-        ref={containerRef}
-        data-barba="container"
-        data-barba-namespace={namespace}
-        className="barba-page-container"
+        className="page-transition-content"
         aria-busy={isTransitioning}
       >
         {children(displayedLocation)}

@@ -49,5 +49,14 @@ export const buildPhoneLink = (number) => {
 
 export const getDefaultWhatsAppNumber = () => FALLBACK_WHATSAPP_NUMBER;
 export const getAdminWhatsAppNumber = () => normalizeWhatsAppNumber(ENV_ADMIN_WHATSAPP_NUMBER || FALLBACK_WHATSAPP_NUMBER);
-export const getSupportPhoneNumber = () => SUPPORT_PHONE_NUMBER;
-export const getSupportContacts = () => SUPPORT_CONTACTS;
+const validContactNumber = (value) => /^\+?[0-9]{7,20}$/.test(String(value || '').replace(/[^0-9+]/g, ''));
+
+export const getSupportContacts = (configuredContacts) => {
+  const owner = validContactNumber(configuredContacts?.owner) ? configuredContacts.owner : OWNER_PHONE_NUMBER;
+  const support = validContactNumber(configuredContacts?.support) ? configuredContacts.support : SUPPORT_WHATSAPP_NUMBER;
+  return SUPPORT_CONTACTS.map((contact) => ({ ...contact, number: contact.id === 'owner' ? owner : support }));
+};
+
+export const getOwnerWhatsAppNumber = (configuredContacts) => normalizeWhatsAppNumber(
+  validContactNumber(configuredContacts?.owner) ? configuredContacts.owner : OWNER_PHONE_NUMBER
+);

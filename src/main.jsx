@@ -6,6 +6,7 @@ import './i18n';
 import { devLogger } from './utils/devLogger';
 import { cleanupVolatileAppStorage } from './utils/storageMaintenance';
 import { applyPerformanceMode } from './utils/performanceMode';
+import transitionLogo from './assets/payment-warning-dragon-lite.webp';
 
 const isExternalExtensionPermissionError = (value) => {
   const message = String(
@@ -65,6 +66,8 @@ const hideBootLoader = () => {
   if (typeof window === 'undefined') return;
   const bootLoader = document.getElementById('app-boot-loader');
   if (!bootLoader) return;
+  const bootLogo = bootLoader.querySelector('.boot-loader__logo');
+  if (bootLogo) bootLogo.src = transitionLogo;
 
   window.requestAnimationFrame(() => {
     window.requestAnimationFrame(() => {

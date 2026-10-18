@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { MessageCircle, Phone } from 'lucide-react';
 import Modal from './Modal';
 import logoImg from '../../assets/logo.webp';
 import { buildWhatsAppLink, buildPhoneLink, getSupportContacts } from '../../utils/whatsapp';
+import useSystemStore from '../../store/useSystemStore';
 
 /* ─── contact card colours ─── */
 const CONTACT_STYLES = {
@@ -36,7 +37,12 @@ const FALLBACK_STYLE = {
 const getContactStyle = (contact) => CONTACT_STYLES[contact.id] || FALLBACK_STYLE;
 
 const WhatsAppContactChooser = ({ isOpen, onClose, message = '', isArabic = true }) => {
-  const contacts = getSupportContacts();
+  const { paymentSettings, loadPaymentSettings } = useSystemStore();
+  const contacts = getSupportContacts(paymentSettings?.supportContacts);
+
+  useEffect(() => {
+    if (isOpen) void loadPaymentSettings({ force: true });
+  }, [isOpen, loadPaymentSettings]);
 
   const openContact = (contact) => {
     if (contact.type === 'phone') {

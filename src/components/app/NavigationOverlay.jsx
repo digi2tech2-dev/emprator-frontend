@@ -1,5 +1,5 @@
 import React from 'react';
-const logo = '/embrator-og.webp';
+import transitionLogo from '../../assets/payment-warning-dragon-lite.webp';
 
 const NavigationOverlay = ({ active }) => (
   <div
@@ -9,14 +9,17 @@ const NavigationOverlay = ({ active }) => (
     <div className="page-transition-overlay__card" role="status" aria-live="polite">
       <img
         className="page-transition-overlay__logo"
-        src={logo}
+        src={transitionLogo}
         alt=""
-        width="120"
-        height="63"
+        width="240"
+        height="240"
+        fetchPriority="high"
+        decoding="async"
       />
       <div className="page-transition-overlay__track" aria-hidden="true">
         <span className="page-transition-overlay__progress" />
       </div>
+      <span className="page-transition-overlay__label" aria-hidden="true">جارٍ تحميل الصفحة</span>
       <span className="sr-only">Loading page</span>
     </div>
   </div>

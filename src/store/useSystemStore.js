@@ -47,6 +47,8 @@ const createInitialPaymentSettings = () => ({
   countryAccounts: [],
   instructions: '',
   whatsappNumber: isRealProvider ? '' : getDefaultWhatsAppNumber(),
+  supportContacts: null,
+  adminNotificationWhatsApp: '',
   paymentGroups: isRealProvider ? [] : createDefaultPaymentGroups(),
 });
 
@@ -54,6 +56,10 @@ const normalizeStorePaymentSettings = (settings = {}) => ({
   countryAccounts: Array.isArray(settings?.countryAccounts) ? settings.countryAccounts : [],
   instructions: settings?.instructions || '',
   whatsappNumber: settings?.whatsappNumber || (isRealProvider ? '' : getDefaultWhatsAppNumber()),
+  supportContacts: settings?.supportContacts && typeof settings.supportContacts === 'object'
+    ? { owner: String(settings.supportContacts.owner || '').trim(), support: String(settings.supportContacts.support || '').trim() }
+    : null,
+  adminNotificationWhatsApp: String(settings?.adminNotificationWhatsApp || '').trim(),
   paymentGroups: normalizePaymentGroups(settings?.paymentGroups, { fallbackToDefault: !isRealProvider }),
 });
 

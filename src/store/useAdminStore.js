@@ -18,7 +18,7 @@ const WALLETS_CACHE_TTL = isRealProvider ? 15 * 1000 : 60 * 1000;
 const USERS_PAGE_LIMIT = 20;
 const USERS_DEFAULT_SORT_BY = 'walletBalance';
 const USERS_DEFAULT_SORT_ORDER = 'desc';
-let usersRequest = null;
+const usersRequests = new Map();
 let walletsRequest = null;
 const walletTransactionsRequests = new Map();
 
@@ -221,14 +221,25 @@ const useAdminStore = create((set, get) => ({
 
       appendAdminActivity: (entry) => appendAdminActivity(set, entry),
 
-      loadUsers: async ({ force = false, page, search = '', status = '', role = 'customer' } = {}) => {
+      loadUsers: async ({ force = false, page, limit = USERS_PAGE_LIMIT, search = '', status = '', role = 'customer' } = {}) => {
         const requestedPageCandidate = Number(page ?? get().usersCurrentPage ?? 1);
         const requestedPage = Number.isFinite(requestedPageCandidate) && requestedPageCandidate > 0
           ? Math.floor(requestedPageCandidate)
           : 1;
+        const requestedLimitCandidate = Number(limit);
+        const requestedLimit = Number.isFinite(requestedLimitCandidate) && requestedLimitCandidate > 0
+          ? Math.min(Math.floor(requestedLimitCandidate), 500)
+          : USERS_PAGE_LIMIT;
         const normalizedSearch = String(search || '').trim();
         const normalizedStatus = String(status || '').trim();
         const normalizedRole = String(role || '').trim();
+        const requestKey = JSON.stringify({
+          page: requestedPage,
+          limit: requestedLimit,
+          search: normalizedSearch,
+          status: normalizedStatus,
+          role: normalizedRole,
+        });
         const { users, usersLastLoadedAt } = get();
         const hasUsers = Array.isArray(users) && users.length > 0;
         const shouldBypassHydratedCache = isRealProvider && !hasFetchedAdminUsersFromBackendThisSession;
@@ -243,15 +254,15 @@ const useAdminStore = create((set, get) => ({
           return users;
         }
 
-        if (usersRequest) {
-          return usersRequest;
+        if (!force && usersRequests.has(requestKey)) {
+          return usersRequests.get(requestKey);
         }
 
         set({ isLoadingUsers: true });
 
-        usersRequest = apiClient.users.list({
+        const request = apiClient.users.list({
           page: requestedPage,
-          limit: USERS_PAGE_LIMIT,
+          limit: requestedLimit,
           sortBy: USERS_DEFAULT_SORT_BY,
           sortOrder: USERS_DEFAULT_SORT_ORDER,
           search: normalizedSearch,
@@ -292,10 +303,13 @@ const useAdminStore = create((set, get) => ({
             return get().users;
           })
           .finally(() => {
-            usersRequest = null;
+            if (usersRequests.get(requestKey) === request) {
+              usersRequests.delete(requestKey);
+            }
           });
 
-        return usersRequest;
+        usersRequests.set(requestKey, request);
+        return request;
       },
 
       loadUsersPage: async (page) => {

@@ -8,6 +8,9 @@ import useMediaStore from '../store/useMediaStore';
 import useGroupStore from '../store/useGroupStore';
 import HeroSlider from '../components/home/HeroSlider';
 import { usePlatformNeon } from '../theme/usePlatformNeon';
+import { isSafeThemeMediaPath } from '../theme/platformTheme';
+import { useTheme } from '../context/ThemeContext';
+import { resolveImageUrl } from '../utils/imageUrl';
 import CategoryNeonCard from '../components/home/CategoryNeonCard';
 import BestSellingSection from '../components/home/BestSellingSection';
 import ProductSearchBar from '../components/products/ProductSearchBar';
@@ -30,6 +33,7 @@ const Dashboard = () => {
   const { categories, products, loadProducts } = useMediaStore();
   const groupsLastLoadedAt = useGroupStore((state) => state.groupsLastLoadedAt);
   const { i18n } = useTranslation();
+  const { publishedTheme } = useTheme();
   const navigate = useNavigate();
   const heroNeon = usePlatformNeon('hero');
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -37,6 +41,10 @@ const Dashboard = () => {
   const language = getStorefrontLanguage(i18n);
   const isTwoFactorEnabled = Boolean(user?.twoFactorEnabled ?? user?.isTwoFactorEnabled);
   const isCustomerUser = String(user?.role || '').trim().toLowerCase() === 'customer';
+  const targetBannerPath = publishedTheme?.brand?.targetBannerPath;
+  const displayedTargetBanner = isSafeThemeMediaPath(targetBannerPath)
+    ? resolveImageUrl(targetBannerPath)
+    : targetBannerImage;
 
   useEffect(() => {
     const userKey = String(user?.id || user?._id || user?.email || user?.username || '').trim();
@@ -270,7 +278,7 @@ const Dashboard = () => {
             aria-label={language === 'ar' ? 'بيع تارجت' : 'Sell Target'}
           >
             <img
-              src={targetBannerImage}
+              src={displayedTargetBanner}
               alt=""
               className="block h-auto w-full transition-transform duration-500 group-hover:scale-[1.012]"
               loading="lazy"
