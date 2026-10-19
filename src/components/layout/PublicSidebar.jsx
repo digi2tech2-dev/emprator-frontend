@@ -28,6 +28,7 @@ const GoogleMark = () => (
 const PublicSidebar = ({ isOpen, onClose, onLogin, onHome, onAbout, onContact, onCreateAccount, onGoogleLogin, isBusy, isArabic }) => {
   const { publishedTheme } = useTheme();
   const uploadedLogo = publishedTheme?.brand?.logoPath;
+  const sidebarTemplate = ['royal', 'glass', 'aurora', 'square', 'rounded'].includes(publishedTheme?.brand?.sidebarTemplate) ? publishedTheme.brand.sidebarTemplate : 'default';
   const platformLogo = isSafeThemeMediaPath(uploadedLogo) ? resolveImageUrl(uploadedLogo) : emperorLogo;
   const platformLogoWidth = publishedTheme?.brand?.logoWidth;
   const [isMobile, setIsMobile] = useState(false);

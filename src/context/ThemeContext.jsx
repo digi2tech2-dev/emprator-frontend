@@ -20,6 +20,8 @@ export const useTheme = () => useContext(ThemeContext);
 export const ThemeProvider = ({ children }) => {
   const [theme, setThemeState] = useState(getInitialTheme);
   const [publishedTheme, setPublishedTheme] = useState(null);
+  const [draftPreviewTheme, setDraftPreviewTheme] = useState(null);
+  const [isDraftPreview, setIsDraftPreview] = useState(false);
   const hasOwnPreference = useRef(null);
   if (hasOwnPreference.current === null) {
     try { hasOwnPreference.current = Boolean(normalizeTheme(window.localStorage.getItem(THEME_STORAGE_KEY))); }
@@ -53,8 +55,22 @@ export const ThemeProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    applyPublishedPlatformTheme(publishedTheme, theme);
-  }, [publishedTheme, theme]);
+    const previewMode = new URLSearchParams(window.location.search).get('themeDraftPreview') === '1';
+    const receiveDraft = (event) => {
+      if (!previewMode || event.origin !== window.location.origin || event.source !== window.parent
+        || event.data?.type !== 'platform-theme-draft-preview' || event.data?.theme?.schemaVersion !== 2) return;
+      setDraftPreviewTheme(event.data.theme);
+      if (event.data.mode === 'light' || event.data.mode === 'dark') setThemeState(event.data.mode);
+    };
+    if (previewMode && window.parent !== window) setIsDraftPreview(true);
+    if (previewMode && window.parent !== window) window.parent.postMessage({ type: 'platform-theme-preview-ready' }, window.location.origin);
+    window.addEventListener('message', receiveDraft);
+    return () => window.removeEventListener('message', receiveDraft);
+  }, []);
+
+  useEffect(() => {
+    applyPublishedPlatformTheme(draftPreviewTheme || publishedTheme, theme);
+  }, [draftPreviewTheme, publishedTheme, theme]);
 
   useEffect(() => {
     const onPublished = (event) => {
@@ -81,11 +97,12 @@ export const ThemeProvider = ({ children }) => {
     () => ({
       theme,
       isDark,
-      publishedTheme,
+      publishedTheme: draftPreviewTheme || publishedTheme,
+      isDraftPreview,
       toggleTheme,
       setTheme
     }),
-    [theme, isDark, publishedTheme, toggleTheme, setTheme]
+    [theme, isDark, publishedTheme, draftPreviewTheme, isDraftPreview, toggleTheme, setTheme]
   );
 
   return (

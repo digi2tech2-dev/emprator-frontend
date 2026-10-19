@@ -35,6 +35,7 @@ import LoadingSkeleton from '../components/products/LoadingSkeleton';
 import EmptyState from '../components/products/EmptyState';
 import Seo from '../components/seo/Seo';
 import { getDefaultRouteForRole } from '../utils/authRoles';
+import { useTheme } from '../context/ThemeContext';
 import {
   createStorefrontCategories,
   createStorefrontProducts,
@@ -140,12 +141,28 @@ const PublicCatalog = () => {
   const location = useLocation();
   const { i18n } = useTranslation();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const isThemeDraftPreview = new URLSearchParams(window.location.search).get('themeDraftPreview') === '1';
+  const { publishedTheme } = useTheme();
+  const chrome = publishedTheme?.schemaVersion === 2 ? publishedTheme.chrome?.header : null;
+  const customHeaderHeight = Boolean(chrome && chrome.height !== 64);
+  const storefrontHeaderStyle = chrome ? {
+    '--platform-header-height': customHeaderHeight ? String(chrome.height) + 'px' : undefined,
+    '--platform-header-width': String(chrome.width) + '%',
+    '--platform-header-background': chrome.background,
+    '--platform-header-foreground': chrome.foreground,
+    '--platform-header-accent': chrome.accent,
+    '--platform-header-radius': String(chrome.radius) + 'px',
+    top: chrome.template === 'floating' ? '1rem' : '0px',
+    insetInline: chrome.template === 'floating' ? '1rem' : '0px',
+  } : undefined;
+  const storefrontHeaderClass = chrome?.template === 'floating'
+    ? 'platform-storefront-header--floating' : 'platform-storefront-header--bar';
   const userRole = useAuthStore((state) => state.user?.role);
   const loginWithGoogle = useAuthStore((state) => state.loginWithGoogle);
   const { categories, products, isLoading, loadProducts } = useMediaStore();
   const groups = useGroupStore((state) => state.groups);
   const loadGroups = useGroupStore((state) => state.loadGroups);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(() => new URLSearchParams(window.location.search).get('themeDraftPreview') === '1');
   const [showServiceNotice, setShowServiceNotice] = useState(false);
   const [showWhatsAppNotice, setShowWhatsAppNotice] = useState(false);
   const [currentParentId, setCurrentParentId] = useState(null);
@@ -196,17 +213,18 @@ const PublicCatalog = () => {
   );
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && !isThemeDraftPreview) {
       navigate(getDefaultRouteForRole(userRole), { replace: true });
     }
-  }, [isAuthenticated, navigate, userRole]);
+  }, [isAuthenticated, isThemeDraftPreview, navigate, userRole]);
 
   useEffect(() => {
+    if (isThemeDraftPreview) return;
     loadGroups({ force: false });
-  }, [loadGroups]);
+  }, [isThemeDraftPreview, loadGroups]);
 
   useEffect(() => {
-    if (typeof window === 'undefined' || isAuthenticated) return undefined;
+    if (typeof window === 'undefined' || isAuthenticated || isThemeDraftPreview) return undefined;
     if (hasSeenPublicNotices()) return undefined;
 
     let didCancel = false;
@@ -233,9 +251,14 @@ const PublicCatalog = () => {
       didCancel = true;
       window.cancelAnimationFrame(handle);
     };
-  }, [isAuthenticated]);
+  }, [isAuthenticated, isThemeDraftPreview]);
 
   useEffect(() => {
+    if (isThemeDraftPreview) {
+      setIsPublicCatalogLoading(false);
+      return undefined;
+    }
+
     if (!isRealProvider) {
       void loadProducts({ force: true, bypassCache: true });
       setIsPublicCatalogLoading(false);
@@ -289,7 +312,7 @@ const PublicCatalog = () => {
       document.removeEventListener('visibilitychange', refreshWhenVisible);
       window.clearInterval(refreshInterval);
     };
-  }, [loadProducts]);
+  }, [isThemeDraftPreview, loadProducts]);
 
   const handleCloseServiceNotice = useCallback(() => {
     setShowServiceNotice(false);
@@ -606,7 +629,7 @@ const PublicCatalog = () => {
     navigate('/');
   }, [navigate]);
 
-  if (isAuthenticated) return null;
+  if (isAuthenticated && !isThemeDraftPreview) return null;
 
   return (
     <div className="min-h-screen pb-5 pt-[4.75rem]">
@@ -621,9 +644,9 @@ const PublicCatalog = () => {
       />
 
       {typeof document !== 'undefined' && createPortal(
-      <header className="pointer-events-none fixed inset-x-0 top-0 z-[90]">
+      <header style={storefrontHeaderStyle} data-custom-header-height={customHeaderHeight} className={"platform-header-shell platform-storefront-header pointer-events-none fixed z-[90] " + storefrontHeaderClass}>
         <div className="mx-auto max-w-[var(--shell-max-width)] px-3 py-2 sm:px-4 lg:px-6">
-          <div dir="ltr" className="ka-card-panel pointer-events-auto grid min-h-[2.95rem] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 rounded-[20px] border px-2.5 py-1 sm:min-h-[3.25rem] sm:gap-5 sm:rounded-[28px] sm:px-5 sm:py-1.5">
+          <div dir="ltr" className="app-shell-header-panel ka-card-panel pointer-events-auto grid min-h-[2.95rem] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-2 rounded-[20px] border px-2.5 py-1 sm:min-h-[3.25rem] sm:gap-5 sm:rounded-[28px] sm:px-5 sm:py-1.5">
             <div className="col-start-1 row-start-1 flex items-center gap-1 justify-self-start sm:gap-2">
               <ThemeToggle variant="glass" compact className="h-9 w-9 sm:h-10 sm:w-10" />
             </div>

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Check, Clock3, CreditCard, History, ImagePlus, LockKeyhole, Palette, RotateCcw, Save, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Activity, ArrowUpRight, Check, CreditCard, History, ImagePlus, Layers3, LockKeyhole, MenuSquare, Palette, PanelsTopLeft, RotateCcw, Save, Sparkles, Type, MessageCircle, LayoutDashboard } from 'lucide-react';
 import apiClient from '../../services/client';
 import useMediaStore from '../../store/useMediaStore';
 import CategoryCard from '../../components/home/CategoryCard';
@@ -9,6 +9,9 @@ import { useLanguage } from '../../context/LanguageContext';
 import { useToast } from '../../components/ui/Toast';
 import { platformThemeStyles } from '../../theme/platformTheme';
 import { resolveImageUrl } from '../../utils/imageUrl';
+import useAuthStore from '../../store/useAuthStore';
+import useSystemStore from '../../store/useSystemStore';
+import PlatformStudioPreview from './PlatformStudioPreview';
 import './PlatformThemeEditor.css';
 
 const liveApi = (import.meta.env.VITE_DATA_PROVIDER || 'mock').toLowerCase() === 'real';
@@ -33,7 +36,20 @@ const samplePart = (mode) => ({ presetId: 'classic', colors: { ...sampleColors[m
   buttons: { radius: 8, style: 'solid' }, cards: { radius: 12, shadow: 'subtle' }, navigation: { style: 'standard' }, neon: sampleNeon() });
 const DEFAULT_MARQUEE_AR = 'بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ ﴿قُلْ إِنَّ رَبِّي يَبْسُطُ الرِّزْقَ لِمَنْ يَشَاءُ مِنْ عِبَادِهِ وَيَقْدِرُ لَهُ وَمَا أَنْفَقْتُمْ مِنْ شَيْءٍ فَهُوَ يُخْلِفُهُ وَهُوَ خَيْرُ الرَّازِقِينَ﴾ صَدَقَ اللَّهُ الْعَظِيمُ';
 const sampleTheme = { schemaVersion: 2, modes: { light: samplePart('light'), dark: samplePart('dark') },
-  brand: { logoPath: null, logoWidth: 144, slides: [null, null, null, null], marqueeTextArabic: DEFAULT_MARQUEE_AR, targetBannerPath: null, sidebarTemplate: 'default' } };
+  brand: { logoPath: null, logoWidth: 144, slides: [null, null, null, null], marqueeTextArabic: DEFAULT_MARQUEE_AR, targetBannerPath: null, sidebarTemplate: 'default' },
+  chrome: { header: { template: 'bar', height: 64, width: 100, background: '#FFFFFF', foreground: '#0F172A', accent: '#2563EB', radius: 0 }, bottomNav: { template: 'bar', height: 64, width: 100, background: '#FFFFFF', foreground: '#0F172A', accent: '#2563EB', radius: 0 } } };
+const headerLooks = [
+  { name: 'Midnight edge', ar: 'مستطيل منتصف الليل', config: { template: 'bar', height: 64, width: 100, background: '#111827', foreground: '#F8FAFC', accent: '#38BDF8', radius: 0 } },
+  { name: 'Violet float', ar: 'عائم بنفسجي', config: { template: 'floating', height: 72, width: 90, background: '#312E81', foreground: '#F5F3FF', accent: '#C4B5FD', radius: 24 } },
+  { name: 'Emerald float', ar: 'عائم زمردي', config: { template: 'floating', height: 68, width: 94, background: '#064E3B', foreground: '#ECFDF5', accent: '#6EE7B7', radius: 16 } },
+];
+const bottomNavLooks = [
+  { name: 'Full-width', ar: 'مستطيل كامل', config: { template: 'bar', height: 64, width: 100, background: '#111827', foreground: '#F8FAFC', accent: '#38BDF8', radius: 0 } },
+  { name: 'Slate float', ar: 'عائم رمادي', config: { template: 'floating', height: 68, width: 92, background: '#1E293B', foreground: '#F8FAFC', accent: '#67E8F9', radius: 20 } },
+  { name: 'Rounded pill', ar: 'كبسولة دائرية', config: { template: 'pill', height: 72, width: 90, background: '#312E81', foreground: '#F5F3FF', accent: '#C4B5FD', radius: 24 } },
+  { name: 'Emerald', ar: 'زمردي', config: { template: 'floating', height: 64, width: 88, background: '#064E3B', foreground: '#ECFDF5', accent: '#6EE7B7', radius: 16 } },
+  { name: 'Warm accent', ar: 'ذهبي دافئ', config: { template: 'pill', height: 70, width: 94, background: '#422006', foreground: '#FFFBEB', accent: '#FBBF24', radius: 24 } },
+];
 const previewPresetPalettes = {
   "classic": {
     "light": [
@@ -426,6 +442,17 @@ const presetNames = {
     "frost": "Frost"
   }
 };
+const presetCategory = (id, language) => {
+  const categories = {
+    luxury: ['royal', 'gold', 'silver', 'copper'], glass: ['aurora', 'orchid', 'frost'], neon: ['ruby', 'sunset'],
+    minimal: ['classic', 'midnight', 'graphite'], modern: ['ocean', 'forest', 'desert', 'warm'],
+  };
+  const category = Object.keys(categories).find((key) => categories[key].includes(id)) || 'modern';
+  const labels = language === 'ar'
+    ? { luxury: 'فاخر', glass: 'شفق', neon: 'جريء', minimal: 'بسيط', modern: 'حديث' }
+    : { luxury: 'Luxury', glass: 'Atmospheric', neon: 'Bold', minimal: 'Minimal', modern: 'Modern' };
+  return labels[category];
+};
 const samplePresets = Object.entries(previewPresetPalettes).map(([id, modes]) => ({
   id, tier: ['classic', 'midnight', 'warm'].includes(id) ? 'FREE' : 'THEME_PRO',
   configuration: { ...sampleTheme, modes: {
@@ -436,11 +463,17 @@ const samplePresets = Object.entries(previewPresetPalettes).map(([id, modes]) =>
 const copy = {
   ar: {
     title: 'مظهر المنصة', subtitle: 'صمّم مظهرًا مستقلًا للوضع الفاتح والغامق، ثم عاين النتيجة قبل النشر.',
+    sectionNavigation: 'أقسام مظهر المنصة', appearancePage: 'تخصيص المظهر', subscriptionPage: 'الدفع والاشتراكات', contactsPage: 'أرقام واتساب', historyPage: 'السجل',
+    appearanceColors: 'الألوان والثيمات', appearanceInterface: 'الخطوط والواجهة', appearanceBrand: 'الهوية والصور',
+    ownerWhatsApp: 'واتساب صاحب الموقع', serverWhatsApp: 'واتساب إشعارات السيرفر · ULTRA', supportWhatsApp: 'واتساب خدمة العملاء',
+    contactsHint: 'تظهر أرقام التواصل العامة في نافذة تواصل معنا وصفحة من نحن وقسم مشاكل الحساب. رقم إشعارات السيرفر مخصص للإدارة فقط ولا يظهر للعملاء. تغيير أرقام واتساب متاح لمشتركي ULTRA فقط.', serverWhatsAppHint: 'أدخل الأرقام بصيغة دولية مع رمز + ومفتاح الدولة، مثال: +201012345678.',
+    phoneFormatHint: 'اكتب الرقم مع + ومفتاح الدولة، مثال: +201012345678.', phoneValidation: 'أدخل رقمًا دوليًا صحيحًا يبدأ بـ + ومفتاح الدولة.', contactsLockedTitle: 'إدارة أرقام واتساب ميزة حصرية لخطة ULTRA.', contactsSubscriptionCta: 'شاهد الخطط والمميزات وطرق الدفع والتفعيل',
+    ultraContactsOnly: 'تغيير أرقام واتساب متاح في ULTRA فقط.', subscriptionLink: 'شاهد الخطط والمميزات وطرق الدفع والتفعيل', saveContacts: 'حفظ أرقام التواصل', saving: 'جارٍ الحفظ...', contactsSaved: 'تم حفظ أرقام واتساب التواصل.', contactsSaveFailed: 'تعذر حفظ أرقام واتساب.',
     previewNotice: 'هذه معاينة للتصميم فقط. لإنشاء طلب تحويل حقيقي، افتح صفحة الأدمن بعد تشغيل الباك إند.',
     previewOrderHint: 'لا يمكن إنشاء رقم طلب أو إرسال تحويل من المعاينة. افتح صفحة الأدمن لإنشاء طلب مسجل أولًا.',
     offerEyebrow: 'عرض خاص للثيمات', offerHeadline: 'استمتع بمميزات الثيمات لمدة 3 أشهر فقط',
     freeWarning: 'الخطة المجانية تمنحك تغييرين فقط، مع الانتظار 30 يومًا بينهما. للمزيد اشترك في PRO أو ULTRA.',
-    ultraBenefits: ['كل مميزات PRO', 'تغيير أرقام واتساب التواصل ورقم استقبال إشعارات السيرفر', 'قوالب سايدبار جاهزة: ملكي وزجاجي'],
+    ultraBenefits: ['كل مميزات PRO', 'تغيير أرقام واتساب التواصل ورقم استقبال إشعارات السيرفر', 'قوالب سايدبار متنوعة: ملكي ذهبي، زجاجي، شفق بنفسجي، مستطيل فحمي، ودائري زمردي'],
     upgrade: 'الترقية إلى ULTRA بدفع الفرق: 5 USDT فقط', upgradeTerm: 'تستمر الترقية حتى تاريخ انتهاء اشتراك PRO الحالي؛ لا تبدأ مدة جديدة.',
     amountDue: 'صافي المبلغ المطلوب', changesLeft: 'التغييرات المجانية المتبقية', ultraActive: 'اشتراك ULTRA نشط', contactsSettings: 'إعدادات أرقام واتساب',
     offerOld: 'بدلًا من 50$ لنفس المدة', offerNew: '24.99$ فقط',
@@ -473,11 +506,9 @@ const copy = {
     activationTitle: 'تفعيل الاشتراك بالكود المؤقت', activationHint: 'بعد مراجعة وصول مبلغ خطتك أو الترقية، سيصلك كود من 10 أرقام. صلاحيته 48 ساعة ويُستخدم مرة واحدة.',
     activationCode: 'كود التفعيل', activate: 'تفعيل الاشتراك أو الترقية', activated: 'تم تفعيل الاشتراك بنجاح.',
     activationOrderNeeded: 'أنشئ طلب التحويل أولًا، ثم أدخل كود التفعيل بعد تأكيد الدفع.',
-    reviewTitle: 'تأكيد التحويل وإرسال الكود', reviewHint: 'بعد التحقق يدويًا من وصول التحويل في حساب الاستلام، أدخل مرجع الطلب ومعرّف المعاملة. سيُنشئ الخادم الكود ويرسله تلقائيًا إلى واتساب صاحب الطلب؛ لا يظهر الكود هنا.',
-    reviewReference: 'مرجع الطلب', reviewTransaction: 'معرّف التحويل أو المعاملة', reviewConfirm: 'تأكيد الدفع وإرسال الكود', reviewResend: 'إصدار كود جديد وإرساله', reviewSent: 'تم إرسال كود التفعيل إلى واتساب صاحب الطلب.', reviewSkipped: 'تم إصدار الكود في وضع الاختبار المحلي؛ لا يتم إرسال رسائل واتساب محليًا.', reviewFailed: 'تم تأكيد الدفع لكن تعذر إرسال واتساب. أعد اتصال واتساب ثم اضغط إصدار كود جديد وإرساله.',
     noPaymentReady: 'تعليمات التحويل غير متاحة حتى يتصل التطبيق بالباك إند.',
     animatedArabic: 'النص العربي المتحرك', animatedArabicHint: 'تعديل النص الظاهر أسفل السلايدر متاح للمشتركين في Pro فقط (حتى 240 حرفًا).',
-    sidebarTemplate: 'قالب السايدبار', sidebarTemplateHint: 'قوالب السايدبار الجاهزة متاحة مع ULTRA فقط.', sidebarDefault: 'الافتراضي', sidebarRoyal: 'ملكي', sidebarGlass: 'زجاجي', ultraLocked: 'هذه الميزة تحتاج اشتراك ULTRA.',
+    sidebarTemplate: 'قالب السايدبار', sidebarTemplateHint: 'اختر شكل القائمة الجانبية وعاين شكلها قبل حفظ المسودة ونشرها. القوالب المميزة متاحة مع ULTRA.', sidebarDefault: 'الافتراضي', sidebarRoyal: 'ملكي ذهبي', sidebarGlass: 'زجاجي', sidebarAurora: 'شفق بنفسجي', sidebarSquare: 'مستطيل فحمي', sidebarRounded: 'دائري زمردي', sidebarPreviewBrand: 'EMBRATOR', sidebarPreviewAccount: 'حساب المدير', sidebarPreviewItem: 'لوحة التحكم', ultraLocked: 'هذه الميزة تحتاج اشتراك ULTRA.',
     logo: 'شعار المنصة', logoWidth: 'عرض الشعار', slides: 'صور السلايدر الرئيسية', targetBanner: 'صورة بانر بيع التارجت', imageHint: 'JPG أو PNG أو WebP، بحد أقصى 5MB',
     upload: 'رفع صورة', remove: 'إزالة', sample: 'زر تجريبي', sampleText: 'هذه معاينة للألوان والخطوط والبطاقات في الوضع المحدد.',
     retry: 'إعادة المحاولة', partial: 'تعذر تحميل بعض بيانات الاشتراك أو السجل، ويمكنك تعديل الثيم.', loading: 'جارٍ التحميل...',
@@ -487,11 +518,17 @@ const copy = {
   },
   en: {
     title: 'Platform Appearance', subtitle: 'Design separate light and dark appearances and preview before publishing.',
+    sectionNavigation: 'Platform appearance sections', appearancePage: 'Customize appearance', subscriptionPage: 'Payments and plans', contactsPage: 'WhatsApp numbers', historyPage: 'History',
+    appearanceColors: 'Colors and presets', appearanceInterface: 'Fonts and layout', appearanceBrand: 'Brand and images',
+    ownerWhatsApp: 'Site owner WhatsApp', serverWhatsApp: 'Server notification WhatsApp · ULTRA', supportWhatsApp: 'Customer support WhatsApp',
+    contactsHint: 'Public contact numbers appear in Contact Us, About Us, and Account Problems. The server notification number is private to administration and never shown to customers. WhatsApp number editing requires ULTRA.', serverWhatsAppHint: 'Enter an international number with + and country code, for example +201012345678.',
+    phoneFormatHint: 'Use + and a country code, for example +201012345678.', phoneValidation: 'Enter a valid international number starting with + and the country code.', contactsLockedTitle: 'WhatsApp contact management is exclusive to the ULTRA plan.', contactsSubscriptionCta: 'View plans, features, payment and activation',
+    ultraContactsOnly: 'Editing WhatsApp numbers requires ULTRA.', subscriptionLink: 'View plans, features, payment and activation', saveContacts: 'Save contact numbers', saving: 'Saving...', contactsSaved: 'WhatsApp contact numbers saved.', contactsSaveFailed: 'Could not save WhatsApp numbers.',
     previewNotice: 'This is a design preview. Open the admin page with a running backend to create a real transfer order.',
     previewOrderHint: 'The preview cannot issue an order reference or record a transfer. Open the admin page to create a recorded order first.',
     offerEyebrow: 'Special theme offer', offerHeadline: 'Enjoy theme features for 3 months',
     freeWarning: 'The free plan includes two changes, with 30 days between them. Subscribe to PRO or ULTRA for more.',
-    ultraBenefits: ['All PRO features', 'Edit public WhatsApp contacts and the server notification recipient', 'Ready sidebar templates: Royal and Glass'],
+    ultraBenefits: ['All PRO features', 'Edit public WhatsApp contacts and the server notification recipient', 'Distinct sidebar templates: Royal gold, Glass, Violet aurora, Charcoal square, and Emerald rounded'],
     upgrade: 'Upgrade to ULTRA for the difference: only 5 USDT', upgradeTerm: 'The upgrade keeps your current PRO expiry date; it does not start a new term.',
     amountDue: 'Net amount due', changesLeft: 'Free changes remaining', ultraActive: 'ULTRA active', contactsSettings: 'WhatsApp number settings',
     offerOld: 'Instead of $50 for the same term', offerNew: 'Only $24.99',
@@ -524,11 +561,9 @@ const copy = {
     activationTitle: 'Activate with a temporary code', activationHint: 'After your plan or upgrade payment is verified, you receive a 10-digit code. It lasts 48 hours and works once.',
     activationCode: 'Activation code', activate: 'Activate subscription or upgrade', activated: 'Subscription activated.',
     activationOrderNeeded: 'Create a transfer order first, then enter the activation code after payment verification.',
-    reviewTitle: 'Confirm transfer and send code', reviewHint: 'After manually verifying receipt in the receiving account, enter the order reference and transaction ID. The server creates the code and sends it to the payer’s WhatsApp; the code is never shown here.',
-    reviewReference: 'Order reference', reviewTransaction: 'Transfer or transaction ID', reviewConfirm: 'Confirm payment and send code', reviewResend: 'Issue and send a new code', reviewSent: 'The activation code was sent to the payer’s WhatsApp.', reviewSkipped: 'The code was issued in local safe mode; WhatsApp messages are not sent locally.', reviewFailed: 'Payment was confirmed but WhatsApp delivery failed. Reconnect WhatsApp, then issue and send a new code.',
     noPaymentReady: 'Transfer instructions require a backend connection.',
     animatedArabic: 'Animated Arabic text', animatedArabicHint: 'Pro subscribers can edit the text below the slider (up to 240 characters).',
-    sidebarTemplate: 'Sidebar template', sidebarTemplateHint: 'Ready sidebar templates are available with ULTRA only.', sidebarDefault: 'Default', sidebarRoyal: 'Royal', sidebarGlass: 'Glass', ultraLocked: 'This feature requires ULTRA.',
+    sidebarTemplate: 'Sidebar template', sidebarTemplateHint: 'Choose a sidebar look and preview it before saving and publishing. Premium templates require ULTRA.', sidebarDefault: 'Default', sidebarRoyal: 'Royal gold', sidebarGlass: 'Glass', sidebarAurora: 'Violet aurora', sidebarSquare: 'Charcoal square', sidebarRounded: 'Emerald rounded', sidebarPreviewBrand: 'EMBRATOR', sidebarPreviewAccount: 'Admin account', sidebarPreviewItem: 'Dashboard', ultraLocked: 'This feature requires ULTRA.',
     logo: 'Platform logo', logoWidth: 'Logo width', slides: 'Homepage slider images', targetBanner: 'Sell Target banner image', imageHint: 'JPG, PNG, or WebP up to 5MB',
     upload: 'Upload image', remove: 'Remove', sample: 'Sample button', sampleText: 'Preview colors, fonts, and cards in the selected mode.',
     retry: 'Retry', partial: 'Some subscription or history details could not be loaded; you can still edit.', loading: 'Loading...',
@@ -563,47 +598,47 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
   const { categories, loadProducts } = useMediaStore();
   const [catalogCategories, setCatalogCategories] = useState(null);
   const { addToast } = useToast();
+  const { user } = useAuthStore();
+  const { paymentSettings, loadPaymentSettings, savePaymentSettings } = useSystemStore();
   const t = copy[language] || copy.ar;
   const languageRef = useRef(language);
   languageRef.current = language;
   const [mode, setMode] = useState('light');
+  const [activePage, setActivePage] = useState('overview');
+  const navigate = useNavigate();
+  const [supportContacts, setSupportContacts] = useState({ owner: '', support: '' });
+  const [adminNotificationWhatsApp, setAdminNotificationWhatsApp] = useState('');
+  const [savingContacts, setSavingContacts] = useState(false);
+  const [contactsErrors, setContactsErrors] = useState({});
+  const contactsSaveInFlight = useRef(false);
+  const contactsDirty = useRef(false);
   const [draft, setDraft] = useState(previewOnly ? sampleTheme : null);
   const [settings, setSettings] = useState(null);
   const [presets, setPresets] = useState(previewOnly ? samplePresets : []);
-  const [manual, setManual] = useState(null);
-  const [paymentError, setPaymentError] = useState('');
-  const [network, setNetwork] = useState('BINANCE_ID');
-  const [selectedPlanId, setSelectedPlanId] = useState('THEME_PRO');
-  const [order, setOrder] = useState(null);
-  const [activationCode, setActivationCode] = useState('');
-  const [reviewReference, setReviewReference] = useState('');
-  const [reviewTransactionId, setReviewTransactionId] = useState('');
-  const [reviewResult, setReviewResult] = useState(null);
   const [history, setHistory] = useState([]);
-  const [payments, setPayments] = useState([]);
-  const activationReference = payments.find((item) => item.status === 'VERIFIED' && !item.redeemed)?.providerReference || '';
   const [loading, setLoading] = useState(!previewOnly);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [partial, setPartial] = useState(false);
-  const [offerOpen, setOfferOpen] = useState(true);
-  const offerCloseRef = useRef(null);
   useEffect(() => {
-    if (!offerOpen) return undefined;
-    const frame = window.requestAnimationFrame(() => offerCloseRef.current?.focus());
-    const onKeyDown = (event) => { if (event.key === 'Escape') setOfferOpen(false); };
-    window.addEventListener('keydown', onKeyDown);
-    return () => { window.cancelAnimationFrame(frame); window.removeEventListener('keydown', onKeyDown); };
-  }, [offerOpen]);
+    if (previewOnly) return;
+    const section = window.location.hash.replace('#studio-', '').replace('#theme-', '');
+    if (section === 'subscription') { navigate('/admin/theme/subscriptions', { replace: true }); return; }
+    if (['overview', 'colors', 'templates', 'typography', 'header', 'sidebar', 'navigation', 'branding', 'contacts', 'history', 'preview'].includes(section)) setActivePage(section);
+  }, [navigate, previewOnly]);
   const paid = ['THEME_PRO', 'THEME_ULTRA'].includes(settings?.eligibility?.plan);
   const ultra = settings?.eligibility?.plan === 'THEME_ULTRA';
-  const upgrading = settings?.eligibility?.plan === 'THEME_PRO' && selectedPlanId === 'THEME_ULTRA';
-  const selectedOffer = manual?.offers?.find((item) => item.id === selectedPlanId);
-  const transferAmount = upgrading ? '5.00' : selectedOffer?.amount || (selectedPlanId === 'THEME_ULTRA' ? '29.99' : '24.99');
-  const selectPlan = (id) => { setSelectedPlanId(id); setOrder(null); };
+  const canPreviewUltra = ultra || previewOnly;
+  const canPreviewPaid = paid || previewOnly;
   useEffect(() => {
-    if (['THEME_PRO', 'THEME_ULTRA'].includes(settings?.eligibility?.plan)) { setSelectedPlanId('THEME_ULTRA'); setOrder(null); }
-  }, [settings?.eligibility?.plan]);
+    if (!previewOnly && liveApi) void loadPaymentSettings({ force: true });
+  }, [previewOnly, loadPaymentSettings]);
+  useEffect(() => {
+    if (contactsDirty.current) return;
+    setSupportContacts({ owner: String(paymentSettings?.supportContacts?.owner || '').trim(), support: String(paymentSettings?.supportContacts?.support || '').trim() });
+    setAdminNotificationWhatsApp(String(paymentSettings?.adminNotificationWhatsApp || '').trim());
+    setContactsErrors({});
+  }, [paymentSettings]);
   const part = draft?.modes?.[mode];
   const previewStyle = useMemo(() => platformThemeStyles(draft, mode), [draft, mode]);
   useEffect(() => {
@@ -623,9 +658,8 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
     if (previewOnly || !liveApi) return;
     setLoading(true);
     try {
-      const [settingsResult, presetsResult, historyResult, subscriptionResult, paymentsResult] = await Promise.allSettled([
+      const [settingsResult, presetsResult, historyResult] = await Promise.allSettled([
         apiClient.platformTheme.getSettings(), apiClient.platformTheme.getPresets(), apiClient.platformTheme.getHistory(),
-        apiClient.platformTheme.getSubscription(), apiClient.platformTheme.getPayments(),
       ]);
       if (settingsResult.status === 'rejected') throw settingsResult.reason;
       if (presetsResult.status === 'rejected') throw presetsResult.reason;
@@ -634,12 +668,7 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
       setSettings(current);
       setPresets(options);
       setHistory(historyResult.status === 'fulfilled' ? historyResult.value?.items || [] : []);
-      const paymentItems = paymentsResult.status === 'fulfilled' ? paymentsResult.value?.items || [] : [];
-      setPayments(paymentItems);
-      setManual(subscriptionResult.status === 'fulfilled' ? subscriptionResult.value?.manualPayment || null : null);
-      setPaymentError(subscriptionResult.status === 'rejected'
-        ? errorText(subscriptionResult.reason, copy[languageRef.current] || copy.ar) : '');
-      setPartial([historyResult, subscriptionResult, paymentsResult].some((result) => result.status === 'rejected'));
+      setPartial(historyResult.status === 'rejected');
       if (!keepDraft) setDraft(current?.draft || current?.published || options[0]?.configuration || null);
       setError('');
     } catch (cause) { setError(errorText(cause, copy[languageRef.current] || copy.ar)); }
@@ -650,6 +679,7 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
   const updatePart = (section, key, value) => setDraft((current) => ({ ...current,
     modes: { ...current.modes, [mode]: { ...current.modes[mode], [section]: { ...current.modes[mode][section], [key]: value } } } }));
   const updateBrand = (change) => setDraft((current) => ({ ...current, brand: { ...current.brand, ...change } }));
+  const updateChrome = (section, change) => setDraft((current) => ({ ...current, chrome: { ...current.chrome, [section]: { ...current.chrome[section], ...change } } }));
   const updateNeon = (section, change) => setDraft((current) => ({ ...current,
     modes: { ...current.modes, [mode]: { ...current.modes[mode], neon: { ...current.modes[mode].neon,
       [section]: { ...current.modes[mode].neon[section], ...change } } } } }));
@@ -704,91 +734,75 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
     } catch (cause) { addToast(errorText(cause, t), 'error'); }
     finally { setBusy(false); }
   };
-  const createOrder = async () => {
-    if (previewOnly || !manual) return;
-    if (manual.durationCalendarMonths !== 3) { addToast(t.offerBackendOutdated, 'error'); return; }
-    setBusy(true);
+  const saveContacts = async () => {
+    if (!ultra || previewOnly || contactsSaveInFlight.current) return;
+    const validPhone = (value) => /^\+[1-9]\d{7,14}$/.test(String(value || '').trim().replace(/[٠-٩۰-۹]/g, (digit) => String(digit.charCodeAt(0) & 15)).replace(/[\s()-]/g, ''));
+    const nextErrors = {
+      owner: validPhone(supportContacts.owner) ? '' : t.phoneValidation,
+      support: validPhone(supportContacts.support) ? '' : t.phoneValidation,
+      notification: !String(adminNotificationWhatsApp || '').trim() || validPhone(adminNotificationWhatsApp) ? '' : t.phoneValidation,
+    };
+    contactsDirty.current = true;
+    setContactsErrors(nextErrors);
+    if (Object.values(nextErrors).some(Boolean)) return;
+    contactsSaveInFlight.current = true;
+    setSavingContacts(true);
     try {
-      const result = await apiClient.platformTheme.createManualOrder(network, selectedPlanId);
-      setOrder(result);
-      await refresh(true);
-    } catch (cause) { addToast(errorText(cause, t), 'error'); }
-    finally { setBusy(false); }
+      const saved = await savePaymentSettings({ supportContacts, adminNotificationWhatsApp }, user);
+      setSupportContacts({ owner: String(saved?.supportContacts?.owner || supportContacts.owner).trim(), support: String(saved?.supportContacts?.support || supportContacts.support).trim() });
+      setAdminNotificationWhatsApp(String(saved?.adminNotificationWhatsApp ?? adminNotificationWhatsApp).trim());
+      contactsDirty.current = false;
+      setContactsErrors({});
+      addToast(t.contactsSaved, 'success');
+    } catch (cause) {
+      const status = Number(cause?.response?.status || cause?.status || 0);
+      addToast(status === 403 ? t.ultraContactsOnly : status === 400 ? t.phoneValidation : t.contactsSaveFailed, 'error');
+    }
+    finally { contactsSaveInFlight.current = false; setSavingContacts(false); }
   };
-  const activateCode = async () => {
-    if (previewOnly || !/^THEME-[0-9A-F-]{36}$/.test(activationReference.trim()) || !/^\d{10}$/.test(activationCode.trim())) return;
-    setBusy(true);
-    try {
-      await apiClient.platformTheme.redeemCode(activationReference.trim(), activationCode.trim());
-      window.dispatchEvent(new CustomEvent('platform-theme-subscription-updated'));
-      setActivationCode('');
-      await refresh(true);
-      addToast(t.activated, 'success');
-    } catch (cause) { addToast(errorText(cause, t), 'error'); }
-    finally { setBusy(false); }
-  };
-  const confirmManualPayment = async () => {
-    if (previewOnly || !/^THEME-[0-9A-F-]{36}$/.test(reviewReference.trim()) || !/^[A-Za-z0-9:_-]{8,128}$/.test(reviewTransactionId.trim())) return;
-    setBusy(true);
-    try {
-      const result = await apiClient.platformTheme.confirmManualOrder(reviewReference.trim(), reviewTransactionId.trim());
-      setReviewResult(result);
-      setReviewTransactionId('');
-      await refresh(true);
-      addToast(result.deliveryStatus === 'SENT' ? t.reviewSent : result.deliveryStatus === 'SKIPPED' ? t.reviewSkipped : t.reviewFailed,
-        result.deliveryStatus === 'FAILED' ? 'error' : 'success');
-    } catch (cause) { addToast(errorText(cause, t), 'error'); }
-    finally { setBusy(false); }
-  };
-  const reissueManualCode = async () => {
-    if (previewOnly || !/^THEME-[0-9A-F-]{36}$/.test(reviewReference.trim())) return;
-    setBusy(true);
-    try {
-      const result = await apiClient.platformTheme.reissueManualCode(reviewReference.trim());
-      setReviewResult(result);
-      await refresh(true);
-      addToast(result.deliveryStatus === 'SENT' ? t.reviewSent : result.deliveryStatus === 'SKIPPED' ? t.reviewSkipped : t.reviewFailed,
-        result.deliveryStatus === 'FAILED' ? 'error' : 'success');
-    } catch (cause) { addToast(errorText(cause, t), 'error'); }
-    finally { setBusy(false); }
-  };
-  const copyValue = async (value) => { try { await navigator.clipboard.writeText(value); addToast(t.copied, 'success'); } catch { /* Browser may deny clipboard access. */ } };
 
   if (!previewOnly && !liveApi) return <div className={card}>{t.unavailable}</div>;
   if (loading && !draft) return <div className={card}>{t.loading}</div>;
   if (!draft || !part) return <div className={card}><p>{error || t.failed}</p><button type="button" className={`${button} mt-3`} onClick={() => refresh()}>{t.retry}</button></div>;
 
-  return <main className="mx-auto max-w-7xl space-y-5 px-3 py-5 sm:px-6 sm:py-7">
-    <header><h1 className="flex items-center gap-2 text-2xl font-black text-[var(--color-text)]"><Palette className="h-7 w-7 text-[var(--color-primary)]" />{t.title}</h1><p className="mt-1 text-sm text-[var(--color-text-secondary)]">{t.subtitle}</p></header>
-    {!paid && !offerOpen && <button type="button" className="theme-offer-reopen" onClick={() => setOfferOpen(true)}><Sparkles className="h-4 w-4" />{t.offerOpen}</button>}
-    {!paid && offerOpen && <div className="theme-offer-backdrop" role="presentation"><section className="theme-offer-window" role="dialog" aria-modal="true" aria-label={t.offerEyebrow}>
-      <div className="theme-offer-window__content">
-        <div className="theme-offer-window__bar" aria-hidden="true">
-          <span className="theme-offer-window__lights"><i /><i /><i /></span>
-          <span>THEME PRO · 03</span>
-          <Sparkles className="h-4 w-4" />
-        </div>
-        <button ref={offerCloseRef} type="button" className="theme-offer-window__close" onClick={() => setOfferOpen(false)} aria-label={t.offerClose}>×</button>
-        <div className="theme-offer-window__body">
-          <span className="theme-offer-window__eyebrow"><Sparkles className="h-4 w-4" />{t.offerEyebrow}</span>
-          <h2>{t.offerHeadline}</h2>
-          <p className="font-bold text-amber-500">{t.freeWarning}</p>
-          <div className="theme-offer-window__price"><strong>{t.offerNew}</strong><del>{t.offerOld}</del></div>
-          <p>{t.offerPayment}</p>
-          <a href="#theme-subscription" className="theme-offer-window__action" onClick={() => setOfferOpen(false)}>{t.offerAction}<span aria-hidden="true">←</span></a>
-        </div>
-      </div>
-    </section></div>}
+  const studioNav = [
+    ['overview', LayoutDashboard, language === 'ar' ? 'نظرة عامة' : 'Overview'],
+    ['header', PanelsTopLeft, language === 'ar' ? 'تصميم الهيدر' : 'Header studio'],
+    ['sidebar', MenuSquare, language === 'ar' ? 'تصميم السايدبار' : 'Sidebar studio'],
+    ['navigation', Activity, language === 'ar' ? 'النافبار السفلي' : 'Bottom navigation'],
+    ['colors', Palette, language === 'ar' ? 'الألوان' : 'Colors'],
+    ['typography', Type, language === 'ar' ? 'الخطوط والتفاصيل' : 'Typography'],
+    ['templates', Layers3, language === 'ar' ? 'مكتبة القوالب' : 'Template library'],
+    ['branding', ImagePlus, language === 'ar' ? 'الهوية والصور' : 'Branding & images'],
+    ['preview', Sparkles, language === 'ar' ? 'معاينة الموقع بالكامل' : 'Full website preview'],
+    ['contacts', MessageCircle, language === 'ar' ? 'أرقام واتساب' : 'WhatsApp contacts'],
+    ['history', History, language === 'ar' ? 'سجل النشر' : 'Publish history'],
+  ];
+  const editingPage = ['colors', 'templates', 'typography', 'header', 'sidebar', 'navigation', 'branding'].includes(activePage);
+  const setStudioSection = (id) => { setActivePage(id); window.history.replaceState(null, '', `#studio-${id}`); };
+  const openSubscriptions = () => navigate('/admin/theme/subscriptions');
+  return <main className="platform-studio mx-auto max-w-[90rem] space-y-5 px-3 py-5 sm:px-6 sm:py-7">
+    <header className="platform-studio__hero"><div><span className="platform-studio__eyebrow"><Sparkles className="h-4 w-4" />PLATFORM STUDIO</span><h1>{language === 'ar' ? 'حوّل منصتك إلى تجربة فريدة تحمل هويتك.' : 'Make your platform a distinctive experience.'}</h1><p>{language === 'ar' ? 'استكشف الهوية البصرية وعدّل مظهر منصتك من مساحة واحدة.' : 'Explore your visual identity and shape the platform from one workspace.'}</p></div><div className="platform-studio__hero-actions"><span className={`platform-studio__plan-badge ${paid ? 'is-paid' : ''}`}>{ultra ? 'ULTRA' : paid ? 'PRO' : language === 'ar' ? 'الخطة المجانية' : 'Free plan'}</span><Link to="/admin/theme/subscriptions" className="platform-studio__upgrade-link"><CreditCard className="h-4 w-4" />{language === 'ar' ? 'الخطط والاشتراكات' : 'Plans & subscriptions'}<ArrowUpRight className="h-4 w-4" /></Link></div></header>
     {(previewOnly || error || partial) && <div role="status" className={`${card} border-sky-500/40 text-sm text-[var(--color-text)]`}>{previewOnly ? t.previewNotice : error || t.partial}{!previewOnly && <button type="button" className={`${button} ms-3`} onClick={() => refresh(true)}>{t.retry}</button>}</div>}
-    <div className="flex flex-wrap gap-2" role="tablist" aria-label={t.title}>{['light', 'dark'].map((value) => <button key={value} role="tab" aria-selected={mode === value} type="button" className={`${button} ${mode === value ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white' : ''}`} onClick={() => setMode(value)}>{t[value]}</button>)}</div>
-    <div className="grid gap-5 xl:grid-cols-[minmax(0,1.45fr)_minmax(20rem,1fr)]">
-      <div className="space-y-5">
+    {!previewOnly && <nav className="platform-studio__nav" aria-label={language === 'ar' ? 'أقسام الاستوديو' : 'Studio sections'}>{studioNav.map(([id, Icon, label]) => { const locked = ['header', 'sidebar', 'navigation'].includes(id) && !canPreviewUltra; return <button key={id} type="button" aria-current={activePage === id ? 'page' : undefined} className={activePage === id ? 'is-active' : ''} onClick={() => setStudioSection(id)}><Icon className="h-4 w-4" /><span>{label}</span>{locked && <LockKeyhole className="ms-auto h-3.5 w-3.5 text-amber-500" aria-label="ULTRA" title="ULTRA" />}</button>; })}</nav>}
+    {(previewOnly || editingPage || activePage === 'preview') && <div className="platform-studio__modebar"><span>{language === 'ar' ? 'وضع المعاينة' : 'Preview mode'}</span>{['light', 'dark'].map((value) => <button key={value} type="button" aria-pressed={mode === value} className={mode === value ? 'is-active' : ''} onClick={() => setMode(value)}>{t[value]}</button>)}</div>}
+    {!previewOnly && activePage === 'overview' && <section className="space-y-5">
+      <div className="platform-studio__overview-grid"><article className={`${card} platform-studio__welcome-card`}><span className="platform-studio__eyebrow"><Sparkles className="h-4 w-4" />{language === 'ar' ? 'مساحة تخصيصك' : 'Your customization workspace'}</span><h2>{language === 'ar' ? 'كل تفاصيل الهوية البصرية في مكان واحد' : 'Your visual identity, all in one place'}</h2><p>{language === 'ar' ? 'خصص عناصر المنصة، استكشف القوالب، وشاهد أثر تعديلاتك قبل النشر.' : 'Customize the platform, explore templates, and preview changes before publishing.'}</p><div className="platform-studio__overview-actions"><button type="button" onClick={() => setStudioSection('preview')}>{language === 'ar' ? 'ابدأ بالمعاينة' : 'Open full preview'}<ArrowUpRight className="h-4 w-4" /></button><Link to="/admin/theme/subscriptions">{language === 'ar' ? 'استكشف الخطط والاشتراكات' : 'Explore plans & subscriptions'}<ArrowUpRight className="h-4 w-4" /></Link></div></article><div className={`${card} platform-studio__status-card`}><span className="platform-studio__status-icon"><Activity /></span><small>{language === 'ar' ? 'حالة الثيم الحالي' : 'Current theme status'}</small><strong>{settings?.version ? `v${settings.version}` : language === 'ar' ? 'مسودة جاهزة' : 'Draft ready'}</strong><p>{language === 'ar' ? `${settings?.eligibility?.freeChangesRemaining ?? 0} تغييرات مجانية متبقية` : `${settings?.eligibility?.freeChangesRemaining ?? 0} free publishes remaining`}</p><span className="platform-studio__feature-count">{language === 'ar' ? 'أكثر من 20 خيار تخصيص' : '20+ customization controls'}</span></div></div>
+      <div className={`${card} p-3 sm:p-5`}><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><div><h2 className="text-lg font-black">{language === 'ar' ? 'معاينة المنصة المباشرة' : 'Live platform preview'}</h2><p className="text-sm text-[var(--color-text-secondary)]">{language === 'ar' ? 'بيانات توضيحية آمنة · التغييرات مسودة حتى النشر' : 'Safe sample data · edits stay as drafts until published'}</p></div><button type="button" className={button} onClick={() => setStudioSection('preview')}>{language === 'ar' ? 'فتح المعاينة الكاملة' : 'Open full preview'}<ArrowUpRight className="h-4 w-4" /></button></div><PlatformStudioPreview theme={draft} mode={mode} language={language} compact locked={!canPreviewPaid} onUpgrade={openSubscriptions} /></div>
+      <div className="platform-studio__quick-grid">{studioNav.filter(([id]) => !['overview', 'preview', 'contacts', 'history'].includes(id)).map(([id, Icon, label]) => <button key={id} type="button" onClick={() => setStudioSection(id)}><span><Icon className="h-5 w-5" /></span><strong>{label}</strong><small>{language === 'ar' ? 'افتح مساحة التخصيص' : 'Open customization workspace'}</small><ArrowUpRight className="platform-studio__quick-arrow h-4 w-4" /></button>)}</div>
+      <section className={`${card} p-4 sm:p-5`}><div className="mb-3 flex flex-wrap items-center justify-between gap-2"><div><h2 className="font-black text-[var(--color-text)]">{language === 'ar' ? 'قوالب مقترحة لك' : 'Recommended templates'}</h2><p className="mt-1 text-xs text-[var(--color-text-secondary)]">{language === 'ar' ? 'عاين القالب وطبقه على المسودة مباشرة.' : 'Preview a template and apply it to your draft.'}</p></div><button type="button" onClick={() => setStudioSection('templates')} className="inline-flex items-center gap-1 text-xs font-black text-[var(--color-primary)]">{language === 'ar' ? 'المكتبة كاملة' : 'Full library'}<ArrowUpRight className="h-4 w-4" /></button></div><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{presets.slice(0, 4).map((entry) => { const locked = entry.tier === 'THEME_PRO' && !paid; const colors = entry.configuration.modes[mode].colors; return <button key={entry.id} type="button" onClick={() => locked ? openSubscriptions() : choosePreset(entry)} className={`theme-preset-card ${locked ? 'theme-preset-card--locked' : ''}`}><span className="theme-preset-card__scene" style={{ backgroundColor: colors.background, borderColor: colors.border }}><span className="theme-preset-card__panel" style={{ backgroundColor: colors.surface, borderColor: colors.border }}><span className="theme-preset-card__title" style={{ color: colors.text }}>Aa</span><span className="theme-preset-card__accent" style={{ backgroundColor: colors.primary }} /><span className="theme-preset-card__line" style={{ backgroundColor: colors.secondary }} /></span></span><span className="theme-preset-card__label"><span>{presetNames[language]?.[entry.id] || entry.id}</span>{locked ? <LockKeyhole className="h-4 w-4 text-amber-500" /> : null}</span><small className="studio-template-meta">{presetCategory(entry.id, language)} · {locked ? 'PRO' : language === 'ar' ? 'تطبيق فوري' : 'Apply instantly'}</small></button>; })}</div></section>
+      {!paid && <div className="platform-studio__upgrade-banner"><span className="platform-studio__upgrade-orb"><Sparkles /></span><div><strong>{language === 'ar' ? 'أطلق الهوية الكاملة لمنصتك' : 'Unlock your platform’s full identity'}</strong><p>{language === 'ar' ? 'قوالب أكثر، تخصيص أعمق، ومعاينة متكاملة قبل النشر.' : 'More templates, richer controls, and a complete preview before publishing.'}</p></div><Link to="/admin/theme/subscriptions">{language === 'ar' ? 'استكشف الخطط' : 'Explore plans'}<ArrowUpRight className="h-4 w-4" /></Link></div>}
+    </section>}
+    {!previewOnly && activePage === 'preview' && <Section icon={Sparkles} title={language === 'ar' ? 'معاينة الموقع بالكامل' : 'Full website preview'}><p className="mb-4 text-sm text-[var(--color-text-secondary)]">{language === 'ar' ? 'واجهة تفاعلية ببيانات توضيحية، مستقلة عن حسابات وطلبات العملاء.' : 'Interactive sample interface isolated from customer accounts and live orders.'}</p><PlatformStudioPreview theme={draft} mode={mode} language={language} locked={!canPreviewPaid} onUpgrade={openSubscriptions} /></Section>}
+    <div className="grid grid-cols-1 gap-5">
+      <div id="theme-appearance" className={`space-y-5 scroll-mt-20 ${!previewOnly && !editingPage ? 'hidden' : ''}`}>
+        {(previewOnly || activePage === 'colors' || activePage === 'templates') && <>
         <Section icon={Sparkles} title={`${t.presets} · ${t[mode]}`}><div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">{presets.map((entry) => {
           const locked = entry.tier === 'THEME_PRO' && !paid;
           const palette = entry.configuration.modes[mode].colors;
           const active = part.presetId === entry.id;
-          return <button key={entry.id} type="button" disabled={locked} aria-pressed={active}
-            onClick={() => choosePreset(entry)} className={`theme-preset-card ${active ? 'theme-preset-card--active' : ''}`}>
+          return <button key={entry.id} type="button" aria-pressed={active} aria-disabled={locked}
+            onClick={() => locked ? openSubscriptions() : choosePreset(entry)} className={`theme-preset-card ${active ? 'theme-preset-card--active' : ''} ${locked ? 'theme-preset-card--locked' : ''}`}>
             <span className="theme-preset-card__scene" style={{ backgroundColor: palette.background, borderColor: palette.border }}>
               <span className="theme-preset-card__panel" style={{ backgroundColor: palette.surface, borderColor: palette.border }}>
                 <span className="theme-preset-card__title" style={{ color: palette.text }}>Aa</span>
@@ -797,14 +811,17 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
               </span>
             </span>
             <span className="theme-preset-card__label"><span>{presetNames[language]?.[entry.id] || entry.id}</span>
-              {locked ? <LockKeyhole className="h-4 w-4 text-amber-500" /> : entry.tier === 'THEME_PRO' ? <span className="theme-preset-card__pro">Pro</span> : null}
+              {locked ? <LockKeyhole className="h-4 w-4 text-amber-500" /> : entry.tier === 'THEME_PRO' ? <span className="theme-preset-card__pro">PRO</span> : null}
             </span>
+            <small className="studio-template-meta">{presetCategory(entry.id, language)} · {locked ? (language === 'ar' ? 'مقفول · اعرض الخطط' : 'Locked · View plans') : (language === 'ar' ? 'معاينة وتطبيق فوري' : 'Preview and apply instantly')}</small>
           </button>;
         })}</div></Section>
-        <Section icon={Palette} title={t.colors}><div className="grid gap-3 sm:grid-cols-2">{colorKeys.map((key) => <label key={key} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text)]"><span>{t[key]}</span><span className="flex items-center gap-2"><small dir="ltr">{part.colors[key]}</small><input type="color" aria-label={t[key]} value={part.colors[key]} onChange={(event) => updatePart('colors', key, event.target.value)} /></span></label>)}</div></Section>
-        <Section icon={Palette} title={t.typography}><div className="grid gap-3 sm:grid-cols-2">{[['arabicFont', 'arabic'], ['englishFont', 'english']].map(([key, kind]) => <label key={key} className="text-sm text-[var(--color-text)]">{t[key]}<select className={`${input} mt-1`} value={part.typography[key]} onChange={(event) => updatePart('typography', key, event.target.value)}>{fonts[kind].map((font) => <option key={font} value={font} disabled={!paid && !freeFonts[kind].includes(font)}>{font}{!freeFonts[kind].includes(font) ? ' 🔒 Pro' : ''}</option>)}</select></label>)}</div><div className="mt-3 grid gap-3 sm:grid-cols-2"><Select label={t.baseSize} value={part.typography.baseSize} values={[14,16,18,20]} disabled={!paid} onChange={(value) => updatePart('typography','baseSize',Number(value))} suffix="px" /><Select label={t.headingWeight} value={part.typography.headingWeight} values={[600,700,800]} disabled={!paid} onChange={(value) => updatePart('typography','headingWeight',Number(value))} /></div></Section>
-        <Section icon={Palette} title={t.components} locked={!paid}><fieldset disabled={!paid} className="grid gap-3 sm:grid-cols-2 disabled:opacity-60"><Select label={t.buttonRadius} value={part.buttons.radius} values={[0,4,8,12,24]} suffix="px" onChange={(value) => updatePart('buttons','radius',Number(value))} /><Select label={t.buttonStyle} value={part.buttons.style} values={['solid','outline']} labels={t} onChange={(value) => updatePart('buttons','style',value)} /><Select label={t.cardRadius} value={part.cards.radius} values={[0,4,8,12,16,24]} suffix="px" onChange={(value) => updatePart('cards','radius',Number(value))} /><Select label={t.cardShadow} value={part.cards.shadow} values={['none','subtle','medium']} labels={t} onChange={(value) => updatePart('cards','shadow',value)} /><Select label={t.navigation} value={part.navigation.style} values={['standard','compact']} labels={t} onChange={(value) => updatePart('navigation','style',value)} /></fieldset></Section>
-        <Section icon={Sparkles} title={t.neonTitle} locked={!paid}>
+        {(previewOnly || activePage === 'colors') && <Section icon={Palette} title={t.colors}><div className="grid gap-3 sm:grid-cols-2">{colorKeys.map((key) => <label key={key} className="flex items-center justify-between gap-3 rounded-xl border border-[var(--color-border)] px-3 py-2 text-sm text-[var(--color-text)]"><span>{t[key]}</span><span className="flex items-center gap-2"><small dir="ltr">{part.colors[key]}</small><input type="color" aria-label={t[key]} value={part.colors[key]} onChange={(event) => updatePart('colors', key, event.target.value)} /></span></label>)}</div></Section>}
+        </>}
+        {(previewOnly || ['typography', 'header', 'navigation'].includes(activePage)) && <>
+        {(previewOnly || activePage === 'typography') && <Section icon={Palette} title={t.typography}><div className="grid gap-3 sm:grid-cols-2">{[['arabicFont', 'arabic'], ['englishFont', 'english']].map(([key, kind]) => <label key={key} className="text-sm text-[var(--color-text)]">{t[key]}<select className={`${input} mt-1`} value={part.typography[key]} onChange={(event) => updatePart('typography', key, event.target.value)}>{fonts[kind].map((font) => <option key={font} value={font} disabled={!paid && !freeFonts[kind].includes(font)}>{font}{!freeFonts[kind].includes(font) ? ' 🔒 Pro' : ''}</option>)}</select></label>)}</div><div className="mt-3 grid gap-3 sm:grid-cols-2"><Select label={t.baseSize} value={part.typography.baseSize} values={[14,16,18,20]} disabled={!paid} onChange={(value) => updatePart('typography','baseSize',Number(value))} suffix="px" /><Select label={t.headingWeight} value={part.typography.headingWeight} values={[600,700,800]} disabled={!paid} onChange={(value) => updatePart('typography','headingWeight',Number(value))} /></div></Section>}
+        {(previewOnly || activePage === 'typography') && <Section icon={Palette} title={t.components} locked={!paid}><fieldset disabled={!paid} className="grid gap-3 sm:grid-cols-2 disabled:opacity-60"><Select label={t.buttonRadius} value={part.buttons.radius} values={[0,4,8,12,24]} suffix="px" onChange={(value) => updatePart('buttons','radius',Number(value))} /><Select label={t.buttonStyle} value={part.buttons.style} values={['solid','outline']} labels={t} onChange={(value) => updatePart('buttons','style',value)} /><Select label={t.cardRadius} value={part.cards.radius} values={[0,4,8,12,16,24]} suffix="px" onChange={(value) => updatePart('cards','radius',Number(value))} /><Select label={t.cardShadow} value={part.cards.shadow} values={['none','subtle','medium']} labels={t} onChange={(value) => updatePart('cards','shadow',value)} /><Select label={t.navigation} value={part.navigation.style} values={['standard','compact']} labels={t} onChange={(value) => updatePart('navigation','style',value)} /></fieldset></Section>}
+        {(previewOnly || activePage === 'typography') && <Section icon={Sparkles} title={t.neonTitle} locked={!paid}>
           <p className="mb-4 text-xs text-[var(--color-text-secondary)]">{t.neonHint}</p>
           <div className="grid gap-3 sm:grid-cols-2">{neonSections.map((section) => {
             const effect = part.neon?.[section] || sampleNeon()[section];
@@ -833,9 +850,32 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
                 </div>;
               })}</div>}
           </div>
-        </Section>
-        <Section icon={ImagePlus} title={t.branding} locked={!paid}><p className="mb-3 text-xs text-[var(--color-text-secondary)]">{t.imageHint}</p><div className="grid gap-4 sm:grid-cols-2"><div className="rounded-xl border border-[var(--color-border)] p-3"><p className="mb-2 text-sm font-bold">{t.logo}</p>{draft.brand.logoPath && <div className="mb-2 flex h-28 items-center overflow-auto rounded-lg bg-[var(--color-surface)] p-2"><img src={resolveImageUrl(draft.brand.logoPath)} alt="" className="max-h-full shrink-0 object-contain" style={{ width: draft.brand.logoWidth }} /></div>}<label className={button}>{t.upload}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!paid || busy} onChange={(event) => { upload(event.target.files?.[0]); event.target.value = ''; }} /></label>{draft.brand.logoPath && <button type="button" className={`${button} ms-2`} disabled={!paid} onClick={() => updateBrand({ logoPath: null })}>{t.remove}</button>}<label className="mt-3 block text-xs">{t.logoWidth}: {draft.brand.logoWidth}px<input type="range" min="80" max="300" step="4" className="mt-2 w-full" disabled={!paid} value={draft.brand.logoWidth} onChange={(event) => updateBrand({ logoWidth: Number(event.target.value) })} /></label></div><div className="rounded-xl border border-[var(--color-border)] p-3"><p className="mb-2 text-sm font-bold">{t.slides}</p><div className="grid grid-cols-2 gap-2">{draft.brand.slides.map((path, index) => <div key={index} className="rounded-lg border border-[var(--color-border)] p-2 text-center text-xs"><div className="mb-2 flex aspect-video items-center justify-center overflow-hidden bg-[var(--color-surface)]">{path ? <img src={resolveImageUrl(path)} alt="" className="h-full w-full object-cover" /> : `${index + 1}`}</div><label className={button}>{t.upload}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!paid || busy} onChange={(event) => { upload(event.target.files?.[0], index); event.target.value = ''; }} /></label>{path && <button type="button" className="mt-1 block w-full text-rose-500" disabled={!paid} onClick={() => updateBrand({ slides: draft.brand.slides.map((old, slot) => slot === index ? null : old) })}>{t.remove}</button>}</div>)}</div></div></div></Section>
-        <Section icon={ImagePlus} title={t.targetBanner} locked={!paid}>
+        </Section>}
+        {(previewOnly || ['header', 'navigation'].includes(activePage)) && <Section icon={Palette} title={activePage === 'header' ? (language === 'ar' ? 'تصميم الهيدر · ULTRA' : 'Header studio · ULTRA') : (language === 'ar' ? 'تصميم النافبار السفلي · ULTRA' : 'Bottom navigation studio · ULTRA')} locked={!canPreviewUltra}>
+          <p className="mb-4 text-sm text-[var(--color-text-secondary)]">{language === 'ar' ? 'اختر قالبًا، ثم اضبط أبعاده وألوانه. التغييرات تظهر مباشرة في المعاينة الآمنة.' : 'Choose a layout and adjust its dimensions and colors. Changes appear immediately in the safe preview.'}</p>
+          {['header', 'bottomNav'].filter((section) => previewOnly || (activePage === 'header' ? section === 'header' : section === 'bottomNav')).map((section) => {
+            const value = draft.chrome?.[section] || sampleTheme.chrome[section];
+            const headerPart = section === 'header';
+            return <fieldset key={section} disabled={!canPreviewUltra} className="mb-4 grid gap-3 rounded-xl border border-[var(--color-border)] p-3 disabled:opacity-55">
+              <strong>{headerPart ? (language === 'ar' ? 'الهيدر العلوي' : 'Top header') : (language === 'ar' ? 'النافبار السفلي' : 'Bottom navigation')}</strong>
+              <div className="grid gap-2 sm:grid-cols-3">{(headerPart ? headerLooks : bottomNavLooks).map((look) => <button key={look.name} type="button" onClick={() => updateChrome(section, look.config)} className={`studio-look-card ${value.template === look.config.template && value.background === look.config.background ? 'is-selected' : ''}`}><span style={{ background: look.config.background, color: look.config.accent, borderRadius: look.config.template === 'pill' ? 999 : look.config.radius }}>{look.config.template === 'bar' ? '━━━━' : '◜━━◝'}</span><strong>{language === 'ar' ? look.ar : look.name}</strong><small>{look.config.template === 'bar' ? (language === 'ar' ? 'حافة كاملة' : 'Full width') : look.config.template === 'pill' ? (language === 'ar' ? 'كبسولة عائمة' : 'Floating pill') : (language === 'ar' ? 'عائم منحني' : 'Curved floating')}</small></button>)}</div>
+              <label className="text-sm">{language === 'ar' ? 'القالب' : 'Template'}
+                <select className={`${input} mt-1`} value={value.template} onChange={(event) => updateChrome(section, { template: event.target.value })}>
+                  {(headerPart ? [['bar', language === 'ar' ? 'مستطيل ملاصق للأعلى' : 'Rectangular, flush to top'], ['floating', language === 'ar' ? 'منحني عائم' : 'Curved floating']] : [['bar', language === 'ar' ? 'مستطيل' : 'Bar'], ['floating', language === 'ar' ? 'عائم' : 'Floating'], ['pill', language === 'ar' ? 'كبسولة' : 'Pill']]).map(([id, label]) => <option key={id} value={id}>{label}</option>)}
+                </select>
+              </label>
+              <label className="text-sm">{language === 'ar' ? 'الارتفاع' : 'Height'}: {value.height}px<input type="range" className="mt-1 w-full" min={headerPart ? 48 : 48} max={headerPart ? 120 : 100} value={value.height} onChange={(event) => updateChrome(section, { height: Number(event.target.value) })} /></label>
+              <label className="text-sm">{language === 'ar' ? 'العرض' : 'Width'}: {value.width}%<input type="range" className="mt-1 w-full" min="60" max="100" value={value.width} onChange={(event) => updateChrome(section, { width: Number(event.target.value) })} /></label>
+              <label className="text-sm">{language === 'ar' ? 'استدارة الحواف' : 'Corner radius'}: {value.radius}px<input type="range" className="mt-1 w-full" min="0" max="32" step="4" value={value.radius} onChange={(event) => updateChrome(section, { radius: Number(event.target.value) })} /></label>
+              <div className="grid grid-cols-3 gap-2">{[['background', language === 'ar' ? 'الخلفية' : 'Background'], ['foreground', language === 'ar' ? 'النص' : 'Text'], ['accent', language === 'ar' ? 'التمييز' : 'Accent']].map(([key, label]) => <label key={key} className="text-xs">{label}<input type="color" className="mt-1 h-10 w-full" value={value[key]} onChange={(event) => updateChrome(section, { [key]: event.target.value.toUpperCase() })} /></label>)}</div>
+            </fieldset>;
+          })}
+          {!ultra && <Link to="/admin/theme/subscriptions" className="mt-3 inline-flex items-center gap-2 font-bold text-amber-600">{language === 'ar' ? '🔒 استكشف ULTRA لفتح التعديل' : '🔒 Explore ULTRA to unlock editing'}<ArrowUpRight className="h-4 w-4" /></Link>}
+        </Section>}
+        </>}
+        {(previewOnly || ['branding', 'sidebar'].includes(activePage)) && <>
+        {['branding', 'preview'].includes(activePage) || previewOnly ? <Section icon={ImagePlus} title={t.branding} locked={!paid}><p className="mb-3 text-xs text-[var(--color-text-secondary)]">{t.imageHint}</p><div className="grid gap-4 sm:grid-cols-2"><div className="rounded-xl border border-[var(--color-border)] p-3"><p className="mb-2 text-sm font-bold">{t.logo}</p>{draft.brand.logoPath && <div className="mb-2 flex h-28 items-center overflow-auto rounded-lg bg-[var(--color-surface)] p-2"><img src={resolveImageUrl(draft.brand.logoPath)} alt="" className="max-h-full shrink-0 object-contain" style={{ width: draft.brand.logoWidth }} /></div>}<label className={button}>{t.upload}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!paid || busy} onChange={(event) => { upload(event.target.files?.[0]); event.target.value = ''; }} /></label>{draft.brand.logoPath && <button type="button" className={`${button} ms-2`} disabled={!paid} onClick={() => updateBrand({ logoPath: null })}>{t.remove}</button>}<label className="mt-3 block text-xs">{t.logoWidth}: {draft.brand.logoWidth}px<input type="range" min="80" max="300" step="4" className="mt-2 w-full" disabled={!paid} value={draft.brand.logoWidth} onChange={(event) => updateBrand({ logoWidth: Number(event.target.value) })} /></label></div><div className="rounded-xl border border-[var(--color-border)] p-3"><p className="mb-2 text-sm font-bold">{t.slides}</p><div className="grid grid-cols-2 gap-2">{draft.brand.slides.map((path, index) => <div key={index} className="rounded-lg border border-[var(--color-border)] p-2 text-center text-xs"><div className="mb-2 flex aspect-video items-center justify-center overflow-hidden bg-[var(--color-surface)]">{path ? <img src={resolveImageUrl(path)} alt="" className="h-full w-full object-cover" /> : `${index + 1}`}</div><label className={button}>{t.upload}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!paid || busy} onChange={(event) => { upload(event.target.files?.[0], index); event.target.value = ''; }} /></label>{path && <button type="button" className="mt-1 block w-full text-rose-500" disabled={!paid} onClick={() => updateBrand({ slides: draft.brand.slides.map((old, slot) => slot === index ? null : old) })}>{t.remove}</button>}</div>)}</div></div></div></Section> : null}
+        {['branding', 'preview'].includes(activePage) || previewOnly ? <Section icon={ImagePlus} title={t.targetBanner} locked={!paid}>
           <p className="mb-3 text-xs text-[var(--color-text-secondary)]">{t.imageHint}</p>
           <div className="rounded-xl border border-[var(--color-border)] p-3">
             <div className="mb-3 flex aspect-[5/1] items-center justify-center overflow-hidden rounded-lg bg-[var(--color-surface)]">
@@ -844,69 +884,54 @@ export default function PlatformThemeEditor({ previewOnly = false }) {
             <label className={button}>{t.upload}<input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" disabled={!paid || busy} onChange={(event) => { upload(event.target.files?.[0], 'targetBanner'); event.target.value = ''; }} /></label>
             {draft.brand.targetBannerPath && <button type="button" className={`${button} ms-2`} disabled={!paid} onClick={() => updateBrand({ targetBannerPath: null })}>{t.remove}</button>}
           </div>
-        </Section>
-        <Section icon={Sparkles} title={t.animatedArabic} locked={!paid}>
+        </Section> : null}
+        {['branding', 'preview'].includes(activePage) || previewOnly ? <Section icon={Sparkles} title={t.animatedArabic} locked={!paid}>
           <p className="mb-3 text-xs text-[var(--color-text-secondary)]">{t.animatedArabicHint}</p>
           <textarea className={`${input} min-h-24 resize-y`} dir="rtl" lang="ar" maxLength={240}
             value={draft.brand.marqueeTextArabic ?? DEFAULT_MARQUEE_AR}
             disabled={!paid || busy}
             onChange={(event) => updateBrand({ marqueeTextArabic: event.target.value })} />
-        </Section>
-        <Section icon={Palette} title={t.sidebarTemplate} locked={!ultra}>
-          <p className="mb-3 text-xs text-[var(--color-text-secondary)]">{t.sidebarTemplateHint}</p>
-          <div className="grid grid-cols-3 gap-2">{[['default', t.sidebarDefault], ['royal', t.sidebarRoyal], ['glass', t.sidebarGlass]].map(([value, label]) => <button key={value} type="button" disabled={!ultra && value !== 'default'} onClick={() => updateBrand({ sidebarTemplate: value })} className={`${button} ${draft.brand.sidebarTemplate === value ? 'border-[var(--color-primary)] bg-[var(--color-primary)] text-white' : ''}`}>{label}</button>)}</div>
-          {!ultra && <p className="mt-3 text-xs text-amber-600">{t.ultraLocked}</p>}
-        </Section>
-        {!paid && needsPro && <p className="rounded-xl border border-amber-500/50 bg-amber-500/10 p-3 text-sm text-[var(--color-text)]">{t.freeLocked}</p>}
-        <div className="flex flex-wrap gap-2"><button type="button" className={button} disabled={previewOnly || busy || !settings} onClick={() => run(() => apiClient.platformTheme.saveDraft(draft), t.saved, true)}><Save className="h-4 w-4" />{t.save}</button><button type="button" className={button} disabled={previewOnly || busy || !settings} onClick={() => run(() => apiClient.platformTheme.resetDraft(), t.resetDone)}><RotateCcw className="h-4 w-4" />{t.reset}</button><button type="button" className={`${button} border-[var(--color-primary)] bg-[var(--color-primary)] text-white`} disabled={previewOnly || busy || !settings?.eligibility?.canPublish || (!paid && needsPro)} onClick={() => run(() => apiClient.platformTheme.publish(draft), t.published)}><Check className="h-4 w-4" />{t.publish}</button></div>
+        </Section> : null}
+        {['sidebar', 'preview'].includes(activePage) || previewOnly ? <Section icon={Palette} title={t.sidebarTemplate} locked={!canPreviewUltra}>
+          <p className="mb-4 text-sm text-[var(--color-text-secondary)]">{t.sidebarTemplateHint}</p>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-3">{[['default', t.sidebarDefault], ['royal', t.sidebarRoyal], ['glass', t.sidebarGlass], ['aurora', t.sidebarAurora], ['square', t.sidebarSquare], ['rounded', t.sidebarRounded]].map(([value, label]) => {
+            const locked = !canPreviewUltra && value !== 'default';
+            return <button key={value} type="button" aria-pressed={draft.brand.sidebarTemplate === value} disabled={locked} onClick={() => updateBrand({ sidebarTemplate: value })} className={`theme-sidebar-template-card ${draft.brand.sidebarTemplate === value ? 'theme-sidebar-template-card--active' : ''} ${locked ? 'theme-sidebar-template-card--locked' : ''}`}>
+              <span style={previewStyle} className={`ka-sidebar-panel ka-sidebar-template-${value} theme-sidebar-template-preview border`} aria-hidden="true">
+                <span className="theme-sidebar-template-preview__brand">{t.sidebarPreviewBrand}</span>
+                <span className="theme-sidebar-template-preview__account"><i />{t.sidebarPreviewAccount}</span>
+                <span className="theme-sidebar-template-preview__nav"><i />{t.sidebarPreviewItem}</span>
+                <span className="theme-sidebar-template-preview__nav theme-sidebar-template-preview__nav--muted"><i />{t.history}</span>
+              </span>
+              <span className="theme-sidebar-template-label"><span>{label}</span>{locked ? <LockKeyhole className="h-4 w-4 text-amber-500" /> : value !== 'default' ? <span className="theme-preset-card__pro">ULTRA</span> : null}</span>
+            </button>;
+          })}</div>
+          {!canPreviewUltra && <p className="mt-3 text-xs text-amber-600">{t.ultraLocked}</p>}
+          {!canPreviewUltra && <Link to="/admin/theme/subscriptions" className="mt-4 inline-flex items-center gap-2 font-bold text-amber-600">{language === 'ar' ? 'استكشف خطة ULTRA' : 'Explore the ULTRA plan'}<ArrowUpRight className="h-4 w-4" /></Link>}
+        </Section> : null}
+        </>}
       </div>
+      {!previewOnly && editingPage && <div className="platform-studio__savebar">{!paid && needsPro && <div className="platform-studio__locked-note"><LockKeyhole className="h-4 w-4" />{t.freeLocked}<Link to="/admin/theme/subscriptions">{language === 'ar' ? 'عرض الخطط' : 'View plans'}<ArrowUpRight className="h-3.5 w-3.5" /></Link></div>}<div className="flex flex-col gap-2 sm:flex-row"><button type="button" className={`${button} w-full sm:w-auto`} disabled={busy || !settings} onClick={() => run(() => apiClient.platformTheme.saveDraft(draft), t.saved, true)}><Save className="h-4 w-4" />{t.save}</button><button type="button" className={`${button} w-full sm:w-auto`} disabled={busy || !settings} onClick={() => run(() => apiClient.platformTheme.resetDraft(), t.resetDone)}><RotateCcw className="h-4 w-4" />{t.reset}</button><button type="button" className={`${button} w-full border-[var(--color-primary)] bg-[var(--color-primary)] text-white sm:w-auto`} disabled={busy || !settings?.eligibility?.canPublish || (!paid && needsPro)} onClick={() => run(() => apiClient.platformTheme.publish(draft), t.published)}><Check className="h-4 w-4" />{t.publish}</button></div></div>}
       <div className="space-y-5">
-        <Section icon={Palette} title={`${t.livePreview} · ${t[mode]}`}><div style={previewStyle} className="overflow-hidden rounded-2xl border border-[var(--color-border)] text-[var(--color-text)]"><div className="border-b border-[var(--color-border)] bg-[var(--color-surface)] px-4 py-3 font-bold">{t.title}</div><div className="space-y-4 bg-[var(--color-bg)] p-5" style={{ fontFamily: language === 'ar' ? previewStyle['--platform-font-ar'] : previewStyle['--platform-font-en'], fontSize: previewStyle['--platform-base-font-size'] }}><h3 style={{ fontWeight: part.typography.headingWeight }}>{t.title}</h3><p className="text-[var(--color-text-secondary)]">{t.sampleText}</p><div className="border border-[var(--color-border)] bg-[var(--color-surface)] p-4" style={{ borderRadius: part.cards.radius, boxShadow: previewStyle['--shadow-subtle'] }}>{t.sampleText}</div><button type="button" style={{ background: part.buttons.style === 'outline' ? 'transparent' : part.colors.primary, color: part.buttons.style === 'outline' ? part.colors.primary : previewStyle['--color-button-text'], borderRadius: part.buttons.radius, border: `1px solid ${part.colors.primary}`, padding: '8px 16px' }}>{t.sample}</button></div></div></Section>
-        {!previewOnly && <Section icon={Clock3} title={t.currentPlan}><strong className="text-lg">{ultra ? t.ultraActive : paid ? t.paid : t.free}</strong><div className="mt-2 space-y-1 text-sm text-[var(--color-text-secondary)]"><p>{t.changesLeft}: {settings?.eligibility?.freeChangesRemaining ?? 2}</p><p>{t.lastPublish}: {dateText(settings?.eligibility?.lastSuccessfulPublishAt, language)}</p><p>{t.nextEdit}: {dateText(settings?.eligibility?.nextFreeEditAt, language)}</p>{paid && <p>{t.expires}: {dateText(settings?.eligibility?.subscription?.expiresAt, language)}</p>}</div></Section>}
-        <div id="theme-subscription" className="scroll-mt-20"><Section icon={CreditCard} title={t.plan}>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {[['THEME_PRO', t.planPrice], ['THEME_ULTRA', t.ultra]].map(([id, label]) => <button key={id} type="button" aria-pressed={selectedPlanId === id} disabled={busy || (paid && id === 'THEME_PRO')} onClick={() => selectPlan(id)} className={`${button} ${selectedPlanId === id ? 'border-amber-400 bg-amber-400/15' : ''}`}>{label}</button>)}
-          </div>
-          <p className="mt-2 text-sm text-[var(--color-text-secondary)]">{t.duration}</p>
-          {upgrading && <div className="mt-3 rounded-xl border border-amber-400/60 bg-amber-400/10 p-3"><strong>{t.upgrade}</strong><p className="mt-2 text-sm">{t.upgradeTerm}</p><p className="mt-1 text-sm">{t.expires}: {dateText(settings?.eligibility?.subscription?.expiresAt, language)}</p></div>}
-          <h3 className="mt-4 font-bold">{t.benefitsTitle}</h3>
-          <ul className="mt-2 space-y-2 text-sm">{[...t.benefits, ...(selectedPlanId === 'THEME_ULTRA' ? t.ultraBenefits : [])].map((benefit) => <li key={benefit} className="flex gap-2"><Check className="h-4 w-4 shrink-0 text-emerald-500" />{benefit}</li>)}</ul>
-          {ultra && <Link to="/admin/payment-methods" className={`${button} mt-4`}>{t.contactsSettings}</Link>}
-          {(!paid || upgrading) && <div className="mt-5 border-t border-[var(--color-border)] pt-4">
-            <h3 className="font-bold">{t.transferTitle}</h3>
-            <p className="mt-2 text-lg font-black">{t.amountDue}: <span dir="ltr">{transferAmount} USDT</span></p>
-            {previewOnly ? <div className="mt-2 space-y-3"><p className="text-sm text-[var(--color-text-secondary)]">{t.previewOrderHint}</p><Link className={`${button} w-full`} to="/admin/themes#theme-subscription">{t.openAdminOrder}</Link></div> : manual ? <>
-              <p className="mt-2 text-sm">{t.payee}: <b>{manual.payeeName}</b></p>
-              <label className="mt-3 block text-sm">{t.network}<select className={`${input} mt-1`} value={network} disabled={busy} onChange={(event) => { setNetwork(event.target.value); setOrder(null); }}>{Object.keys(manual.destinations).map((kind) => <option key={kind} value={kind}>{kind === 'BINANCE_ID' ? 'Binance ID' : kind}</option>)}</select></label>
-              <p className="mt-3 text-xs text-[var(--color-text-secondary)]">{t.destination}</p>
-              <div className="mt-1 flex items-center gap-2 rounded-xl bg-[var(--color-surface)] p-2"><code dir="ltr" className="min-w-0 flex-1 break-all text-xs">{manual.destinations[network]}</code><button type="button" className={button} onClick={() => copyValue(manual.destinations[network])}>{t.copy}</button></div>
-              <button type="button" className={`${button} mt-3 w-full`} disabled={busy || manual.durationCalendarMonths !== 3} onClick={createOrder}>{t.request}</button>
-              {manual.durationCalendarMonths !== 3 && <p role="alert" className="mt-2 text-sm text-amber-600">{t.offerBackendOutdated}</p>}
-              {order && <div className="mt-3 rounded-xl border border-emerald-500/40 p-3 text-sm"><strong>{order.planName} · {order.amount} USDT</strong><a className={`${button} mt-3 w-full`} href={order.whatsappUrl} target="_blank" rel="noopener noreferrer">{t.whatsapp}</a></div>}
-              <p className="mt-3 text-xs text-[var(--color-text-secondary)]">{t.proof}</p>
-            </> : <div className="mt-2 space-y-2 text-sm"><p role="alert">{paymentError || t.noPaymentReady}</p><button type="button" className={button} disabled={loading} onClick={() => refresh(true)}>{t.retry}</button></div>}
-          </div>}
-        </Section></div>
-        {!ultra && <Section icon={LockKeyhole} title={t.activationTitle}>
-          <p className="mb-3 text-sm text-[var(--color-text-secondary)]">{t.activationHint}</p>{!previewOnly && !activationReference && <p role="status" className="mb-3 text-sm text-amber-600">{t.activationOrderNeeded}</p>}
-          <div className="grid gap-3">
-            {!previewOnly && <button type="button" className={button} disabled={loading || busy} onClick={() => refresh(true)}>{language === 'ar' ? 'تحديث حالة الدفع' : 'Refresh payment status'}</button>}
-            <label className="text-sm">{t.activationCode}<input className={`${input} mt-1`} dir="ltr" inputMode="numeric" autoComplete="one-time-code" maxLength={10} value={activationCode} onChange={(event) => setActivationCode(event.target.value.replace(/\D/g, ''))} disabled={previewOnly || busy} placeholder="0000000000" /></label>
-            <button type="button" className={`${button} border-[var(--color-primary)] bg-[var(--color-primary)] text-white`} disabled={previewOnly || busy || !/^THEME-[0-9A-F-]{36}$/.test(activationReference.trim()) || !/^\d{10}$/.test(activationCode)} onClick={activateCode}>{t.activate}</button>
-          </div>
-        </Section>}
-        {!previewOnly && <Section icon={CreditCard} title={t.reviewTitle}>
-          <p className="mb-3 text-sm text-[var(--color-text-secondary)]">{t.reviewHint}</p>
-          <div className="grid gap-3">
-            <label className="text-sm">{t.reviewReference}<input className={`${input} mt-1`} dir="ltr" value={reviewReference} onChange={(event) => { setReviewReference(event.target.value.toUpperCase()); setReviewResult(null); }} placeholder="THEME-..." disabled={busy} /></label>
-            <label className="text-sm">{t.reviewTransaction}<input className={`${input} mt-1`} dir="ltr" value={reviewTransactionId} onChange={(event) => setReviewTransactionId(event.target.value)} placeholder="Transaction ID" disabled={busy} /></label>
-            <button type="button" className={`${button} border-[var(--color-primary)] bg-[var(--color-primary)] text-white`} disabled={busy || !/^THEME-[0-9A-F-]{36}$/.test(reviewReference.trim()) || !/^[A-Za-z0-9:_-]{8,128}$/.test(reviewTransactionId.trim())} onClick={confirmManualPayment}>{t.reviewConfirm}</button>
-            {reviewResult?.deliveryStatus === 'FAILED' && <button type="button" className={button} disabled={busy || !/^THEME-[0-9A-F-]{36}$/.test(reviewReference.trim())} onClick={reissueManualCode}>{t.reviewResend}</button>}
-            {reviewResult && <p role="status" className={`text-sm ${reviewResult.deliveryStatus === 'FAILED' ? 'text-amber-600' : 'text-emerald-600'}`}>{reviewResult.deliveryStatus === 'SENT' ? t.reviewSent : reviewResult.deliveryStatus === 'SKIPPED' ? t.reviewSkipped : t.reviewFailed}</p>}
-          </div>
-        </Section>}
-        {!previewOnly && <Section icon={History} title={t.history}><div className="space-y-2">{history.length ? history.map((item) => <div key={item._id} className="flex items-center justify-between gap-2 rounded-xl bg-[var(--color-surface)] p-3 text-sm"><span>#{item.version} · {dateText(item.publishedAt, language)}</span><button type="button" className={button} disabled={busy || !settings?.eligibility?.canPublish} onClick={() => run(() => apiClient.platformTheme.restore(item.version), t.published)}>{t.restore}</button></div>) : t.empty}</div></Section>}
-        {!previewOnly && <Section icon={CreditCard} title={t.payments}><div className="space-y-2 text-sm">{payments.length ? payments.map((item) => <p key={item._id} className="rounded-xl bg-[var(--color-surface)] p-3"><b>{t.paymentStates[item.status] || item.status}</b> · {item.settlementAmount || '24.99'} USDT · {item.network || ''}<span className="block text-xs text-[var(--color-text-secondary)]">{dateText(item.createdAt, language)}</span></p>) : t.empty}</div></Section>}
+        {!previewOnly && activePage === 'history' && <div id="theme-history" className="scroll-mt-20"><Section icon={History} title={t.history}><div className="space-y-2">{history.length ? history.map((item) => <div key={item._id} className="flex items-center justify-between gap-2 rounded-xl bg-[var(--color-surface)] p-3 text-sm"><span>#{item.version} · {dateText(item.publishedAt, language)}</span><button type="button" className={button} disabled={busy || !settings?.eligibility?.canPublish} onClick={() => run(() => apiClient.platformTheme.restore(item.version), t.published)}>{t.restore}</button></div>) : t.empty}</div></Section></div>}
+        {!previewOnly && activePage === 'contacts' && <div id="theme-contacts" className="scroll-mt-20"><Section icon={MessageCircle} title={t.contactsPage}>
+          {!ultra ? <div className="rounded-2xl border border-amber-400/40 bg-gradient-to-br from-amber-500/10 via-transparent to-orange-500/10 p-5 sm:p-6">
+            <div className="flex items-start gap-3"><span className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-amber-400/15 text-amber-500"><LockKeyhole className="h-5 w-5" /></span><div><span className="inline-flex items-center rounded-full bg-amber-400/15 px-2.5 py-1 text-[0.68rem] font-black tracking-wide text-amber-600">ULTRA</span><h3 className="mt-2 font-black text-[var(--color-text)]">{t.contactsLockedTitle}</h3><p className="mt-2 text-sm leading-6 text-[var(--color-text-secondary)]">{t.contactsHint}</p></div></div>
+            <Link to="/admin/themes#theme-subscription" className={`${button} mt-5 w-full justify-center border-amber-400/50 bg-gradient-to-r from-amber-400 to-yellow-300 text-amber-950 sm:w-auto`}><Sparkles className="h-4 w-4" />{t.contactsSubscriptionCta}<ArrowUpRight className="h-4 w-4" /></Link>
+          </div> : <>
+            <div className="mb-4 flex items-center gap-2"><span className="grid h-9 w-9 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600"><MessageCircle className="h-4 w-4" /></span><div><h3 className="font-black text-[var(--color-text)]">{language === 'ar' ? 'أرقام التواصل العامة' : 'Public contact numbers'}</h3><p className="text-xs text-[var(--color-text-secondary)]">{language === 'ar' ? 'تظهر هذه الأرقام للعملاء في صفحات التواصل والدعم.' : 'Customers see these numbers on contact and support pages.'}</p></div><span className="ms-auto rounded-full bg-amber-400/15 px-2.5 py-1 text-[0.68rem] font-black text-amber-600">ULTRA</span></div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className="text-sm font-bold">{t.ownerWhatsApp}<input className={`${input} mt-1`} dir="ltr" inputMode="tel" autoComplete="tel" placeholder="+201012345678" aria-invalid={Boolean(contactsErrors.owner)} aria-describedby={contactsErrors.owner ? 'theme-owner-phone-error' : 'theme-phone-format'} value={supportContacts.owner} disabled={savingContacts} onChange={(event) => { contactsDirty.current = true; setSupportContacts((current) => ({ ...current, owner: event.target.value })); setContactsErrors((current) => ({ ...current, owner: '' })); }} />{contactsErrors.owner && <span id="theme-owner-phone-error" className="mt-1 block text-xs font-semibold text-rose-600" role="alert">{contactsErrors.owner}</span>}</label>
+              <label className="text-sm font-bold">{t.supportWhatsApp}<input className={`${input} mt-1`} dir="ltr" inputMode="tel" autoComplete="tel" placeholder="+201556537530" aria-invalid={Boolean(contactsErrors.support)} aria-describedby={contactsErrors.support ? 'theme-support-phone-error' : 'theme-phone-format'} value={supportContacts.support} disabled={savingContacts} onChange={(event) => { contactsDirty.current = true; setSupportContacts((current) => ({ ...current, support: event.target.value })); setContactsErrors((current) => ({ ...current, support: '' })); }} />{contactsErrors.support && <span id="theme-support-phone-error" className="mt-1 block text-xs font-semibold text-rose-600" role="alert">{contactsErrors.support}</span>}</label>
+            </div>
+            <p id="theme-phone-format" className="mt-2 text-xs text-[var(--color-text-secondary)]">{t.phoneFormatHint}</p>
+            <div className="my-5 border-t border-[var(--color-border)]" />
+            <div className="mb-3 flex items-center gap-2"><span className="grid h-9 w-9 place-items-center rounded-xl bg-sky-500/10 text-sky-600"><LockKeyhole className="h-4 w-4" /></span><div><h3 className="font-black text-[var(--color-text)]">{t.serverWhatsApp}</h3><p className="text-xs text-[var(--color-text-secondary)]">{t.serverWhatsAppHint}</p></div><span className="ms-auto rounded-full border border-sky-500/25 px-2.5 py-1 text-[0.68rem] font-bold text-sky-600">{language === 'ar' ? 'خاص بالإدارة' : 'Private'}</span></div>
+            <label className="block text-sm font-bold">{t.serverWhatsApp}<input className={`${input} mt-1`} dir="ltr" inputMode="tel" autoComplete="tel" placeholder="+201012345678" aria-invalid={Boolean(contactsErrors.notification)} aria-describedby={contactsErrors.notification ? 'theme-notification-phone-error' : 'theme-phone-format'} value={adminNotificationWhatsApp} disabled={savingContacts} onChange={(event) => { contactsDirty.current = true; setAdminNotificationWhatsApp(event.target.value); setContactsErrors((current) => ({ ...current, notification: '' })); }} />{contactsErrors.notification && <span id="theme-notification-phone-error" className="mt-1 block text-xs font-semibold text-rose-600" role="alert">{contactsErrors.notification}</span>}</label>
+            <p className="mt-4 text-xs leading-5 text-[var(--color-text-secondary)]">{t.contactsHint}</p>
+            <button type="button" className={`${button} mt-4 w-full border-[var(--color-primary)] bg-[var(--color-primary)] text-white sm:w-auto`} disabled={savingContacts} onClick={saveContacts}>{savingContacts ? t.saving : t.saveContacts}</button>
+          </>}
+        </Section></div>}
       </div>
     </div>
   </main>;

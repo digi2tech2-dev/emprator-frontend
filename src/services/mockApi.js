@@ -636,7 +636,7 @@ const defaultPaymentSettings = {
   countryAccounts: [],
   instructions: 'ارفع صورة الإيصال وحدد المبلغ قبل إرسال الطلب.',
   whatsappNumber: getDefaultWhatsAppNumber(),
-  supportContacts: { owner: '01286591021', support: '01556537530' },
+  supportContacts: { owner: '+201286591021', support: '+201556537530' },
   paymentGroups: createDefaultPaymentGroups(),
 };
 

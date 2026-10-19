@@ -16,6 +16,7 @@ import {
   registerVisitedPath,
 } from '../../utils/navigation';
 import { isLitePerformanceMode } from '../../utils/performanceMode';
+import { useTheme } from '../../context/ThemeContext';
 
 const MOBILE_SIDEBAR_QUERY = '(max-width: 1023px)';
 
@@ -28,6 +29,8 @@ const Layout = ({ children = null }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => !getInitialMobileState());
   const { dir, language } = useLanguage();
   const { user } = useAuthStore();
+  const { publishedTheme } = useTheme();
+  const headerChrome = publishedTheme?.schemaVersion === 2 ? publishedTheme.chrome?.header : null;
   const location = useLocation();
   const navigate = useNavigate();
   const performanceLite = isLitePerformanceMode();
@@ -87,7 +90,8 @@ const Layout = ({ children = null }) => {
       <div
         className="fixed z-40 max-w-full transition-all duration-300"
         style={{
-          top: isMobile ? 'env(safe-area-inset-top, 0px)' : '1rem',
+          top: isMobile ? 'env(safe-area-inset-top, 0px)' : (headerChrome?.template === 'floating' ? '1rem' : '0px'),
+          height: headerChrome?.height && headerChrome.height !== 64 ? `${headerChrome.height}px` : undefined,
           [dir === 'rtl' ? 'right' : 'left']: isMobile ? '0px' : shellOffset,
           [dir === 'rtl' ? 'left' : 'right']: isMobile ? '0px' : '16px',
         }}

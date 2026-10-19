@@ -33,6 +33,21 @@ export const platformThemeStyles = (configuration, mode = 'light') => {
     styles[property] = value;
     if (rgbMap[key]) styles[rgbMap[key]] = toRgb(value);
   }
+  const chrome = configuration.schemaVersion === 2 ? configuration.chrome : null;
+  for (const [key, layout] of Object.entries({ header: chrome?.header, 'bottom-nav': chrome?.bottomNav })) {
+    if (!layout || !/^#[0-9A-Fa-f]{6}$/.test(layout.background || '')
+      || !/^#[0-9A-Fa-f]{6}$/.test(layout.foreground || '')
+      || !/^#[0-9A-Fa-f]{6}$/.test(layout.accent || '')
+      || !Number.isInteger(layout.height) || layout.height < 48 || layout.height > 120
+      || !Number.isInteger(layout.width) || layout.width < 60 || layout.width > 100) continue;
+    const prefix = key === 'bottom-nav' ? '--platform-bottom-nav' : '--platform-header';
+    styles[prefix + '-height'] = layout.height + 'px';
+    styles[prefix + '-width'] = layout.width + 'vw';
+    styles[prefix + '-background'] = layout.background;
+    styles[prefix + '-foreground'] = layout.foreground;
+    styles[prefix + '-accent'] = layout.accent;
+    styles[prefix + '-radius'] = layout.radius + 'px';
+  }
   styles['--color-card'] = appearance.colors.surface;
   styles['--color-card-rgb'] = toRgb(appearance.colors.surface);
   styles['--color-muted'] = appearance.colors.mutedText;

@@ -85,7 +85,7 @@ const copyToClipboard = async (value) => {
 const Sidebar = ({ isOpen, setIsOpen, isMobile }) => {
   const { publishedTheme } = useTheme();
   const uploadedLogo = publishedTheme?.brand?.logoPath;
-  const sidebarTemplate = ['royal', 'glass'].includes(publishedTheme?.brand?.sidebarTemplate)
+  const sidebarTemplate = ['royal', 'glass', 'aurora', 'square', 'rounded'].includes(publishedTheme?.brand?.sidebarTemplate)
     ? publishedTheme.brand.sidebarTemplate : 'default';
   const platformLogo = isSafeThemeMediaPath(uploadedLogo) ? resolveImageUrl(uploadedLogo) : emperorLogo;
   const platformLogoWidth = publishedTheme?.brand?.logoWidth;

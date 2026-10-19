@@ -10,6 +10,7 @@ import HeaderBrand from './HeaderBrand';
 import { formatDisplayNumber, getCurrencySymbol } from '../../utils/storefront';
 import { getDefaultRouteForRole, isAdminRole, isSupervisorRole } from '../../utils/authRoles';
 import { cn } from '../ui/Button';
+import { useTheme } from '../../context/ThemeContext';
 
 const Header = ({ toggleSidebar }) => {
   const navigate = useNavigate();
@@ -19,6 +20,10 @@ const Header = ({ toggleSidebar }) => {
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const notificationsRef = useRef(null);
   const { dir } = useLanguage();
+  const { publishedTheme } = useTheme();
+  const chrome = publishedTheme?.schemaVersion === 2 ? publishedTheme.chrome?.header : null;
+  const customHeaderHeight = Boolean(chrome && chrome.height !== 64);
+  const headerStyle = chrome ? { '--platform-header-height': customHeaderHeight ? `${chrome.height}px` : undefined, '--platform-header-width': `${chrome.width}%`, '--platform-header-background': chrome.background, '--platform-header-foreground': chrome.foreground, '--platform-header-accent': chrome.accent, '--platform-header-radius': `${chrome.radius}px` } : undefined;
 
   const language = String(i18n.resolvedLanguage || i18n.language || 'ar').toLowerCase().startsWith('ar') ? 'ar' : 'en';
   const isRTL = dir === 'rtl';
@@ -199,9 +204,9 @@ const Header = ({ toggleSidebar }) => {
   };
 
   return (
-    <header dir={isRTL ? 'rtl' : 'ltr'} className="w-full max-w-full">
+    <header dir={isRTL ? 'rtl' : 'ltr'} style={headerStyle} className={`platform-header-shell w-full max-w-full ${chrome?.template === 'floating' ? 'platform-header-shell--floating' : 'platform-header-shell--bar'}`} data-header-template={chrome?.template || 'bar'} data-custom-header-height={customHeaderHeight}>
       <div className={cn(
-        'app-shell-header-panel header-reference-panel ka-card-panel w-full max-w-full overflow-visible rounded-[18px] border px-2 py-0.5 backdrop-blur-[22px] sm:rounded-[24px] sm:px-4 sm:py-1',
+        'app-shell-header-panel header-reference-panel ka-card-panel w-full max-w-full overflow-visible border px-2 py-0.5 backdrop-blur-[22px] sm:px-4 sm:py-1',
         isAdmin && 'border-[color:rgb(var(--color-primary-rgb)/0.26)]'
       )}>
         <div dir="ltr" className="header-reference-row grid min-h-[2.55rem] min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-1.5 sm:min-h-[2.9rem] sm:gap-4">

@@ -2,6 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import FloatingWhatsApp from './components/ui/FloatingWhatsApp';
+import StorefrontBottomNav from './components/layout/StorefrontBottomNav';
 import PageTransition from './components/app/PageTransition';
 import SessionBootstrap from './components/app/SessionBootstrap';
 import RouteErrorBoundary from './components/app/RouteErrorBoundary';
@@ -52,6 +53,7 @@ const AdminSuppliers = lazy(routeLoaders.AdminSuppliers);
 const AdminOrders = lazy(routeLoaders.AdminOrders);
 const AdminTargetRequests = lazy(routeLoaders.AdminTargetRequests);
 const PlatformThemeEditor = lazy(routeLoaders.PlatformThemeEditor);
+const PlatformThemeSubscriptions = lazy(routeLoaders.PlatformThemeSubscriptions);
 const BuyTarget = lazy(routeLoaders.BuyTarget);
 const TargetOrders = lazy(routeLoaders.TargetOrders);
 const AddBalance = lazy(routeLoaders.AddBalance);
@@ -98,6 +100,14 @@ const PlatformThemeRoute = () => {
     return <Navigate to="/admin/dashboard" replace />;
   }
   return renderSuspended(<PlatformThemeEditor />);
+};
+
+const PlatformThemeSubscriptionsRoute = () => {
+  const role = useAuthStore((state) => state.user?.role);
+  if (String(role || '').toLowerCase() !== 'admin') {
+    return <Navigate to="/admin/dashboard" replace />;
+  }
+  return renderSuspended(<PlatformThemeSubscriptions />);
 };
 
 const CreatedByEntryRoute = () => {
@@ -471,6 +481,14 @@ const AnimatedAppRoutes = ({ location }) => {
             </ProtectedRoute>
           )}
         />
+        <Route
+          path="/admin/theme/subscriptions"
+          element={(
+            <ProtectedRoute roles={['admin']}>
+              <PlatformThemeSubscriptionsRoute />
+            </ProtectedRoute>
+          )}
+        />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
@@ -496,6 +514,7 @@ function App() {
             <PageTransition>
               {(location) => <AnimatedAppRoutes location={location} />}
             </PageTransition>
+            <StorefrontBottomNav />
             <FloatingWhatsApp />
           </BrowserRouter>
         </ToastProvider>

@@ -33,6 +33,7 @@ export const routeLoaders = {
   AdminOrders: () => import('../pages/admin/AdminOrders'),
   AdminTargetRequests: () => import('../pages/admin/AdminTargetRequests'),
   PlatformThemeEditor: () => import('../pages/admin/PlatformThemeEditor'),
+  PlatformThemeSubscriptions: () => import('../pages/admin/PlatformThemeSubscriptions'),
   BuyTarget: () => import('../pages/BuyTarget'),
   TargetOrders: () => import('../pages/TargetOrders'),
   AddBalance: () => import('../pages/AddBalance'),
@@ -108,6 +109,7 @@ const routeMatchers = [
   [/^\/admin\/suppliers\/?$/, routeLoaders.AdminSuppliers],
   [/^\/admin\/target-requests\/?$/, routeLoaders.AdminTargetRequests],
   [/^\/admin\/themes\/?$/, routeLoaders.PlatformThemeEditor],
+  [/^\/admin\/theme\/subscriptions\/?$/, routeLoaders.PlatformThemeSubscriptions],
 ];
 
 const resolvedModules = new Map();
