@@ -1914,6 +1914,7 @@ const realApi = {
     getHistory: async (page = 1) => unwrap(await http.get('/admin/theme/history', { params: { page } })),
     getSubscription: async () => unwrap(await http.get('/admin/theme/subscription')),
     getPayments: async () => unwrap(await http.get('/admin/theme/subscription/payment-status')),
+    getReviewQueue: async () => unwrap(await http.get('/admin/theme/subscription/review-queue')),
     checkout: async () => unwrap(await http.post('/admin/theme/subscription/checkout')),
     createManualOrder: async (network, planId = 'THEME_PRO') => unwrap(await http.post('/admin/theme/subscription/manual-order', { network, planId })),
     confirmManualOrder: async (reference, chainTransactionId) => unwrap(await http.post('/admin/theme/subscription/manual-order/confirm', { reference, chainTransactionId })),

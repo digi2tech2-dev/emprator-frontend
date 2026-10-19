@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, Clock3, Copy, CreditCard, ExternalLink, LockKeyhole, RefreshCw, ShieldCheck, Sparkles, Wallet } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import apiClient from '../../services/client';
@@ -19,6 +19,39 @@ const text = {
   },
 };
 
+const reviewText = {
+  ar: {
+    activationHelp: 'بعد اعتماد التحويل، يصلك كود التفعيل على رقم واتساب المسجل في حسابك. الكود من 10 أرقام، صالح لمدة 48 ساعة، ويستخدم مرة واحدة.',
+    reviewTitle: 'مراجعة طلبات التحويل', reviewHelp: 'راجع التحويل في حساب الاستلام، ثم أدخل معرّف المعاملة واضغط تأكيد لإرسال الكود تلقائيًا لصاحب الطلب.',
+    reviewEmpty: 'لا توجد طلبات تحويل تحتاج إلى مراجعة الآن.', reviewLoading: 'جارٍ تحميل طلبات المراجعة…',
+    reviewMisconfigured: 'مراجعة التحويلات غير مفعلة. أضف معرّف حساب المراجع إلى THEME_PAYMENT_REVIEWER_IDS في ملف .env الخاص بالباك إند، ثم أعد تشغيل الخادم.',
+    reviewLoadFailed: 'تعذر تحميل طلبات المراجعة. حاول تحديث الحالة.', reviewAction: 'تأكيد الدفع وإرسال كود التفعيل', reviewRetry: 'إعادة إصدار وإرسال كود جديد',
+    reviewTx: 'معرّف المعاملة بعد التحقق', reviewTxHint: 'أدخل معرّف التحويل الظاهر في حساب الاستلام.', reviewMissingTx: 'أدخل معرّف المعاملة الصحيح قبل التأكيد.',
+    reviewSent: 'تم تأكيد الدفع وإرسال كود التفعيل إلى واتساب المسجل لصاحب الطلب.', reviewDeliveryFailed: 'تم تأكيد الدفع، لكن تعذر إرسال الكود عبر واتساب. تحقق من اتصال واتساب ورقم الحساب ثم أعد الإرسال.',
+    reviewSkipped: 'تم تأكيد الدفع، لكن إرسال واتساب متوقف في وضع التشغيل الحالي.', reviewRetrySent: 'تم إصدار كود جديد وإرساله إلى واتساب صاحب الطلب.',
+    reviewRetryFailed: 'تعذر إرسال الكود الجديد. تحقق من واتساب ثم حاول مجددًا.', reviewConfirmFailed: 'تعذر تأكيد التحويل. تحقق من البيانات وحالة الطلب.',
+    reviewDeliveryPending: 'فشل إرسال واتساب؛ يمكن إعادة إصدار كود جديد وإرساله.', payer: 'صاحب الطلب',
+    invalidCode: 'كود التفعيل غير صحيح.', expiredCode: 'انتهت صلاحية كود التفعيل. تواصل مع الإدارة لإصدار كود جديد.',
+    usedCode: 'هذا الكود غير متاح أو سبق استخدامه.', unrelatedCode: 'كود التفعيل أو الطلب لا يخص هذا الحساب.',
+    upgradeUnavailable: 'اشتراك PRO المطلوب للترقية غير نشط الآن.', redeemFailed: 'تعذر تفعيل الاشتراك. راجع الكود وحالة الطلب وحاول مجددًا.',
+  },
+  en: {
+    activationHelp: 'After payment is verified, the activation code is sent to the WhatsApp number registered on your account. It has 10 digits, is valid for 48 hours, and can be used once.',
+    reviewTitle: 'Transfer review queue', reviewHelp: 'Verify the transfer in the receiving account, then enter its transaction ID and confirm to send the activation code to the payer.',
+    reviewEmpty: 'There are no transfer orders awaiting review.', reviewLoading: 'Loading review requests…',
+    reviewMisconfigured: 'Payment review is disabled. Add the reviewer account ID to THEME_PAYMENT_REVIEWER_IDS in the backend .env file, then restart the server.',
+    reviewLoadFailed: 'Could not load review requests. Refresh and try again.', reviewAction: 'Confirm payment and send activation code', reviewRetry: 'Issue and send a new code',
+    reviewTx: 'Verified transaction ID', reviewTxHint: 'Enter the transfer ID shown in the receiving account.', reviewMissingTx: 'Enter a valid transaction ID before confirming.',
+    reviewSent: 'Payment confirmed. The activation code was sent to the payer’s registered WhatsApp.', reviewDeliveryFailed: 'Payment was confirmed, but WhatsApp delivery failed. Check the WhatsApp session and payer number, then retry delivery.',
+    reviewSkipped: 'Payment was confirmed, but WhatsApp delivery is skipped in the current runtime mode.', reviewRetrySent: 'A new activation code was issued and sent to the payer.',
+    reviewRetryFailed: 'Could not deliver the new code. Check WhatsApp and try again.', reviewConfirmFailed: 'Could not confirm the transfer. Check the details and order status.',
+    reviewDeliveryPending: 'WhatsApp delivery failed. You can issue and send a new activation code.', payer: 'Payer',
+    invalidCode: 'The activation code is incorrect.', expiredCode: 'The activation code expired. Ask the administrator to issue a new code.',
+    usedCode: 'This code is unavailable or has already been used.', unrelatedCode: 'This activation code or order does not belong to this account.',
+    upgradeUnavailable: 'The PRO subscription required for this upgrade is no longer active.', redeemFailed: 'Could not activate the subscription. Check the code and order status, then try again.',
+  },
+};
+
 const formatDate = (value, language) => value ? new Intl.DateTimeFormat(language === 'ar' ? 'ar-EG' : 'en', { year: 'numeric', month: 'short', day: 'numeric' }).format(new Date(value)) : '—';
 const paymentLabel = (value, language) => {
   const labels = language === 'ar'
@@ -30,7 +63,7 @@ const paymentLabel = (value, language) => {
 export default function PlatformThemeSubscriptions() {
   const { language } = useLanguage();
   const { addToast } = useToast();
-  const t = text[language] || text.ar;
+  const t = { ...(text[language] || text.ar), ...(reviewText[language] || reviewText.ar) };
   const [status, setStatus] = useState(null);
   const [manual, setManual] = useState(null);
   const [payments, setPayments] = useState([]);
@@ -41,6 +74,12 @@ export default function PlatformThemeSubscriptions() {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [reviewItems, setReviewItems] = useState([]);
+  const [reviewAccess, setReviewAccess] = useState('loading');
+  const [reviewBusyId, setReviewBusyId] = useState('');
+  const [transactionIds, setTransactionIds] = useState({});
+  const reviewInFlight = useRef(false);
+  const redeemInFlight = useRef(false);
 
   const refresh = useCallback(async ({ quiet = false } = {}) => {
     if (!isLive) { setLoading(false); setError('mock'); return; }
@@ -59,6 +98,22 @@ export default function PlatformThemeSubscriptions() {
   }, [t.failed]);
 
   useEffect(() => { void refresh(); }, [refresh]);
+  const refreshReviewQueue = useCallback(async () => {
+    if (!isLive) { setReviewAccess('hidden'); return; }
+    try {
+      const result = await apiClient.platformTheme.getReviewQueue();
+      setReviewItems(result?.items || []);
+      setReviewAccess('reviewer');
+    } catch (cause) {
+      const statusCode = cause?.response?.status;
+      const codeValue = cause?.response?.data?.code;
+      if (statusCode === 403) { setReviewItems([]); setReviewAccess('forbidden'); }
+      else if (statusCode === 503 || codeValue === 'THEME_PAYMENT_REVIEWER_MISSING') {
+        setReviewItems([]); setReviewAccess('misconfigured');
+      } else { setReviewItems([]); setReviewAccess('error'); }
+    }
+  }, []);
+  useEffect(() => { void refreshReviewQueue(); }, [refreshReviewQueue]);
   const currentPlan = status?.plan || 'FREE';
   const paid = ['THEME_PRO', 'THEME_ULTRA'].includes(currentPlan);
   const ultra = currentPlan === 'THEME_ULTRA';
@@ -99,17 +154,64 @@ export default function PlatformThemeSubscriptions() {
     } finally { setBusy(false); }
   };
   const redeem = async () => {
-    if (!verifiedPayment || !/^\d{10}$/.test(code)) return;
+    if (!verifiedPayment || !/^\d{10}$/.test(code) || redeemInFlight.current) return;
+    redeemInFlight.current = true;
     setBusy(true);
     try {
       await apiClient.platformTheme.redeemCode(verifiedPayment.providerReference, code);
       setCode('');
       setOrder(null);
       window.dispatchEvent(new Event('platform-theme-subscription-updated'));
-      addToast(t.redeemSuccess, 'success');
       await refresh();
-    } catch (cause) { addToast(cause?.response?.data?.message || t.failed, 'error'); await refresh({ quiet: true }); }
-    finally { setBusy(false); }
+      addToast(t.redeemSuccess, 'success');
+    } catch (cause) {
+      const codeValue = cause?.response?.data?.code || cause?.code;
+      const messages = {
+        CODE_INVALID: t.invalidCode, CODE_EXPIRED: t.expiredCode, CODE_UNAVAILABLE: t.usedCode,
+        CODE_ALREADY_USED: t.usedCode, PAYMENT_NOT_VERIFIED: t.unrelatedCode,
+        THEME_UPGRADE_UNAVAILABLE: t.upgradeUnavailable,
+      };
+      addToast(messages[codeValue] || t.redeemFailed, 'error');
+      await refresh({ quiet: true });
+    } finally { redeemInFlight.current = false; setBusy(false); }
+  };
+
+  const confirmReviewedPayment = async (payment) => {
+    const transactionId = String(transactionIds[payment.providerReference] || '').trim();
+    if (!/^[A-Za-z0-9:_-]{8,128}$/.test(transactionId)) {
+      addToast(t.reviewMissingTx, 'error');
+      return;
+    }
+    if (reviewInFlight.current) return;
+    reviewInFlight.current = true;
+    setReviewBusyId(payment.providerReference);
+    try {
+      const result = await apiClient.platformTheme.confirmManualOrder(payment.providerReference, transactionId);
+      const message = result?.deliveryStatus === 'SENT' ? t.reviewSent
+        : result?.deliveryStatus === 'FAILED' ? t.reviewDeliveryFailed : t.reviewSkipped;
+      addToast(message, result?.deliveryStatus === 'SENT' ? 'success' : 'error');
+      setTransactionIds((current) => ({ ...current, [payment.providerReference]: '' }));
+      await Promise.all([refreshReviewQueue(), refresh({ quiet: true })]);
+    } catch {
+      addToast(t.reviewConfirmFailed, 'error');
+      await refreshReviewQueue();
+    } finally { reviewInFlight.current = false; setReviewBusyId(''); }
+  };
+
+  const retryCodeDelivery = async (payment) => {
+    if (reviewInFlight.current) return;
+    reviewInFlight.current = true;
+    setReviewBusyId(payment.providerReference);
+    try {
+      const result = await apiClient.platformTheme.reissueManualCode(payment.providerReference);
+      const message = result?.deliveryStatus === 'SENT' ? t.reviewRetrySent
+        : result?.deliveryStatus === 'FAILED' ? t.reviewRetryFailed : t.reviewSkipped;
+      addToast(message, result?.deliveryStatus === 'SENT' ? 'success' : 'error');
+      await Promise.all([refreshReviewQueue(), refresh({ quiet: true })]);
+    } catch {
+      addToast(t.reviewRetryFailed, 'error');
+      await refreshReviewQueue();
+    } finally { reviewInFlight.current = false; setReviewBusyId(''); }
   };
 
   const plans = [
@@ -142,6 +244,33 @@ export default function PlatformThemeSubscriptions() {
     </header>
 
     {error && <div className={`${card} border-rose-500/30 p-4 text-sm text-rose-600`} role="alert">{error === 'mock' ? t.noInstructions : error}<button type="button" className="ms-3 underline" onClick={() => void refresh()}>{t.retry}</button></div>}
+
+    {(reviewAccess === 'reviewer' || reviewAccess === 'misconfigured' || reviewAccess === 'error') && <section className={`${card} p-5 sm:p-7`}>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div><h2 className="text-xl font-black text-[var(--color-text)]">{t.reviewTitle}</h2><p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--color-text-secondary)]">{t.reviewHelp}</p></div>
+        <button type="button" className={button} onClick={() => void refreshReviewQueue()} disabled={reviewBusyId !== ''}><RefreshCw className="h-4 w-4" />{t.refresh}</button>
+      </div>
+      {reviewAccess === 'misconfigured' && <p className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-sm text-amber-800 dark:text-amber-200" role="status">{t.reviewMisconfigured}</p>}
+      {reviewAccess === 'error' && <p className="mt-4 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-sm text-rose-700 dark:text-rose-200" role="alert">{t.reviewLoadFailed}</p>}
+      {reviewAccess === 'reviewer' && !reviewItems.length && <p className="mt-4 rounded-xl bg-[var(--color-surface)] p-3 text-sm text-[var(--color-text-secondary)]">{t.reviewEmpty}</p>}
+      {reviewAccess === 'reviewer' && reviewItems.length > 0 && <div className="mt-5 space-y-3">
+        {reviewItems.map((payment) => {
+          const isDeliveryRetry = payment.status === 'VERIFIED' && payment.activationDeliveryStatus === 'FAILED';
+          const isBusy = reviewBusyId === payment.providerReference;
+          const expectedAmount = payment.settlementAmount || (Number(payment.amountMinor) / 100).toFixed(2);
+          return <article key={payment.providerReference} className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface)] p-4 sm:p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div><h3 className="font-black text-[var(--color-text)]">{payment.payer?.name || payment.payer?.email || t.payer}</h3><p className="mt-1 text-xs text-[var(--color-text-secondary)]">{payment.payer?.email || ''}</p><code className="mt-2 block break-all text-xs text-[var(--color-text-secondary)]" dir="ltr">{payment.providerReference}</code></div>
+              <div className="text-start text-sm"><p className="font-bold text-[var(--color-text)]">{payment.isUpgrade ? t.upgradeBadge : payment.planId === 'THEME_ULTRA' ? t.ultra : t.pro}</p><p className="mt-1 text-[var(--color-text-secondary)]" dir="ltr">{expectedAmount} USDT · {payment.network || ''}</p><p className="mt-1 text-xs text-[var(--color-text-secondary)]">{payment.status === 'PENDING' ? t.pending : paymentLabel(payment.status, language)}</p></div>
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-3 text-xs"><span className="font-bold text-[var(--color-text-secondary)]">{t.destination}:</span><code className="break-all text-[var(--color-text)]" dir="ltr">{payment.destination}</code></div>
+            {isDeliveryRetry
+              ? <div className="mt-3 space-y-3"><p className="rounded-xl border border-rose-500/25 bg-rose-500/5 p-3 text-sm text-rose-700 dark:text-rose-200" role="status">{t.reviewDeliveryPending}</p><button type="button" className={`${button} border-amber-500/40 bg-amber-500/10`} disabled={reviewBusyId !== ''} onClick={() => void retryCodeDelivery(payment)}>{isBusy ? t.loadingAction : t.reviewRetry}</button></div>
+              : <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_auto] sm:items-end"><label className="text-sm font-bold text-[var(--color-text)]">{t.reviewTx}<input className={`${input} mt-1`} dir="ltr" autoComplete="off" maxLength={128} value={transactionIds[payment.providerReference] || ''} placeholder={t.reviewTxHint} disabled={reviewBusyId !== ''} onChange={(event) => setTransactionIds((current) => ({ ...current, [payment.providerReference]: event.target.value.replace(/[^A-Za-z0-9:_-]/g, '').slice(0, 128) }))} /></label><button type="button" className={`${button} border-transparent bg-emerald-600 text-white hover:bg-emerald-700`} disabled={reviewBusyId !== '' || !/^[A-Za-z0-9:_-]{8,128}$/.test(transactionIds[payment.providerReference] || '')} onClick={() => void confirmReviewedPayment(payment)}>{isBusy ? t.loadingAction : t.reviewAction}</button></div>}
+          </article>;
+        })}
+      </div>}
+    </section>}
 
     <section className={`${card} flex flex-wrap items-center justify-between gap-4 p-5`}><div><span className="text-xs font-black uppercase tracking-wider text-[var(--color-text-secondary)]">{t.freeTitle}</span><h2 className="mt-1 text-lg font-black text-[var(--color-text)]">{language === 'ar' ? 'متاحة دائمًا دون اشتراك' : 'Available without a subscription'}</h2></div><ul className="grid gap-2 text-xs text-[var(--color-text-secondary)] sm:grid-cols-3">{t.freeFeatures.map((feature) => <li key={feature} className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-primary)]" />{feature}</li>)}</ul></section>
 
