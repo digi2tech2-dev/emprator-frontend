@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { AlertCircle, CheckCircle, Copy, Hash, Info, Landmark, Loader, QrCode, ReceiptText, ShieldCheck, Smartphone, Sparkles, WalletCards } from 'lucide-react';
+import { AlertCircle, CheckCircle, Copy, Info, Landmark, Loader, QrCode, ReceiptText, ShieldCheck, Smartphone, Sparkles, WalletCards } from 'lucide-react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import UploadReceiptBox from '../components/wallet/UploadReceiptBox';
@@ -12,18 +12,13 @@ import useAuthStore from '../store/useAuthStore';
 import { useToast } from '../components/ui/Toast';
 import { inputBaseClassName, textareaClassName } from '../components/ui/Input';
 import { findPaymentMethodById } from '../utils/paymentSettings';
-import { devLogger } from '../utils/devLogger';
+import { normalizeSenderPhone, validateSenderPhone } from '../utils/senderPhone';
 import { resolveImageUrl } from '../utils/imageUrl';
 import { getCurrencySymbol } from '../utils/storefront';
 
 const normalizeMethodType = (type) => String(type || '').trim().toLowerCase();
 
-const isVodafoneCashMethod = (method) => {
-  const token = `${method?.id || ''} ${method?.name || ''}`.trim().toLowerCase();
-  return token.includes('vodafone') || token.includes('فودافون');
-};
-
-const requiresTransactionNumber = (method) => {
+const requiresSenderPhone = (method) => {
   const type = normalizeMethodType(method?.type);
   return ['mobile_wallet', 'e_wallet', 'ewallet', 'electronic_wallet'].includes(type);
 };
@@ -152,7 +147,7 @@ const PaymentDetails = ({
     cvv: '',
     senderWalletNumber: '',
     senderWalletAddress: '',
-    transactionId: '',
+    senderPhoneNumber: '',
     notes: '',
   });
   const [uploadedFile, setUploadedFile] = useState(null);
@@ -183,7 +178,7 @@ const PaymentDetails = ({
 
   const group = selectedMethodEntry?.group || null;
   const method = selectedMethodEntry?.method || null;
-  const needsTransactionNumber = requiresTransactionNumber(method);
+  const needsSenderPhone = requiresSenderPhone(method);
   const receiverDestination = useMemo(
     () => getReceiverDestination(method),
     [method]
@@ -200,14 +195,13 @@ const PaymentDetails = ({
     [method]
   );
   const visibleMethodFields = useMemo(
-    () => methodFields.filter((field) => !['senderNumber', 'senderWalletNumber', 'senderWalletAddress', 'transactionId', 'transactionNumber', 'paymentReference'].includes(field)),
+    () => methodFields.filter((field) => !['senderNumber', 'senderPhoneNumber', 'senderWalletNumber', 'senderWalletAddress', 'transactionId', 'transactionNumber', 'paymentReference'].includes(field)),
     [methodFields]
   );
   const methodInstructions = String(method?.instructions || '').trim();
   const qrCodeUrl = resolveImageUrl(method?.qrCodeImage || '');
   const requiresReceipt =
-    normalizeMethodType(method?.type) !== 'site_wallet'
-    && !isVodafoneCashMethod(method);
+    normalizeMethodType(method?.type) !== 'site_wallet';
   const feePercent = useMemo(() => {
     const value = Number(method?.feePercent);
     if (!Number.isFinite(value)) return 0;
@@ -323,11 +317,8 @@ const PaymentDetails = ({
     if (senderDetailRequirement && !String(formData[senderDetailRequirement.field] || '').trim()) {
       return senderDetailRequirement.validationMessage;
     }
-    if (needsTransactionNumber && !String(formData.transactionId || '').trim()) {
-      return 'يرجى إدخال رقم العملية';
-    }
-    if (needsTransactionNumber && String(formData.transactionId || '').trim().length > 64) {
-      return 'رقم العملية يجب ألا يتجاوز 64 حرفًا';
+    if (needsSenderPhone && validateSenderPhone(formData.senderPhoneNumber)) {
+      return validateSenderPhone(formData.senderPhoneNumber);
     }
     if (requiresReceipt && !uploadedFile) return t('payments.validationReceipt');
     return '';
@@ -369,23 +360,19 @@ const PaymentDetails = ({
       const senderValue = freshSenderRequirement
         ? String(formData[freshSenderRequirement.field] || '').trim()
         : '';
-      const transactionId = String(formData.transactionId || '').trim();
-      const freshNeedsTransactionNumber = requiresTransactionNumber(freshMethod);
-      const freshRequiresReceipt = normalizeMethodType(freshMethod?.type) !== 'site_wallet' && !isVodafoneCashMethod(freshMethod);
+      const freshNeedsSenderPhone = requiresSenderPhone(freshMethod);
+      const senderPhoneNumber = normalizeSenderPhone(formData.senderPhoneNumber);
+      const freshRequiresReceipt = normalizeMethodType(freshMethod?.type) !== 'site_wallet';
 
       if (freshSenderRequirement && !senderValue) {
         addToast(freshSenderRequirement.validationMessage, 'error');
         setFormError(freshSenderRequirement.validationMessage);
         return;
       }
-      if (freshNeedsTransactionNumber && !transactionId) {
-        addToast('يرجى إدخال رقم العملية', 'error');
-        setFormError('يرجى إدخال رقم العملية');
-        return;
-      }
-      if (freshNeedsTransactionNumber && transactionId.length > 64) {
-        addToast('رقم العملية يجب ألا يتجاوز 64 حرفًا', 'error');
-        setFormError('رقم العملية يجب ألا يتجاوز 64 حرفًا');
+      const phoneError = freshNeedsSenderPhone ? validateSenderPhone(formData.senderPhoneNumber) : '';
+      if (phoneError) {
+        addToast(phoneError, 'error');
+        setFormError(phoneError);
         return;
       }
       if (freshRequiresReceipt && !uploadedFile) {
@@ -395,12 +382,16 @@ const PaymentDetails = ({
         return;
       }
 
-      const senderDetails = freshSenderRequirement ? {
+      const senderDetails = freshNeedsSenderPhone ? {
+        methodType: normalizeMethodType(freshMethod?.type),
+        field: 'senderPhoneNumber',
+        label: 'رقم الهاتف المحوّل منه',
+        value: senderPhoneNumber,
+      } : freshSenderRequirement ? {
         methodType: normalizeMethodType(freshMethod?.type),
         field: freshSenderRequirement.field,
         label: freshSenderRequirement.label,
         value: senderValue,
-        transactionNumber: freshNeedsTransactionNumber ? transactionId : '',
       } : null;
       const { requestTopup } = useTopupStore.getState();
 
@@ -412,12 +403,10 @@ const PaymentDetails = ({
         paymentFeeAmount: freshFeeAmount,
         amountWithFee: freshPayableAmount,
         senderDetails,
+        ...(freshNeedsSenderPhone ? { senderPhoneNumber } : {}),
         senderWalletNumber: freshSenderRequirement?.field === 'senderWalletNumber' ? senderValue : '',
         senderWalletAddress: freshSenderRequirement?.field === 'senderWalletAddress' ? senderValue : '',
         transferredFromNumber: senderValue,
-        transactionId: freshNeedsTransactionNumber ? transactionId : '',
-        transactionNumber: freshNeedsTransactionNumber ? transactionId : '',
-        paymentReference: freshNeedsTransactionNumber ? transactionId : '',
         proofImage: uploadedFile || null,
         paymentChannel: freshMethod?.name || methodId || '',
         paymentMethodType: normalizeMethodType(freshMethod?.type),
@@ -429,8 +418,7 @@ const PaymentDetails = ({
       });
 
       setSubmitStatus('success');
-    } catch (error) {
-      devLogger.warnUnlessBenign('Topup submission failed:', error);
+    } catch (_error) {
       setFormError(t('payments.submitErrorDesc'));
       setSubmitStatus('error');
     } finally {
@@ -807,24 +795,28 @@ const PaymentDetails = ({
             </div>
           )}
 
-          {needsTransactionNumber && (
+          {needsSenderPhone && (
           <div className="mb-4">
             <label className={`mb-1.5 flex items-center justify-between gap-2 text-xs font-black text-[var(--color-text)] ${isRTL ? 'text-right' : 'text-left'}`}>
-              <span>رقم العملية</span>
-              <FieldCompletionBadge complete={Boolean(String(formData.transactionId || '').trim())} />
+              <span id="sender-phone-label">رقم الهاتف المحوّل منه</span>
+              <FieldCompletionBadge complete={Boolean(normalizeSenderPhone(formData.senderPhoneNumber))} />
             </label>
             <div
               className="flex h-12 overflow-hidden rounded-xl border border-[color:rgb(var(--color-primary-rgb)/0.42)] bg-[color:rgb(var(--color-primary-rgb)/0.06)] shadow-inner shadow-black/5 transition focus-within:border-[var(--color-primary)] focus-within:ring-2 focus-within:ring-[color:rgb(var(--color-primary-rgb)/0.15)]"
               dir={dir}
             >
               <span className="grid min-w-16 shrink-0 place-items-center border-e border-[color:rgb(var(--color-primary-rgb)/0.5)] bg-[linear-gradient(145deg,var(--color-secondary),var(--color-primary))] text-white shadow-[0_0_24px_-12px_rgb(var(--color-primary-rgb)/0.9)]">
-                <Hash className="h-5 w-5 drop-shadow-sm" />
+                <Smartphone className="h-5 w-5 drop-shadow-sm" />
               </span>
               <input
-                type="text"
-                value={formData.transactionId || ''}
-                onChange={(e) => handleInputChange('transactionId', e.target.value)}
-                placeholder="أدخل رقم العملية"
+                type="tel"
+                inputMode="tel"
+                dir="ltr"
+                aria-labelledby="sender-phone-label"
+                autoComplete="tel"
+                value={formData.senderPhoneNumber || ''}
+                onChange={(e) => handleInputChange('senderPhoneNumber', e.target.value)}
+                placeholder="أدخل رقم الهاتف الذي حوّلت منه"
                 maxLength={64}
                 className="min-w-0 flex-1 bg-transparent px-4 text-right font-['Poppins'] text-sm font-black tracking-wide text-[var(--color-text)] outline-none placeholder:font-semibold placeholder:tracking-normal placeholder:text-[var(--color-text-secondary)] [font-variant-numeric:tabular-nums]"
                 disabled={isSubmitting}
@@ -844,7 +836,6 @@ const PaymentDetails = ({
               <UploadReceiptBox
                 onFileUpload={handleReceiptUpload}
                 paymentAmount={formData.amount}
-                transactionId={needsTransactionNumber ? formData.transactionId : ''}
                 {...receiverDestination}
               />
             </div>

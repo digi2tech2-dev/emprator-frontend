@@ -205,6 +205,7 @@ const normaliseSenderDetails = (source = {}) => {
   const paymentDetails = rawPaymentDetails && typeof rawPaymentDetails === 'object' ? rawPaymentDetails : {};
   const value = String(
     details.value
+    || source.senderPhoneNumber
     || source.senderWalletAddress
     || source.senderWalletNumber
     || source.transferredFromNumber
@@ -245,11 +246,11 @@ const normaliseSenderDetails = (source = {}) => {
   const methodType = String(details.methodType || details.type || source.paymentMethodType || '').trim().toLowerCase();
   const field = String(
     details.field
-    || (source.senderWalletAddress ? 'senderWalletAddress' : 'senderWalletNumber')
+    || (source.senderPhoneNumber !== undefined ? 'senderPhoneNumber' : source.senderWalletAddress ? 'senderWalletAddress' : 'senderWalletNumber')
   ).trim();
   const label = String(
     details.label
-    || (field === 'senderWalletAddress' || methodType === 'usdt'
+    || (field === 'senderPhoneNumber' ? 'رقم الهاتف المحوّل منه' : field === 'senderWalletAddress' || methodType === 'usdt'
       ? 'عنوان المحفظة المحول منها'
       : 'رقم المحفظة المحول منها')
   ).trim();
@@ -3853,7 +3854,8 @@ const realApi = {
      *   - requestedAmount      (required, number)
      *   - currency             (required, string — ISO 4217)
      *   - paymentMethodId      (required, string)
-     *   - receipt              (file, required — multer field name)
+     *   - senderPhoneNumber    (new phone workflow; stored in senderDetails)
+     *   - receipt              (file, required in phone workflow — multer field name)
      *   - notes                (optional, string)
      *
      * FE sends: { requestedAmount, currency, paymentMethodId, receipt (File), notes }
@@ -3892,17 +3894,23 @@ const realApi = {
         formData.append('operationNumber', transactionId);
       }
 
+      const hasSenderPhone = Object.prototype.hasOwnProperty.call(topupData, 'senderPhoneNumber');
+      if (hasSenderPhone) formData.append('senderPhoneNumber', topupData.senderPhoneNumber ?? '');
       const senderDetails = normaliseSenderDetails(topupData);
       if (senderDetails) {
         formData.append('senderDetails', JSON.stringify(senderDetails));
-        formData.append('senderDetailValue', senderDetails.value);
-        formData.append('senderDetailField', senderDetails.field);
-        if (senderDetails.field === 'senderWalletAddress') {
-          formData.append('senderWalletAddress', senderDetails.value);
+        if (senderDetails.field === 'senderPhoneNumber') {
+          if (!hasSenderPhone) formData.append('senderPhoneNumber', senderDetails.value);
         } else {
-          formData.append('senderWalletNumber', senderDetails.value);
+          formData.append('senderDetailValue', senderDetails.value);
+          formData.append('senderDetailField', senderDetails.field);
+          if (senderDetails.field === 'senderWalletAddress') {
+            formData.append('senderWalletAddress', senderDetails.value);
+          } else {
+            formData.append('senderWalletNumber', senderDetails.value);
+          }
+          formData.append('transferredFromNumber', senderDetails.value);
         }
-        formData.append('transferredFromNumber', senderDetails.value);
       }
 
       // ── File — must be a File/Blob for Multer to parse it into req.file

@@ -94,7 +94,7 @@ const getSenderDetails = (request) => {
   const field = String(details.field || (request?.senderWalletAddress ? 'senderWalletAddress' : 'senderWalletNumber')).trim();
   const label = String(
     details.label
-    || (field === 'senderWalletAddress' || methodType === 'usdt'
+    || (field === 'senderPhoneNumber' ? 'رقم الهاتف المحوّل منه' : field === 'senderWalletAddress' || methodType === 'usdt'
       ? 'عنوان المحفظة المحول منها'
       : 'رقم المحفظة المحول منها')
   ).trim();
@@ -115,7 +115,7 @@ const getSenderDetails = (request) => {
     || ''
   ).trim();
 
-  return { label, value: value || '-', transactionNumber };
+  return { label, value: value || '-', transactionNumber, isSenderPhone: field === 'senderPhoneNumber' };
 };
 
 const PAGE_SIZE = 20;
@@ -453,10 +453,13 @@ const AdminPayments = () => {
                   <p className="mt-0.5 font-semibold text-[var(--color-text)]">{getPaymentChannelLabel(request)}</p>
                 </div>
                 <div className="rounded-lg bg-[color:rgb(var(--color-surface-rgb)/0.62)] px-2 py-1.5">
-                  <p className="text-[var(--color-text-secondary)]">رقم العملية</p>
-                  <p className="mt-0.5 break-all font-bold text-[var(--color-primary)]">
-                    {senderDetails.transactionNumber || '-'}
+                  <p className="text-[var(--color-text-secondary)]">{senderDetails.isSenderPhone ? senderDetails.label : 'رقم العملية'}</p>
+                  <p dir="ltr" className="mt-0.5 break-all text-start font-bold text-[var(--color-primary)]">
+                    {senderDetails.isSenderPhone ? senderDetails.value : senderDetails.transactionNumber || '-'}
                   </p>
+                  {senderDetails.isSenderPhone && senderDetails.transactionNumber && (
+                    <p className="mt-1 break-all">رقم العملية: <bdi dir="ltr">{senderDetails.transactionNumber}</bdi></p>
+                  )}
                 </div>
                 <div className="rounded-lg bg-[color:rgb(var(--color-surface-rgb)/0.62)] px-2 py-1.5">
                   <p className="text-[var(--color-text-secondary)]">المبلغ الفعلي</p>
@@ -526,7 +529,7 @@ const AdminPayments = () => {
                 <TableHead className="text-center">العملة</TableHead>
                 <TableHead className="text-center">المبلغ المطلوب</TableHead>
                 <TableHead className="text-center">المبلغ الفعلي</TableHead>
-                <TableHead className="text-center">رقم العملية</TableHead>
+                <TableHead className="text-center">هاتف المُحوِّل / رقم العملية</TableHead>
                 <TableHead className="text-center">الإيصال</TableHead>
                 <TableHead className="text-center">الحالة</TableHead>
                 <TableHead className="text-end">الإجراءات</TableHead>
@@ -567,7 +570,11 @@ const AdminPayments = () => {
                   <TableCell className="text-center">{formatRequestAmount(request.requestedAmount ?? request.requestedCoins ?? request.amount ?? 0)}</TableCell>
                   <TableCell className="text-center">{request.actualPaidAmount ? formatRequestAmount(request.actualPaidAmount) : '-'}</TableCell>
                   <TableCell className="max-w-[220px] text-center">
-                    <div className="break-all font-bold text-[var(--color-primary)]">{senderDetails.transactionNumber || '-'}</div>
+                    <div className="text-[10px] text-[var(--color-text-secondary)]">{senderDetails.isSenderPhone ? senderDetails.label : 'رقم العملية'}</div>
+                    <div dir="ltr" className="break-all font-bold text-[var(--color-primary)]">{senderDetails.isSenderPhone ? senderDetails.value : senderDetails.transactionNumber || '-'}</div>
+                    {senderDetails.isSenderPhone && senderDetails.transactionNumber && (
+                      <div className="mt-1 break-all text-xs">رقم العملية: <bdi dir="ltr">{senderDetails.transactionNumber}</bdi></div>
+                    )}
                   </TableCell>
                   <TableCell className="text-center">
                     {request.proofImage ? (
@@ -699,7 +706,7 @@ const AdminPayments = () => {
 
           <div className="rounded-lg border border-gray-200 p-3 dark:border-gray-700">
             <p className="mb-1 text-sm font-medium text-gray-800 dark:text-gray-100">{selectedSenderDetails.label}</p>
-            <p className="break-all text-sm text-gray-600 dark:text-gray-300">{selectedSenderDetails.value}</p>
+            <p dir="ltr" className="break-all text-start text-sm text-gray-600 dark:text-gray-300">{selectedSenderDetails.value}</p>
           </div>
 
           <div className="rounded-lg border border-gray-200 dark:border-gray-700 p-3">

@@ -169,6 +169,9 @@ const useTopupStore = create((set, get) => ({
           currencyCode: isPayloadObject ? amountOrPayload.currencyCode : 'USD',
           proofImage: isPayloadObject ? amountOrPayload.proofImage : '',
           senderDetails: isPayloadObject ? (amountOrPayload.senderDetails || null) : null,
+          ...(isPayloadObject && Object.prototype.hasOwnProperty.call(amountOrPayload, 'senderPhoneNumber')
+            ? { senderPhoneNumber: amountOrPayload.senderPhoneNumber }
+            : {}),
           senderWalletNumber: isPayloadObject ? amountOrPayload.senderWalletNumber : '',
           senderWalletAddress: isPayloadObject ? amountOrPayload.senderWalletAddress : '',
           transferredFromNumber: isPayloadObject ? amountOrPayload.transferredFromNumber : '',
